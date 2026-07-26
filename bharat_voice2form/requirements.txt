@@ -1,2 +1,6 @@
 streamlit>=1.28.0
 Pillow>=9.0.0
+gTTS>=2.5.0
+SpeechRecognition>=3.10.0
+imageio-ffmpeg>=0.4.9
+Jinja2>=3.1.0

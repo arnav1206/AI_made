@@ -1,10 +1,10 @@
 """
 utils/voice_assist.py
 ======================
-Voice Assistant module for Bharat Voice2Form.
+Voice Assistant module for Formitra.
 
 Features:
-- Converts text into spoken audio in 8 Indian languages using gTTS / Web Speech.
+- Converts text into spoken audio in 9 Indian languages using gTTS / Web Speech.
 - Provides HTML5 browser speech synthesizer and Streamlit audio generator.
 - Reads out form instructions, field status, missing required fields, and auto-fill summary.
 """
@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import io
 import logging
-from gtts import gTTS
 import streamlit as st
 
 logger = logging.getLogger(__name__)
@@ -21,6 +20,7 @@ logger = logging.getLogger(__name__)
 # Map app languages to gTTS language codes
 _GTTS_LANG_CODES: dict[str, str] = {
     "Hindi":     "hi",
+    "Odia":      "or",
     "Tamil":     "ta",
     "Telugu":    "te",
     "Bengali":   "bn",
@@ -33,6 +33,7 @@ _GTTS_LANG_CODES: dict[str, str] = {
 # Map app languages to HTML5 SpeechSynthesis locales
 _WEB_TTS_LOCALES: dict[str, str] = {
     "Hindi":     "hi-IN",
+    "Odia":      "or-IN",
     "Tamil":     "ta-IN",
     "Telugu":    "te-IN",
     "Bengali":   "bn-IN",
@@ -50,8 +51,9 @@ def generate_tts_audio_bytes(text: str, language: str = "Hindi") -> bytes | None
     if not text or not text.strip():
         return None
 
-    lang_code = _GTTS_LANG_CODES.get(language, "hi")
     try:
+        from gtts import gTTS
+        lang_code = _GTTS_LANG_CODES.get(language, "hi")
         tts = gTTS(text=text.strip(), lang=lang_code, slow=False)
         fp = io.BytesIO()
         tts.write_to_fp(fp)
@@ -64,7 +66,7 @@ def generate_tts_audio_bytes(text: str, language: str = "Hindi") -> bytes | None
 
 def render_voice_assistant_player(text: str, language: str = "Hindi", label: str = "🔊 Listen to Voice Assist"):
     """
-    Renders an interactive Voice Assistant button with browser speech synthesis and MP3 fallback.
+    Renders an interactive Voice Assistant button with browser speech synthesis.
     """
     locale = _WEB_TTS_LOCALES.get(language, "hi-IN")
     clean_text = text.replace("'", "\\'").replace("\n", " ")
