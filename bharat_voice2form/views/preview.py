@@ -1,0 +1,113 @@
+"""
+views/preview.py
+================
+Application preview page — translated via t().
+"""
+
+import time
+from datetime import datetime
+
+import streamlit as st
+
+from components.layout   import tricolour_bar, section_heading, spacer
+from components.progress import step_progress_bar
+from components.cards    import preview_table
+from utils.constants     import SCHOLARSHIP_SECTIONS
+from utils.translations  import t
+from utils.pdf_generator import generate as generate_pdf
+import utils.session as session
+
+
+def render() -> None:
+    tricolour_bar()
+    step_progress_bar(current_step=5)
+
+    section_heading(t("preview_title"), t("preview_sub"))
+
+    form_data = session.get("form_data", {})
+    app_no    = session.generate_application_number()
+    now       = datetime.now().strftime("%d %b %Y, %I:%M %p")
+
+    # ── Application header banner ──────────────────────────────────
+    st.markdown(
+        f'<div style="background:linear-gradient(135deg,#002868,#004AD4);color:white;'
+        f'border-radius:16px;padding:1.5rem 2rem;margin-bottom:1.5rem;">'
+        f'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+        f'<div>'
+        f'<div style="font-size:0.75rem;opacity:0.7;text-transform:uppercase;'
+        f'letter-spacing:0.1em;">National Scholarship Portal — Government of India</div>'
+        f'<div style="font-size:1.4rem;font-weight:800;margin:0.3rem 0;">'
+        f'Merit-cum-Means Scholarship 2025-26</div>'
+        f'<div style="font-size:0.88rem;opacity:0.85;">Bharat Voice2Form — AI Assisted Application</div>'
+        f'</div>'
+        f'<div style="text-align:right;">'
+        f'<div style="font-size:0.75rem;opacity:0.7;">{t("app_number")}</div>'
+        f'<div style="font-size:1rem;font-weight:700;font-family:monospace;">{app_no}</div>'
+        f'<div style="font-size:0.78rem;opacity:0.7;margin-top:0.2rem;">Generated: {now}</div>'
+        f'</div></div></div>',
+        unsafe_allow_html=True,
+    )
+
+    # ── Section tables ─────────────────────────────────────────────
+    for section in SCHOLARSHIP_SECTIONS:
+        preview_table(
+            section_title=f'{section["icon"]} {section["title"]}',
+            fields=section["fields"],
+            form_data=form_data,
+        )
+
+    # ── Declaration ────────────────────────────────────────────────
+    st.markdown(
+        f'<div class="form-card" style="background:linear-gradient(135deg,#FFFBEB,#FEF3C7);'
+        f'border:1px solid #FDE68A;">'
+        f'<div style="font-weight:700;font-size:0.95rem;margin-bottom:0.5rem;">{t("declaration_title")}</div>'
+        f'<div style="font-size:0.85rem;color:#374151;line-height:1.7;">'
+        f'{t("declaration_text")}'
+        f'</div></div>',
+        unsafe_allow_html=True,
+    )
+
+    agreed = st.checkbox(t("declaration_check"), key="declaration_agreed")
+
+    # ── Action buttons ─────────────────────────────────────────────
+    spacer()
+    b1, b2, b3 = st.columns(3)
+
+    with b1:
+        if st.button(t("btn_edit"), use_container_width=True):
+            session.navigate("auto_fill")
+
+    with b2:
+        if st.button(t("btn_pdf"), use_container_width=True):
+            with st.spinner("Generating PDF…"):
+                result = generate_pdf(
+                    form_data=form_data,
+                    application_no=app_no,
+                    form_title="Scholarship Application",
+                )
+            if result:
+                st.download_button(
+                    label=t("download_pdf"),
+                    data=result.pdf_bytes,
+                    file_name=result.filename,
+                    mime="application/pdf",
+                )
+            else:
+                st.error(f"PDF generation failed: {result.error}")
+
+    with b3:
+        if st.button(
+            t("btn_submit"),
+            use_container_width=True,
+            type="primary",
+            disabled=not agreed,
+        ):
+            session.navigate("success")
+
+    if not agreed:
+        st.markdown(
+            f'<div style="text-align:center;font-size:0.82rem;color:#9CA3AF;margin-top:0.25rem;">'
+            f'{t("accept_declaration")}'
+            f'</div>',
+            unsafe_allow_html=True,
+        )

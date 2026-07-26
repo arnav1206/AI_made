@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<!--
+assets/templates/application.html
+===================================
+Jinja2 HTML template for the scholarship application PDF.
+
+Used by utils/pdf_generator._generate_weasyprint() once the
+WeasyPrint engine is activated (ENGINE = "weasyprint").
+
+Available template variables:
+  {{ form_title }}       — e.g. "Scholarship Application"
+  {{ application_no }}   — e.g. "BVF-2026-SCH-038472"
+  {{ generated_at }}     — e.g. "25 Jul 2026"
+  {{ form_data }}        — dict of { field_label: value }
+
+To activate:
+  1. pip install weasyprint jinja2
+  2. Set ENGINE = "weasyprint" in utils/pdf_generator.py
+  3. Uncomment _generate_weasyprint() implementation in that file
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ form_title }} — Bharat Voice2Form</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      font-size: 10pt;
+      color: #111827;
+      background: #fff;
+      padding: 2cm;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #002868, #004AD4);
+      color: white;
+      border-radius: 12px;
+      padding: 1.2cm;
+      margin-bottom: 0.8cm;
+    }
+    .header h1  { font-size: 18pt; font-weight: 800; margin-bottom: 4pt; }
+    .header h2  { font-size: 12pt; font-weight: 600; opacity: 0.85; }
+    .header .meta { font-size: 8pt; opacity: 0.65; margin-top: 6pt; }
+
+    .app-no-box {
+      float: right;
+      text-align: right;
+      margin-top: -60pt;
+    }
+    .app-no-box .label { font-size: 8pt; opacity: 0.7; }
+    .app-no-box .value { font-size: 11pt; font-weight: 700; font-family: monospace; }
+
+    /* ── Tricolour bar ── */
+    .tricolour {
+      height: 5pt;
+      background: linear-gradient(90deg,
+        #FF9933 0%, #FF9933 33.3%,
+        #FFFFFF 33.3%, #FFFFFF 66.6%,
+        #138808 66.6%, #138808 100%);
+      border-radius: 3pt;
+      margin-bottom: 0.6cm;
+    }
+
+    /* ── Section ── */
+    .section { margin-bottom: 0.7cm; }
+    .section-title {
+      font-size: 10pt;
+      font-weight: 700;
+      color: #002868;
+      border-bottom: 1.5pt solid #E5E7EB;
+      padding-bottom: 4pt;
+      margin-bottom: 6pt;
+    }
+
+    /* ── Table ── */
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: #F8FAFF;
+      font-size: 8pt;
+      font-weight: 700;
+      color: #6B7280;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 5pt 8pt;
+      text-align: left;
+      border-bottom: 1pt solid #E5E7EB;
+    }
+    td {
+      padding: 6pt 8pt;
+      font-size: 9.5pt;
+      border-bottom: 0.5pt solid #F3F4F6;
+    }
+    td:first-child { font-weight: 600; color: #374151; width: 35%; }
+    .tag-filled {
+      background: #D1FAE5; color: #065F46;
+      border-radius: 4pt; padding: 1pt 4pt;
+      font-size: 7.5pt; font-weight: 700;
+    }
+    .tag-empty {
+      background: #FEF3C7; color: #92400E;
+      border-radius: 4pt; padding: 1pt 4pt;
+      font-size: 7.5pt; font-weight: 700;
+    }
+
+    /* ── Declaration ── */
+    .declaration {
+      background: #FFFBEB;
+      border: 1pt solid #FDE68A;
+      border-radius: 8pt;
+      padding: 0.5cm;
+      margin-top: 0.5cm;
+      font-size: 8.5pt;
+      line-height: 1.6;
+      color: #374151;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      position: fixed;
+      bottom: 1cm;
+      left: 2cm;
+      right: 2cm;
+      display: flex;
+      justify-content: space-between;
+      font-size: 7.5pt;
+      color: #9CA3AF;
+      border-top: 0.5pt solid #E5E7EB;
+      padding-top: 4pt;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="app-no-box">
+      <div class="label">Application No.</div>
+      <div class="value">{{ application_no }}</div>
+    </div>
+    <h1>Bharat Voice2Form</h1>
+    <h2>{{ form_title }}</h2>
+    <div class="meta">National Scholarship Portal — Government of India &nbsp;|&nbsp; Generated: {{ generated_at }}</div>
+  </div>
+
+  <div class="tricolour"></div>
+
+  <!-- Sections: populated by Jinja2 loop -->
+  {% for section_title, fields in sections.items() %}
+  <div class="section">
+    <div class="section-title">{{ section_title }}</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Value</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for field in fields %}
+        {% set val = form_data.get(field, '') %}
+        <tr>
+          <td>{{ field }}</td>
+          <td>{{ val if val and val != '— Select —' else '—' }}</td>
+          <td>
+            {% if val and val != '— Select —' %}
+            <span class="tag-filled">✓ Filled</span>
+            {% else %}
+            <span class="tag-empty">⚠ Missing</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endfor %}
+
+  <!-- Declaration -->
+  <div class="declaration">
+    <strong>Declaration:</strong>
+    I hereby declare that all the information provided in this application is true and correct
+    to the best of my knowledge. I understand that any misrepresentation will result in
+    disqualification and legal action under applicable laws.
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>Bharat Voice2Form — AI-Powered Form Filling</span>
+    <span>Application No: {{ application_no }}</span>
+    <span>Generated: {{ generated_at }}</span>
+  </div>
+
+</body>
+</html>

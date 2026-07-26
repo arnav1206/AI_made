@@ -1,0 +1,143 @@
+"""
+components/navbar.py
+====================
+Sidebar navigation component with language selector & Dark Mode toggle.
+Rebranded for Formitra.
+"""
+
+from __future__ import annotations
+
+import streamlit as st
+
+from utils.constants    import PAGE_ORDER, PAGE_LABELS
+from utils.translations import t, get_available_languages
+from components.layout  import tricolour_divider_inline
+import utils.session as session
+
+
+_NAV_KEYS: dict[str, str] = {
+    "home":           "nav_home",
+    "form_selection": "nav_form_selection",
+    "voice_input":    "nav_voice_input",
+    "ai_processing":  "nav_ai_processing",
+    "auto_fill":      "nav_auto_fill",
+    "preview":        "nav_preview",
+    "success":        "nav_success",
+    "track_status":   "nav_track_status",
+    "help_faq":       "nav_help_faq",
+}
+
+
+def render_sidebar() -> None:
+    """Render left sidebar: logo, theme toggle, language picker, nav, badges."""
+    with st.sidebar:
+        _logo_block()
+        _theme_toggle_button()
+        st.markdown(tricolour_divider_inline(4), unsafe_allow_html=True)
+        _language_selector()
+        st.markdown(tricolour_divider_inline(2), unsafe_allow_html=True)
+        _nav_section()
+        _context_badges()
+        _footer_block()
+
+
+def _logo_block() -> None:
+    st.markdown(
+        '<div style="text-align:center;padding:0.75rem 0 0.5rem;">'
+        '<div style="font-size:2.4rem;">🎙️</div>'
+        '<div style="font-size:1.3rem;font-weight:900;letter-spacing:-0.4px;color:#FF7A00;">'
+        'Formitra</div>'
+        '<div style="font-size:0.75rem;opacity:0.8;margin-top:0.1rem;color:#F8FAFC;">'
+        'AI Voice-Powered Form Filling</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def _theme_toggle_button() -> None:
+    """Dark / Light mode switcher."""
+    is_dark = session.get("dark_mode", False)
+    btn_label = "☀️ Light Mode" if is_dark else "🌙 Dark Mode"
+    if st.button(btn_label, key="theme_toggle_btn", use_container_width=True):
+        session.set("dark_mode", not is_dark)
+        st.rerun()
+
+
+def _language_selector() -> None:
+    """Language selectbox — visible text before & inside dropdown."""
+    langs   = get_available_languages()
+    current = session.get("selected_language", "Hindi")
+    try:
+        idx = langs.index(current)
+    except ValueError:
+        idx = 0
+
+    chosen = st.selectbox(
+        t("ui_language"),
+        langs,
+        index=idx,
+        key="sidebar_lang_select",
+    )
+    if chosen != current:
+        session.set("selected_language", chosen)
+        st.rerun()
+
+
+def _nav_section() -> None:
+    st.markdown(
+        f'<div style="font-size:0.72rem;font-weight:700;opacity:0.7;'
+        f'text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem;color:#F8FAFC;">'
+        f'{t("nav_heading")}</div>',
+        unsafe_allow_html=True,
+    )
+
+    for page_key in PAGE_ORDER:
+        label = t(_NAV_KEYS.get(page_key, "nav_home"))
+        if st.button(label, key=f"nav_{page_key}", use_container_width=True):
+            session.navigate(page_key)
+
+
+def _context_badges() -> None:
+    if sf := session.get("selected_form"):
+        st.markdown(
+            f'<div style="font-size:0.72rem;font-weight:700;opacity:0.7;'
+            f'text-transform:uppercase;letter-spacing:0.1em;'
+            f'margin-top:1.2rem;margin-bottom:0.3rem;color:#F8FAFC;">{t("selected_form_lbl")}</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            f'<div style="background:rgba(255,122,0,0.25);'
+            f'border:1px solid rgba(255,122,0,0.5);border-radius:8px;'
+            f'padding:0.45rem 0.75rem;font-size:0.82rem;font-weight:600;color:#F8FAFC;">'
+            f'🎓 {sf}</div>',
+            unsafe_allow_html=True,
+        )
+
+    if lang := session.get("selected_language"):
+        st.markdown(
+            f'<div style="font-size:0.72rem;font-weight:700;opacity:0.7;'
+            f'text-transform:uppercase;letter-spacing:0.1em;'
+            f'margin-top:0.6rem;margin-bottom:0.3rem;color:#F8FAFC;">{t("language_lbl")}</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            f'<div style="background:rgba(19,136,8,0.25);'
+            f'border:1px solid rgba(19,136,8,0.5);border-radius:8px;'
+            f'padding:0.45rem 0.75rem;font-size:0.82rem;font-weight:600;color:#F8FAFC;">'
+            f'🌐 {lang}</div>',
+            unsafe_allow_html=True,
+        )
+
+
+def _footer_block() -> None:
+    from utils.constants import APP_VERSION
+    st.markdown(
+        f'<div style="margin-top:2rem;padding:0.65rem;background:rgba(255,255,255,0.06);'
+        f'border-radius:10px;text-align:center;border:1px solid rgba(255,255,255,0.1);">'
+        f'<div style="font-size:0.75rem;opacity:0.9;font-weight:700;color:#F8FAFC;">'
+        f'Formitra v{APP_VERSION}</div>'
+        f'<div style="font-size:0.7rem;opacity:0.7;margin-top:0.1rem;color:#CBD5E1;">'
+        f'{t("powered_by")}</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
