@@ -34,7 +34,7 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "theme_light": {
         "English": "☀️ Light Mode", "Hindi": "☀️ लाइट मोड", "Odia": "☀️ ଲାଇଟ୍ ମୋଡ୍",
         "Tamil": "☀️ ஒளி முறை", "Telugu": "☀️ లైట్ మోడ్", "Bengali": "☀️ 라이ট মোড",
-        "Marathi": "☀️ लाईट मोड", "Kannada": "☀️ ಲೈಟ್ ಮೋಡ್", "Malayalam": "☀️ ലൈറ്റ് മോഡ്",
+        "Marathi": "☀️ लाईट मोड", "Kannada": "☀️ ಲೈಟ್ ಮೋಡ್", "Malayalam": "☀️ ലൈറ്റ് മോಡ್",
     },
     "theme_dark": {
         "English": "🌙 Dark Mode", "Hindi": "🌙 डार्क मोड", "Odia": "🌙 ଡାର୍କ ମୋଡ୍",
@@ -86,12 +86,12 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "nav_auto_fill": {
         "English": "✍️ Form Review", "Hindi": "✍️ फॉर्म समीक्षा", "Odia": "✍️ ଫର୍ମ ସମୀକ୍ଷା",
         "Tamil": "✍️ படிவ ஆய்வு", "Telugu": "✍️ ఫారమ్ సమీక్ష", "Bengali": "✍️ ফর্ম পর্যালোচনা",
-        "Marathi": "✍️ फॉर्म पुनरावलोकन", "Kannada": "✍️ ಫಾರ್ಮ್ ಪರಿಶೀಲನೆ", "Malayalam": "✍️ ഫോം അവലോകനം",
+        "Marathi": "✍️ फॉर्म पुनरावलोकन", "Kannada": "✍️ ಪರಿಶೀಲನೆ", "Malayalam": "✍️ ഫോം അവലോകനം",
     },
     "nav_preview": {
         "English": "👁️ Preview", "Hindi": "👁️ पूर्वावलोकन", "Odia": "👁️ ପୂର୍ବାବଲୋକନ",
-        "Tamil": "👁️ முன்னோட்டம்", "Telugu": "👁️ పూర్వవీక్షணம்", "Bengali": "👁️ প্রাকদর্শন",
-        "Marathi": "👁️ पूर्वदृश्य", "Kannada": "👁️ ಮುನ್ನೋಟ", "Malayalam": "👁️ ପ୍ରୀବ്യൂ",
+        "Tamil": "👁️ முன்னோட்டம்", "Telugu": "👁️ పూర్వవీక్షణం", "Bengali": "👁️ প্রাকদর্শন",
+        "Marathi": "👁️ पूर्वदृश्य", "Kannada": "👁️ ಮುನ್ನೋಟ", "Malayalam": "👁️ ପ୍ରୀବୂ",
     },
     "nav_success": {
         "English": "🎉 Submitted", "Hindi": "🎉 जमा हुआ", "Odia": "🎉 ଦାଖଲ ହେଲା",
@@ -105,32 +105,69 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     },
     "nav_help_faq": {
         "English": "❓ Help & FAQ", "Hindi": "❓ सहायता व प्रश्न", "Odia": "❓ ସହାୟତା ଏବଂ ପ୍ରଶ୍ନ",
-        "Tamil": "❓ உதவி & கேள்வி", "Telugu": "❓ సహాయம் & ప్రశ్నలు", "Bengali": "❓ সাহায্য ও প্রশ্ন",
+        "Tamil": "❓ உதவி & கேள்வி", "Telugu": "❓ సహాయం & ప్రశ్నలు", "Bengali": "❓ সাহায্য ও প্রশ্ন",
         "Marathi": "❓ मदत आणि प्रश्न", "Kannada": "❓ ಸಹಾಯ & ಪ್ರಶ್ನೆಗಳು", "Malayalam": "❓ സഹായവും ചോദ്യങ്ങളും",
     },
 
-    # ── Form Review / Auto-Fill View ────────────────────────────────
+    # ── Voice Input View ───────────────────────────────────────────
+    "voice_title": {
+        "English": "🎙️ Voice Input & Multilingual Speech Dictation",
+        "Hindi": "🎙️ वॉइस इनपुट एवं बहुभाषी वाक् डिक्टेशन",
+        "Odia": "🎙️ ଭଏସ୍ ଇନପୁଟ୍ ଏବଂ ବହୁଭାଷୀ ଡିକ୍ଟେସନ୍",
+    },
+    "voice_sub": {
+        "English": "Speak in your native language or upload an audio clip for real-time AI transcription.",
+        "Hindi": "अपनी मातृभाषा में बोलें या रीयल-टाइम एआई ट्रांसक्रिप्शन के लिए ऑडियो रिकॉर्ड करें।",
+        "Odia": "ଆପଣଙ୍କ ମାତୃଭାଷାରେ କୁହନ୍ତୁ କିମ୍ବା ଅଡିଓ ରେକର୍ଡ କରନ୍ତୁ।",
+    },
+    "select_language": {
+        "English": "Select Dictation Language",
+        "Hindi": "डिक्टेशन भाषा चुनें",
+        "Odia": "ଡିକ୍ଟେସନ୍ ଭାଷା ବାଛନ୍ତୁ",
+    },
+    "demo_note": {
+        "English": "💡 Tip: Tap 'Load Sample Transcript' to test Gemma AI extraction without microphone recording.",
+        "Hindi": "💡 सुझाव: बिना माइक के परीक्षण करने के लिए 'नमूना ट्रांसक्रिप्ट लोड करें' पर टैप करें।",
+        "Odia": "💡 ଟିପ୍: 'ନମୁନା ଟ୍ରାନ୍ସକ୍ରିପ୍ଟ ଲୋଡ୍ କରନ୍ତୁ' ଉପରେ ଟ୍ୟାପ୍ କରନ୍ତୁ।",
+    },
+    "no_transcript": {
+        "English": "Please dictate speech or type text into the transcript area before proceeding.",
+        "Hindi": "आगे बढ़ने से पहले कृपया बोलें या पाठ दर्ज करें।",
+        "Odia": "ଆଗକୁ ବଢିବା ପୂର୍ବରୁ ଦୟାକରି କୁହନ୍ତୁ।",
+    },
+
+    # ── AI Processing View ─────────────────────────────────────────
+    "ai_title": {
+        "English": "🤖 Gemma AI Multilingual Entity Extraction",
+        "Hindi": "🤖 गेम्मा एआई बहुभाषी संस्था निष्कर्षण",
+        "Odia": "🤖 Gemma AI ବହୁଭାଷୀ ତଥ୍ୟ ନିଷ୍କାସନ",
+    },
+    "ai_sub": {
+        "English": "Structuring speech audio into verified scholarship application entities.",
+        "Hindi": "वाक् ऑडियो को सत्यापित छात्रवृत्ति आवेदन संस्थाओं में संरचित करना।",
+        "Odia": "ଭଏସ୍ ଅଡିଓକୁ ଯାଞ୍ଚ ହୋଇଥିବା ତଥ୍ୟରେ ସଂରଚିତ କରିବା।",
+    },
+    "field_mapping": {
+        "English": "📋 Field Mapping Audit",
+        "Hindi": "📋 फ़ील्ड मैपिंग ऑडिट",
+        "Odia": "📋 ଫିଲ୍ଡ ମ୍ୟାପିଂ ଅଡିଟ୍",
+    },
+    "field_mapping_sub": {
+        "English": "Comparison between extracted audio data and required scholarship fields.",
+        "Hindi": "निकाले गए ऑडियो डेटा और आवश्यक छात्रवृत्ति फ़ील्ड के बीच तुलना।",
+        "Odia": "ବାହାର କରାଯାଇଥିବା ତଥ୍ୟ ଏବଂ ଆବଶ୍ୟକ ଫିଲ୍ଡ ମଧ୍ୟରେ ତୁଳନା।",
+    },
+
+    # ── Auto-Fill & Review View ────────────────────────────────────
     "autofill_title": {
         "English": "✍️ Form Review & Voice Auto-Fill",
         "Hindi": "✍️ फॉर्म समीक्षा एवं वॉइस ऑटो-फिल",
         "Odia": "✍️ ଫର୍ମ ସମୀକ୍ଷା ଏବଂ ଭଏସ୍ ଅଟୋ-ଫିଲ୍",
-        "Tamil": "✍️ படிவ ஆய்வு & குரல் தானாக நிரப்புதல்",
-        "Telugu": "✍️ ఫారమ్ సమీక్ష & వాయిస్ ఆటో-ఫిల్",
-        "Bengali": "✍️ ফর্ম পর্যালোচনা ও ভয়েস অটো-ফিল",
-        "Marathi": "✍️ फॉर्म पुनरावलोकन आणि व्हॉइस ऑटो-फिल",
-        "Kannada": "✍️ ಫಾರ್ಮ್ ಪರಿಶೀಲನೆ & ಧ್ವನಿ ಆಟೋ-ಫಿಲ್",
-        "Malayalam": "✍️ ഫോം അവലോകനവും വോയ്‌സ് ഓട്ടോ-ഫില്ലും",
     },
     "autofill_sub": {
         "English": "Review extracted application details or speak directly into any field to auto-update.",
         "Hindi": "निकाले गए आवेदन विवरण की समीक्षा करें या स्वतः अपडेट करने के लिए किसी भी फ़ील्ड में बोलें।",
         "Odia": "ବାହାର କରାଯାଇଥିବା ଆବେଦନ ବିବରଣୀ ସମୀକ୍ଷା କରନ୍ତୁ କିମ୍ବା ସିଧାସଳଖ କୁହନ୍ତୁ।",
-        "Tamil": "பிரித்தெடுக்கப்பட்ட விண்ணப்ப விவரங்களை மதிப்பாய்வு செய்யவும் அல்லது நேரடியாகப் பேசவும்.",
-        "Telugu": "సేకరించిన దరఖాస్తు వివరాలను సమీక్షించండి లేదా నేరుగా మాట్లాడండి.",
-        "Bengali": "সংগৃহীত আবেদন বিবরণ পর্যালোচনা করুন অথবা সরাসরি বলুন।",
-        "Marathi": "काढलेल्या अर्ज तपशिलांचे पुनरावलोकन करा किंवा थेट बोला.",
-        "Kannada": "ಸಂಗ್ರಹಿಸಿದ ಅರ್ಜಿ ವಿವರಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಅಥವಾ ನೇರವಾಗಿ ಮಾತನಾಡಿ.",
-        "Malayalam": "ശേഖരിച്ച അപേക്ഷാ വിവരങ്ങൾ പരിശോധിക്കുക അല്ലെങ്കിൽ നേരിട്ട് സംസാരിക്കുക.",
     },
     "section_personal": {
         "English": "👤 Personal Information", "Hindi": "👤 व्यक्तिगत जानकारी", "Odia": "👤 ବ୍ୟକ୍ତିଗତ ସୂଚନା",
@@ -154,71 +191,86 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
         "English": "👁️ Final Preview →", "Hindi": "👁️ अंतिम पूर्वावलोकन →", "Odia": "👁️ ଅନ୍ତିମ ପୂର୍ବାବଲୋକନ →",
     },
 
+    # ── Application Preview View ───────────────────────────────────
+    "preview_title": {
+        "English": "👁️ Application Preview & PDF Generation",
+        "Hindi": "👁️ आवेदन पूर्वावलोकन एवं पीडीएफ जनरेशन",
+        "Odia": "👁️ ଆବେଦନ ପୂର୍ବାବଲୋକନ ଏବଂ PDF ଜନରେସନ୍",
+    },
+    "preview_sub": {
+        "English": "Verify your application details before official submission.",
+        "Hindi": "आधिकारिक जमा करने से पहले अपने आवेदन विवरण की पुष्टि करें।",
+        "Odia": "ସରକାରୀ ଦାଖଲ ପୂର୍ବରୁ ଆପଣଙ୍କର ଆବେଦନ ଯାଞ୍ଚ କରନ୍ତୁ।",
+    },
+    "app_number": {
+        "English": "APPLICATION REF CODE", "Hindi": "आवेदन संदर्भ कोड", "Odia": "ଆବେଦନ ରେଫରେନ୍ସ କୋଡ୍",
+    },
+    "declaration_title": {
+        "English": "📜 Applicant Self-Declaration", "Hindi": "📜 आवेदक स्व-घोषणा", "Odia": "📜 ଆବେଦନକାରୀ ସ୍ୱ-ଘୋଷଣା",
+    },
+    "declaration_text": {
+        "English": "I hereby declare that all information provided above is true and correct to the best of my knowledge. I understand that any false statement will disqualify my scholarship application.",
+        "Hindi": "मैं एतद्द्वारा घोषणा करता हूं कि ऊपर दी गई सभी जानकारी मेरी जानकारी के अनुसार सत्य और सही है।",
+        "Odia": "ମୁଁ ଏତଦ୍ଦ୍ୱାରା ଘୋଷଣା କରୁଛି ଯେ ଉପରେ ଦିଆଯାଇଥିବା ସମସ୍ତ ସୂଚନା ସତ୍ୟ ଅଟେ।",
+    },
+    "declaration_check": {
+        "English": "I accept the self-declaration and confirm my details are accurate.",
+        "Hindi": "मैं स्व-घोषणा स्वीकार करता हूं और विवरण की पुष्टि करता हूं।",
+        "Odia": "ମୁଁ ସ୍ୱ-ଘୋଷଣା ଗ୍ରହଣ କରୁଛି ଏବଂ ବିବରଣୀ ନିଶ୍ଚିତ କରୁଛି।",
+    },
+    "btn_edit": {
+        "English": "✏️ Edit Application", "Hindi": "✏️ आवेदन संपादित करें", "Odia": "✏️ ଆବେଦନ ସମ୍ପାଦନ କରନ୍ତୁ",
+    },
+    "btn_pdf": {
+        "English": "📄 Generate Official PDF", "Hindi": "📄 आधिकारिक पीडीएफ बनाएं", "Odia": "📄 ସରକାରୀ PDF ପ୍ରସ୍ତୁତ କରନ୍ତୁ",
+    },
+    "btn_submit": {
+        "English": "🚀 Submit Application →", "Hindi": "🚀 आवेदन जमा करें →", "Odia": "🚀 ଆବେଦନ ଦାଖଲ କରନ୍ତୁ →",
+    },
+    "download_pdf": {
+        "English": "📥 Download PDF Certificate", "Hindi": "📥 डाउनलोड पीडीएफ प्रमाण पत्र", "Odia": "📥 PDF ଡାଉନଲୋଡ୍ କରନ୍ତୁ",
+    },
+    "accept_declaration": {
+        "English": "Please accept the self-declaration above to enable submission.",
+        "Hindi": "जमा करने के लिए कृपया ऊपर स्व-घोषणा स्वीकार करें।",
+        "Odia": "ଦାଖଲ କରିବାକୁ ଦୟାକରି ସ୍ୱ-ଘୋଷଣା ଗ୍ରହଣ କରନ୍ତୁ।",
+    },
+
     # ── Form Selection View ─────────────────────────────────────────
     "select_form": {
         "English": "📋 Select Scholarship Scheme", "Hindi": "📋 छात्रवृत्ति योजना चुनें", "Odia": "📋 ଛାତ୍ରବୃତ୍ତି ଯୋଜନା ବାଛନ୍ତୁ",
-        "Tamil": "📋 உதவித்தொகை திட்டத்தைத் தேர்ந்தெடுக்கவும்", "Telugu": "📋 స్కాలర్‌షిప్ పథకాన్ని ఎంచుకోండి", "Bengali": "📋 স্কলারশিপ স্কিম নির্বাচন করুন",
-        "Marathi": "📋 शिष्यवृत्ती योजना निवडा", "Kannada": "📋 ಸ್ಕಾಲರ್‌ಶಿಪ್ ಯೋಜನೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ", "Malayalam": "📋 സ്‌കോളർഷിപ്പ് പദ്ധതി തിരഞ്ഞെടുക്കുക",
     },
     "select_form_sub": {
         "English": "Choose your application portal to start voice dictation.",
         "Hindi": "वॉइस डिक्टेशन शुरू करने के लिए अपना आवेदन पोर्टल चुनें।",
         "Odia": "ଭଏସ୍ ଡିକ୍ଟେସନ୍ ଆରମ୍ଭ କରିବାକୁ ଆପଣଙ୍କର ଆବେଦନ ପୋର୍ଟାଲ୍ ବାଛନ୍ତୁ।",
-        "Tamil": "குரல் தட்டச்சு தொடங்க உங்கள் விண்ணப்ப போர்ட்டலைத் தேர்ந்தெடுக்கவும்.",
-        "Telugu": "వాయిస్ డిక్టేషన్ ప్రారంభించడానికి మీ అప్లికేషన్ పోర్టల్‌ని ఎంచుకోండి.",
-        "Bengali": "ভয়েস ডিক্টেশন শুরু করতে আপনার আবেদন পোর্টাল বেছে নিন।",
-        "Marathi": "व्हॉइस डिक्टेशन सुरू करण्यासाठी तुमचा अर्ज पोर्टल निवडा.",
-        "Kannada": "ಧ್ವನಿ ಡಿಕ್ಟೇಷನ್ ಪ್ರಾರಂಭಿಸಲು ನಿಮ್ಮ ಅರ್ಜಿ ಪೋರ್ಟಲ್ ಆಯ್ಕೆಮಾಡಿ.",
-        "Malayalam": "വോയ്‌സ് ഡിക്‌റ്റേഷൻ ആരംഭിക്കാൻ നിങ്ങളുടെ ആപ്ലിക്കേഷൻ പോർട്ടൽ തിരഞ്ഞെടുക്കുക.",
     },
     "select_btn": {
         "English": "Start Voice Application →", "Hindi": "वॉइस आवेदन शुरू करें →", "Odia": "ଭଏସ୍ ଆବେଦନ ଆରମ୍ଭ କରନ୍ତୁ →",
-        "Tamil": "குரல் விண்ணப்பத்தைத் தொடங்கு →", "Telugu": "వాయిస్ దరఖాస్తు ప్రారంభించండి →", "Bengali": "ভয়েস আবেদন শুরু করুন →",
-        "Marathi": "व्हॉइस अर्ज सुरू करा →", "Kannada": "ಧ್ವನಿ ಅರ್ಜಿ ಪ್ರಾರಂಭಿಸಿ →", "Malayalam": "വോയ്‌സ് അപേക്ഷ ആരംഭിക്കുക →",
     },
     "coming_soon": {
         "English": "Coming Soon", "Hindi": "शीघ्र आ रहा है", "Odia": "ଶୀଘ୍ର ଆସୁଛି",
-        "Tamil": "விரைவில்", "Telugu": "త్వరలో వస్తుంది", "Bengali": "শীঘ্রই আসছে",
-        "Marathi": "लवकरच येत आहे", "Kannada": "ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿದೆ", "Malayalam": "ഉടൻ വരുന്നു",
     },
     "prototype_info": {
         "English": "💡 Formitra prototype v2.0 supports major central and state scholarship schemes.",
         "Hindi": "💡 फॉर्ममित्र प्रोटोटाइप v2.0 प्रमुख केंद्रीय और राज्य छात्रवृत्ति योजनाओं का समर्थन करता है।",
         "Odia": "💡 ଫର୍ମମିତ୍ର ପ୍ରୋଟୋଟାଇପ୍ v2.0 ସରକାରୀ ଛାତ୍ରବୃତ୍ତି ଯୋଜନାକୁ ସମର୍ଥନ କରେ।",
-        "Tamil": "💡 ஃபார்ம்மিত্রா முன்மாதிரி v2.0 முக்கிய உதவித்தொகை திட்டங்களை ஆதரிக்கிறது.",
-        "Telugu": "💡 ఫార్మ్‌మිත్ర నమూనా v2.0 ప్రధాన స్కాలర్‌షిప్ పథకాలకు మద్దతు ఇస్తుంది.",
-        "Bengali": "💡 ফর্মমিত্র প্রোটোটাইপ v2.0 প্রধান সরকারি স্কলারশিপ স্কিম সমর্থন করে।",
-        "Marathi": "💡 फॉर्ममित्र प्रोटोटाइप v2.0 प्रामुख्याने शिष्यवृत्ती योजनांना पाठिंबा देतो.",
-        "Kannada": "💡 ಫಾರ್ಮ್‌ಮಿತ್ರ ಪ್ರೊಟೊಟೈಪ್ v2.0 ಪ್ರಮುಖ ಸ್ಕಾಲರ್‌ಶಿಪ್ ಯೋಜನೆಗಳನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ.",
-        "Malayalam": "💡 ഫോംമിത്ര പ്രോട്ടോടൈപ്പ് v2.0 പ്രധാന പദ്ധതികളെ പിന്തുണയ്ക്കുന്നു.",
     },
 
     # ── UI Language Dropdown Label ─────────────────────────────────
     "ui_language": {
         "English": "🌐 Language / भाषा", "Hindi": "🌐 भाषा / Language", "Odia": "🌐 ଭାଷା / Language",
-        "Tamil": "🌐 மொழி / Language", "Telugu": "🌐 భాష / Language", "Bengali": "🌐 ভাষা / Language",
-        "Marathi": "🌐 भाषा / Language", "Kannada": "🌐 ಭಾಷೆ / Language", "Malayalam": "🌐 ഭാഷ / Language",
     },
     "selected_form_lbl": {
         "English": "SELECTED FORM", "Hindi": "चयनित फॉर्म", "Odia": "ଚୟନିତ ଫର୍ମ",
-        "Tamil": "தேர்ந்தெடுக்கப்பட்ட படிவம்", "Telugu": "ఎంచుకున్న ఫారమ్", "Bengali": "নির্বাচিত ফর্ম",
-        "Marathi": "निवडलेला फॉर्म", "Kannada": "ಆಯ್ಕೆಮಾಡಿದ ಫಾರ್ಮ್", "Malayalam": "તિരഞ്ഞെടുത്ത ഫോം",
     },
     "language_lbl": {
         "English": "ACTIVE LANGUAGE", "Hindi": "सक्रिय भाषा", "Odia": "ସକ୍ରିୟ ଭାଷା",
-        "Tamil": "செயலில் உள்ள மொழி", "Telugu": "సక్రియ భాష", "Bengali": "সক্রিয় भाषा",
-        "Marathi": "सक्रिय भाषा", "Kannada": "ಸಕ್ರಿಯ ಭಾಷೆ", "Malayalam": "സജീവ ഭാഷ",
     },
     "powered_by": {
         "English": "Powered by Gemma AI & VoiceAssist",
         "Hindi": "Gemma AI एवं VoiceAssist द्वारा संचालित",
         "Odia": "Gemma AI ଏବଂ VoiceAssist ଦ୍ୱାରା ପରିଚାଳିତ",
-        "Tamil": "Gemma AI மற்றும் VoiceAssist மூலம் இயக்கப்படுகிறது",
-        "Telugu": "Gemma AI మరియు VoiceAssist ద్వారా అందించబడింది",
-        "Bengali": "Gemma AI এবং VoiceAssist চালিত",
-        "Marathi": "Gemma AI आणि VoiceAssist द्वारे संचलित",
-        "Kannada": "Gemma AI ಮತ್ತು VoiceAssist ನಿಂದ ಚಾಲಿತವಾಗಿದೆ",
-        "Malayalam": "Gemma AI, VoiceAssist എന്നിവയാൽ പ്രവർത്തിക്കുന്നു",
     },
 
     # ── Views: Home ────────────────────────────────────────────────
@@ -226,23 +278,11 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
         "English": "Speak in Your Language. Formitra Fills Your Application.",
         "Hindi": "अपनी भाषा में बोलें। फॉर्ममित्र आपका आवेदन भरेगा।",
         "Odia": "ଆପଣଙ୍କ ଭାଷାରେ କୁହନ୍ତୁ। ଫର୍ମମିତ୍ର ଆପଣଙ୍କ ଆବେଦନ ପୂରଣ କରିବ।",
-        "Tamil": "உங்கள் மொழியில் பேசுங்கள். பார்ம்மিত্রா உங்கள் விண்ணப்பத்தை நிரப்பும்.",
-        "Telugu": "మీ భాషలో మాట్లాడండి. ఫార్మ్‌మిత్ర మీ దరఖాస్తును నింపుతుంది.",
-        "Bengali": "আপনার ভাষায় কথা বলুন। ফর্মমিত্র আপনার আবেদন পূরণ করবে।",
-        "Marathi": "तुमच्या भाषेत बोला. फॉर्ममित्र तुमचा अर्ज भरेल.",
-        "Kannada": "ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಮಾತನಾಡಿ. ಫಾರ್ಮ್‌ಮಿತ್ರ ನಿಮ್ಮ ಅರ್ಜಿಯನ್ನು ಭರ್ತಿ ಮಾಡುತ್ತದೆ.",
-        "Malayalam": "നിങ്ങളുടെ ഭാഷയിൽ സംസാരിക്കുക. ഫോംമിത്ര നിങ്ങളുടെ അപേക്ഷ പൂരിപ്പിക്കും.",
     },
     "hero_sub": {
         "English": "India's first voice-driven scholarship form assistant supporting 9 official languages.",
         "Hindi": "9 आधिकारिक भाषाओं का समर्थन करने वाला भारत का पहला आवाज-संचालित छात्रवृत्ति फॉर्म सहायक।",
         "Odia": "9 ଟି ସରକାରୀ ଭାଷାକୁ ସମର୍ଥନ କରୁଥିବା ଭାରତର ପ୍ରଥମ ଭଏସ୍-ଚାଳିତ ଛାତ୍ରବୃତ୍ତି ଫର୍ମ ସହାୟକ।",
-        "Tamil": "9 அதிகாரிக மொழிகளை ஆதரிக்கும் இந்தியாவின் முதல் குரல்-இயக்கப்படும் உதவித்தொகை படிவ உதவியாளர்.",
-        "Telugu": "9 అధికారిక భాషలకు మద్దతు ఇచ్చే భారతదేశపు మొదటి వాయిస్ ఆధారిత స్కాలర్‌షిప్ ఫారమ్ అసిస్టెంట్.",
-        "Bengali": "৯টি অফিশিয়াল ভাষা সমর্থিত ভারতের প্রথম ভয়েস-চালित স্কলারশিপ ফর্ম সহকারী।",
-        "Marathi": "९ अधिकृत भाषांना पाठिंबा देणारा भारतातील पहिला व्हॉइस-चालित शिष्यवृत्ती फॉर्म सहाय्यक.",
-        "Kannada": "9 ಅಧಿಕೃತ ಭಾಷೆಗಳನ್ನು ಬೆಂಬಲಿಸುವ ಭಾರತದ ಮೊದಲ ಧ್ವನಿ-ಚಾಲಿತ ಸ್ಕಾಲರ್‌ಶಿಪ್ ಫಾರ್ମ୍ सहಾಯಕ.",
-        "Malayalam": "9 ഔദ്യോഗിക ഭാഷകളെ പിന്തുണയ്ക്കുന്ന ഇന്ത്യയിലെ ആദ്യത്തെ വോയ്‌സ് നയിക്കുന്ന സ്കോളർഷിപ്പ് ഫോം അസിസ്റ്റന്റ്.",
     },
 }
 

@@ -77,7 +77,7 @@ def render() -> None:
 
         # ── 1. Live Streaming Dictation Component ───────────────────
         st.markdown(
-            '<div style="font-weight:800;font-size:1rem;color:#0F172A;margin:0.5rem 0 0.4rem;">'
+            '<div style="font-weight:800;font-size:1rem;color:#FF7A00;margin:0.5rem 0 0.4rem;">'
             '⚡ Live Speech Dictation (Real-Time)</div>',
             unsafe_allow_html=True,
         )
@@ -86,11 +86,11 @@ def render() -> None:
         if live_text and isinstance(live_text, str) and live_text.strip():
             _update_transcript(live_text)
 
-        st.markdown("<hr style='border:none;border-top:1px solid #E2E8F0;margin:1.25rem 0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='border:none;border-top:1px solid rgba(255,255,255,0.1);margin:1.25rem 0;'>", unsafe_allow_html=True)
 
         # ── 2. Microphone Audio File Clip Recorder ─────────────────
         st.markdown(
-            '<div style="font-weight:800;font-size:1rem;color:#0F172A;margin-bottom:0.4rem;">'
+            '<div style="font-weight:800;font-size:1rem;color:#FF7A00;margin-bottom:0.4rem;">'
             '🎙️ Audio Clip Recorder (File Processing)</div>',
             unsafe_allow_html=True,
         )
@@ -144,8 +144,8 @@ def render() -> None:
         session.set("transcript", transcript)
 
         st.markdown(
-            f'<div style="font-size:0.8rem;color:#64748B;margin-bottom:0.75rem;">'
-            f'🔧 Active STT Engine: <code style="background:#F1F5F9;padding:0.2rem 0.5rem;border-radius:4px;">'
+            f'<div style="font-size:0.8rem;opacity:0.85;margin-bottom:0.75rem;">'
+            f'🔧 Active STT Engine: <code style="background:rgba(255,255,255,0.1);padding:0.2rem 0.5rem;border-radius:4px;">'
             f'{ENGINE} / Live WebSpeech</code></div>',
             unsafe_allow_html=True,
         )
@@ -170,7 +170,7 @@ def render() -> None:
 
     if not has_transcript:
         st.markdown(
-            f'<div style="text-align:center;font-size:0.85rem;color:#64748B;margin-top:0.4rem;font-weight:500;">'
+            f'<div style="text-align:center;font-size:0.85rem;opacity:0.75;margin-top:0.4rem;font-weight:500;">'
             f'{t("no_transcript")}'
             f'</div>',
             unsafe_allow_html=True,
