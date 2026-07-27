@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formitra — AI Voice Form Auto-Filler</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="extension-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo-wrapper">
+        <img src="icons/icon48.png" alt="Formitra Logo" class="brand-logo" />
+        <div>
+          <div class="brand-title">Formitra <span class="brand-badge">AI</span></div>
+          <div class="brand-subtitle">Voice Form Auto-Filler</div>
+        </div>
+      </div>
+      <div class="tricolour-bar"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <!-- Language Picker -->
+      <div class="field-group">
+        <label for="langSelect" class="field-label">🌐 Select Dictation Language:</label>
+        <select id="langSelect" class="custom-select">
+          <option value="hi-IN" selected>🇮🇳 Hindi (हिन्दी)</option>
+          <option value="en-IN">🇬🇧 English (India)</option>
+          <option value="or-IN">🇮🇳 Odia (ଓଡ଼ିଆ)</option>
+          <option value="ta-IN">🇮🇳 Tamil (தமிழ்)</option>
+          <option value="te-IN">🇮🇳 Telugu (తెలుగు)</option>
+          <option value="bn-IN">🇮🇳 Bengali (বাংলা)</option>
+          <option value="mr-IN">🇮🇳 Marathi (मराठी)</option>
+          <option value="kn-IN">🇮🇳 Kannada (கன்னட)</option>
+          <option value="ml-IN">🇮🇳 Malayalam (മലയാളം)</option>
+        </select>
+      </div>
+
+      <!-- Live Mic Dictation Button -->
+      <div class="mic-section">
+        <button id="micBtn" class="mic-button" title="Click to start voice dictation">
+          <span class="mic-icon" id="micIcon">🎙️</span>
+          <span class="pulse-ring"></span>
+        </button>
+        <div id="statusText" class="status-text">Click microphone & speak your details</div>
+        <div id="langDetected" class="lang-badge hidden">🌐 Auto-Detected Language</div>
+      </div>
+
+      <!-- Live Transcript Display -->
+      <div class="field-group">
+        <div class="label-row">
+          <label for="transcriptText" class="field-label">📝 Live Voice Transcript:</label>
+          <button id="demoBtn" class="text-link-btn">📋 Load Demo</button>
+        </div>
+        <textarea id="transcriptText" class="custom-textarea" rows="4" placeholder="Your spoken voice details will stream live here. You can also edit or paste directly..."></textarea>
+      </div>
+
+      <!-- AI Extracted Fields Preview -->
+      <div id="extractionCard" class="extraction-card hidden">
+        <div class="extraction-header">
+          <span>🤖 Gemma AI Extracted Fields (<span id="extractedCount">0</span>)</span>
+        </div>
+        <div id="extractionGrid" class="extraction-grid"></div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="action-section">
+        <button id="autoFillBtn" class="primary-btn" disabled>
+          ✨ Auto-Fill Active Web Page Form →
+        </button>
+      </div>
+
+      <!-- Status Alert Toast -->
+      <div id="toast" class="toast hidden"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span>🏛️ Compatible with NSP, State Portals & All Web Forms</span>
+      <span class="ver-tag">v1.0</span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

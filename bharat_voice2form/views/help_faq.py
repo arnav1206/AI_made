@@ -2,7 +2,7 @@
 views/help_faq.py
 ==================
 Help & FAQ page for Formitra.
-Provides step-by-step instructions, voice command guide, and scholarship assistance.
+Provides step-by-step instructions, voice command guide, scholarship assistance, and Chrome Extension installation details.
 Dynamic Light/Dark mode contrast support.
 """
 
@@ -18,7 +18,7 @@ import utils.session as session
 def render() -> None:
     tricolour_bar()
 
-    section_heading("❓ Formitra Help & FAQ Center", "Step-by-step voice form filling guide, scholarship eligibility & support")
+    section_heading("❓ Formitra Help & FAQ Center", "Step-by-step voice form filling guide, Chrome Extension setup & support")
 
     is_dark = st.session_state.get("dark_mode", False)
 
@@ -43,10 +43,20 @@ def render() -> None:
 
     st.markdown("### ❓ Frequently Asked Questions")
 
-    with st.expander("🗣️ What languages does Formitra support?", expanded=True):
+    with st.expander("🧩 How do I install the standalone Formitra Chrome Browser Extension?", expanded=True):
+        st.markdown(
+            "Formitra is available as a standalone **Google Chrome Browser Extension (Manifest V3)** that allows you to auto-fill forms on ANY web page!\n\n"
+            "**Installation Steps:**\n"
+            "1. Open Chrome and go to `chrome://extensions/`\n"
+            "2. Turn **ON** 'Developer mode' in the top-right corner.\n"
+            "3. Click **'Load unpacked'** and select the `formitra_chrome_extension/` directory.\n"
+            "4. Open any web form, click the Formitra mic icon, and speak to auto-fill!"
+        )
+
+    with st.expander("🗣️ What languages does Formitra support?"):
         st.write(
             "Formitra supports 9 official Indian languages: Hindi (हिन्दी), Odia (ଓଡ଼ିଆ), Tamil (தமிழ்), "
-            "Telugu (తెలుగు), Bengali (বাংলা), Marathi (मराठी), Kannada (<ctrl42>ન્નಡ), Malayalam (മലയാളം), and English."
+            "Telugu (తెలుగు), Bengali (বাংলা), Marathi (मराठी), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), and English."
         )
 
     with st.expander("🎙️ How do I use field-level voice dictation on individual form inputs?"):
