@@ -1,4 +1,4 @@
-// content.js — Formitra Injected Web Form Auto-Filler Engine & Floating Mic Widget
+// content.js — Formitra Web Form Auto-Filler Engine & Google Forms Assistant
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "AUTO_FILL_FORM") {
@@ -26,12 +26,14 @@ function initExtensionWidget() {
 function maybeInjectFloatingWidget() {
   if (document.getElementById("formitra-floating-btn")) return;
 
-  const inputs = document.querySelectorAll("input, select, textarea");
-  if (inputs.length === 0) return;
+  const isGoogleForms = window.location.href.includes("docs.google.com/forms");
+  const inputs = document.querySelectorAll("input, select, textarea, [role='listitem'], [role='textbox']");
+
+  if (inputs.length === 0 && !isGoogleForms) return;
 
   const btn = document.createElement("button");
   btn.id = "formitra-floating-btn";
-  btn.innerHTML = "🎙️ Formitra Voice Auto-Fill";
+  btn.innerHTML = isGoogleForms ? "🎙️ Formitra Google Forms Auto-Fill" : "🎙️ Formitra Voice Auto-Fill";
   btn.title = "Click to dictate & auto-fill this web form in your native language";
   btn.style.cssText = `
     position: fixed;
@@ -86,16 +88,19 @@ function openFloatingFormitraWidget() {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   `;
 
+  const isGF = window.location.href.includes("docs.google.com/forms");
+  const titleText = isGF ? "🎙️ Formitra Google Forms Assistant" : "🎙️ Formitra Screen Voice Assistant";
+
   modal.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div style="font-weight:800;font-size:14px;color:#FF7A00;">🎙️ Formitra Screen Voice Assistant</div>
+      <div style="font-weight:800;font-size:14px;color:#FF7A00;">${titleText}</div>
       <button id="fmt-close-btn" style="background:none;border:none;color:#94A3B8;font-size:16px;cursor:pointer;font-weight:bold;">✕</button>
     </div>
     <div style="font-size:12px;color:#CBD5E1;margin-bottom:10px;">Speak in your native language to auto-fill the form shown on your screen:</div>
     <textarea id="fmt-modal-text" style="width:100%;height:85px;background:#1E293B;color:#FFF;border:1px solid rgba(255,122,0,0.4);border-radius:8px;padding:8px;font-size:12px;box-sizing:border-box;margin-bottom:10px;" placeholder="Press mic to speak or paste transcript..."></textarea>
     <div style="display:flex;gap:8px;">
       <button id="fmt-mic-toggle" style="flex:1;background:#FF7A00;color:#FFF;border:none;padding:9px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">🎙️ Start Mic</button>
-      <button id="fmt-fill-action" style="flex:1;background:#059669;color:#FFF;border:none;padding:9px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">✨ Auto-Fill Active Form</button>
+      <button id="fmt-fill-action" style="flex:1;background:#059669;color:#FFF;border:none;padding:9px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">✨ Auto-Fill Form</button>
     </div>
   `;
 
@@ -153,7 +158,7 @@ function openFloatingFormitraWidget() {
 
     const fields = extractFormFieldsFromText(text);
     const count  = fillPageFormFields(fields);
-    alert(`🎉 Formitra auto-filled ${count} form fields on the active screen!`);
+    alert(`🎉 Formitra auto-filled ${count} form fields on this form!`);
     modal.style.display = "none";
   });
 }
@@ -178,8 +183,44 @@ function extractFormFieldsFromText(text) {
 
 function fillPageFormFields(fields) {
   let count = 0;
-  const inputs = document.querySelectorAll("input, select, textarea");
 
+  // ── 1. Specialized Google Forms Engine Scanner ────────────────────
+  const isGoogleForms = window.location.href.includes("docs.google.com/forms");
+  if (isGoogleForms) {
+    const gfQuestions = document.querySelectorAll('div[role="listitem"], div[jsmodel], .ge2dfc, .QrT82d, .freebirdFormviewerComponentsQuestionBaseRoot');
+    gfQuestions.forEach((qContainer) => {
+      const titleElem = qContainer.querySelector('.M7eMe, [role="heading"], .HoLwm, .freebirdFormviewerComponentsQuestionBaseHeaderTitle, span');
+      if (!titleElem) return;
+
+      const qTitle = titleElem.innerText.toLowerCase();
+      const input = qContainer.querySelector('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], textarea, [role="textbox"]');
+
+      if (!input) return;
+
+      let valToSet = null;
+      if (matchRule(qTitle, ["name", "full name", "applicant name", "candidate name", "नाम"])) valToSet = fields.name;
+      else if (matchRule(qTitle, ["city", "town", "district", "शहर"])) valToSet = fields.city;
+      else if (matchRule(qTitle, ["state", "domicile", "राज्य"])) valToSet = fields.state;
+      else if (matchRule(qTitle, ["income", "annual income", "family income", "आय"])) valToSet = fields.income;
+      else if (matchRule(qTitle, ["course", "degree", "program", "पाठ्यक्रम"])) valToSet = fields.course;
+      else if (matchRule(qTitle, ["year", "academic year", "वर्ष"])) valToSet = fields.year;
+      else if (matchRule(qTitle, ["college", "institute", "school", "university", "संस्थान"])) valToSet = fields.college;
+      else if (matchRule(qTitle, ["dob", "date of birth", "birth date", "जन्मतिथि"])) valToSet = fields.dob;
+      else if (matchRule(qTitle, ["mobile", "phone", "contact", "फोन"])) valToSet = fields.mobile;
+      else if (matchRule(qTitle, ["email", "e-mail", "ईमेल"])) valToSet = fields.email;
+
+      if (valToSet !== null && valToSet !== undefined) {
+        setNativeInputValue(input, valToSet);
+        highlightFilledInput(input, valToSet);
+        count++;
+      }
+    });
+
+    if (count > 0) return count;
+  }
+
+  // ── 2. Standard Web Form & Streamlit Scanner ───────────────────────
+  const inputs = document.querySelectorAll("input, select, textarea");
   inputs.forEach((input) => {
     if (input.type === "hidden" || input.type === "submit" || input.type === "button") return;
 
@@ -260,6 +301,7 @@ function setNativeInputValue(element, value) {
       element.selectedIndex = 1;
     }
   } else {
+    // Native React & Google Forms internal input setter
     const valueSetter = Object.getOwnPropertyDescriptor(element, 'value')?.set;
     const prototypeSetter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(element), 'value')?.set;
 
@@ -272,9 +314,12 @@ function setNativeInputValue(element, value) {
     }
   }
 
+  // Dispatch events to trigger Google Forms internal JS model update
   element.dispatchEvent(new Event("input", { bubbles: true }));
   element.dispatchEvent(new Event("change", { bubbles: true }));
   element.dispatchEvent(new Event("blur", { bubbles: true }));
+  element.dispatchEvent(new KeyboardEvent("keydown", { key: "a", bubbles: true }));
+  element.dispatchEvent(new KeyboardEvent("keyup", { key: "a", bubbles: true }));
 }
 
 function highlightFilledInput(element, value) {
