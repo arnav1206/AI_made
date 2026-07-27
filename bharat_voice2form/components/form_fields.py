@@ -46,9 +46,9 @@ def personal_info_fields(extracted: dict) -> dict:
             key="field_dob",
             placeholder="DD/MM/YYYY",
         )
-        _field_mic_helper("field_dob", "Date of Birth")
         if not dob:
             warning_inline("Date of Birth required for verification")
+        _field_mic_helper("field_dob", "Date of Birth")
 
     c3, c4 = st.columns(2)
 
@@ -207,9 +207,9 @@ def financial_contact_fields(extracted: dict) -> dict:
             key="field_phone",
             placeholder="10-digit mobile number",
         )
-        _field_mic_helper("field_phone", "Phone Number")
         if not phone:
             warning_inline("Required for SMS tracking & OTP")
+        _field_mic_helper("field_phone", "Phone Number")
 
     with c12:
         email = st.text_input(
@@ -218,9 +218,9 @@ def financial_contact_fields(extracted: dict) -> dict:
             key="field_email",
             placeholder="e.g. student@example.com",
         )
-        _field_mic_helper("field_email", "Email Address")
         if not email:
             warning_inline("Required for digital receipt & acknowledgment")
+        _field_mic_helper("field_email", "Email Address")
 
     return {
         "Annual Family Income": income,

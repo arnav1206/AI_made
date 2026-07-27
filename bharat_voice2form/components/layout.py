@@ -68,7 +68,7 @@ def warning_inline(message: str) -> None:
     is_dark = st.session_state.get("dark_mode", False)
     color   = "#FBBF24" if is_dark else "#D97706"
     st.markdown(
-        f'<div style="color:{color};font-size:0.82rem;font-weight:700;margin-top:-0.3rem;margin-bottom:0.4rem;">'
+        f'<div style="color:{color};font-size:0.8rem;font-weight:700;padding:0.2rem 0;margin-top:0.25rem;margin-bottom:0.4rem;display:block;">'
         f'⚠️ {message}</div>',
         unsafe_allow_html=True,
     )
