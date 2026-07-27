@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Comprehensive Light/Dark theme styling covering inputs, text, tabs, cards, selectboxes, top header transparency, toolbar icons, and sidebar navigation buttons.
+Comprehensive Light/Dark theme styling covering inputs, text, tabs, cards, selectboxes, top header transparency, toolbar icons, and main/sidebar buttons.
 """
 
 from __future__ import annotations
@@ -121,10 +121,27 @@ def inject_global_css() -> None:
             padding: 0.65rem 1.5rem !important;
             transition: all 0.2s ease !important;
         }}
-        .stMainBlockContainer .stButton > button p,
-        .stMainBlockContainer .stButton > button span {{
+        .stMainBlockContainer .stButton > button:not([kind="primary"]) {{
+            background-color: {input_bg} !important;
+            color: {text_primary} !important;
+            border: 1.5px solid {border_col} !important;
+        }}
+        .stMainBlockContainer .stButton > button:not([kind="primary"]) p,
+        .stMainBlockContainer .stButton > button:not([kind="primary"]) span,
+        .stMainBlockContainer .stButton > button:not([kind="primary"]) div {{
+            color: {text_primary} !important;
             font-weight: 700 !important;
         }}
+        .stMainBlockContainer .stButton > button:not([kind="primary"]):hover {{
+            border-color: #FF7A00 !important;
+            color: #FF7A00 !important;
+            background-color: rgba(255, 122, 0, 0.1) !important;
+        }}
+        .stMainBlockContainer .stButton > button:not([kind="primary"]):hover p,
+        .stMainBlockContainer .stButton > button:not([kind="primary"]):hover span {{
+            color: #FF7A00 !important;
+        }}
+
         .stMainBlockContainer .stButton > button[kind="primary"] {{
             background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
             color: #FFFFFF !important;
