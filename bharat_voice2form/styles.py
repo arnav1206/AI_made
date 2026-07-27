@@ -232,6 +232,51 @@ def inject_global_css() -> None:
             -webkit-text-fill-color: #FFFFFF !important;
         }}
 
+        /* ── Voice Dictate Popover Body & Dialog Container Fix ── */
+        div[data-testid="stPopoverBody"],
+        [data-testid="stPopoverBody"],
+        div[data-testid="stPopoverContent"] {{
+            background-color: #1E293B !important;
+            background: #1E293B !important;
+            color: #F8FAFC !important;
+            border: 1.5px solid rgba(255, 122, 0, 0.5) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6) !important;
+        }}
+        div[data-testid="stPopoverBody"] p,
+        div[data-testid="stPopoverBody"] label,
+        div[data-testid="stPopoverBody"] span,
+        div[data-testid="stPopoverBody"] div,
+        div[data-testid="stPopoverBody"] h1,
+        div[data-testid="stPopoverBody"] h2,
+        div[data-testid="stPopoverBody"] h3,
+        div[data-testid="stPopoverBody"] h4,
+        [data-testid="stPopoverBody"] p,
+        [data-testid="stPopoverBody"] label,
+        [data-testid="stPopoverBody"] span,
+        [data-testid="stPopoverBody"] div {{
+            color: #F8FAFC !important;
+            -webkit-text-fill-color: #F8FAFC !important;
+            font-weight: 700 !important;
+        }}
+        div[data-testid="stPopoverBody"] .stButton > button,
+        [data-testid="stPopoverBody"] button:not([data-testid="stBaseButton-popover"]) {{
+            background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
+            color: #FFFFFF !important;
+            border: none !important;
+            border-radius: 50px !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 14px rgba(255, 122, 0, 0.4) !important;
+        }}
+        div[data-testid="stPopoverBody"] .stButton > button p,
+        div[data-testid="stPopoverBody"] .stButton > button span,
+        [data-testid="stPopoverBody"] button:not([data-testid="stBaseButton-popover"]) p,
+        [data-testid="stPopoverBody"] button:not([data-testid="stBaseButton-popover"]) span {{
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+            font-weight: 800 !important;
+        }}
+
         /* ── Step Progress Bar Layout ── */
         .step-bar {{
             display: flex !important;
