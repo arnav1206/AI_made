@@ -79,16 +79,13 @@ def _render_admin_dashboard() -> None:
     """Render Admin KPI Overview & Application Audit Workspace."""
     admin_name = st.session_state.get("admin_user", "Officer").title()
 
-    # Top Header Banner
+    # Top Header Banner with explicit white text
     st.markdown(
-        f'<div class="card" style="border-left:5px solid #2563EB;background:linear-gradient(135deg, #1E293B, #0F172A);color:#FFFFFF;">'
-        f'<div style="display:flex;justify-content:space-between;align-items:center;">'
-        f'<div>'
-        f'<div style="font-size:0.75rem;opacity:0.7;text-transform:uppercase;letter-spacing:0.1em;">MINISTRY OF EDUCATION & STATE DBT PORTAL</div>'
-        f'<div style="font-size:1.3rem;font-weight:900;margin-top:0.2rem;">Welcome, Nodal Officer ({admin_name})</div>'
-        f'<div style="font-size:0.85rem;opacity:0.85;margin-top:0.15rem;">Live Application Verifier & Gemma AI Speech Audit Workstation</div>'
-        f'</div>'
-        f'</div></div>',
+        f'<div class="card" style="border-left:5px solid #2563EB;background:linear-gradient(135deg, #1E293B, #0F172A);padding:1.5rem;">'
+        f'<div style="font-size:0.75rem;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">MINISTRY OF EDUCATION & STATE DBT PORTAL</div>'
+        f'<div style="font-size:1.35rem;font-weight:900;color:#FFFFFF;margin-top:0.2rem;">Welcome, Nodal Officer ({admin_name})</div>'
+        f'<div style="font-size:0.85rem;color:#CBD5E1;margin-top:0.15rem;">Live Application Verifier & Gemma AI Speech Audit Workstation</div>'
+        f'</div>',
         unsafe_allow_html=True,
     )
 
@@ -148,21 +145,21 @@ def _render_admin_dashboard() -> None:
     if filter_status != "All Statuses":
         filtered_apps = [a for a in applications if a["status"] == filter_status]
 
-    # Render Applications Table
+    # Render Clean Inline HTML Applications Table (single-line continuous string)
     table_rows = ""
     for app in filtered_apps:
-        table_rows += f"""
-        <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
-            <td style="padding:0.75rem;font-weight:800;font-family:monospace;color:#FF7A00;">{app['ref_code']}</td>
-            <td style="padding:0.75rem;font-weight:700;">{app['name']}</td>
-            <td style="padding:0.75rem;">{app['scheme']}</td>
-            <td style="padding:0.75rem;">{app['state']}</td>
-            <td style="padding:0.75rem;font-weight:700;color:#059669;">{app['income']}</td>
-            <td style="padding:0.75rem;"><span style="background:rgba(37,99,235,0.2);color:#60A5FA;padding:0.2rem 0.5rem;border-radius:6px;font-size:0.78rem;">{app['status']}</span></td>
-        </tr>
-        """
+        table_rows += (
+            f'<tr style="border-bottom:1px solid rgba(255,255,255,0.1);">'
+            f'<td style="padding:0.75rem;font-weight:800;font-family:monospace;color:#FF7A00;">{app["ref_code"]}</td>'
+            f'<td style="padding:0.75rem;font-weight:700;">{app["name"]}</td>'
+            f'<td style="padding:0.75rem;">{app["scheme"]}</td>'
+            f'<td style="padding:0.75rem;">{app["state"]}</td>'
+            f'<td style="padding:0.75rem;font-weight:700;color:#059669;">{app["income"]}</td>'
+            f'<td style="padding:0.75rem;"><span style="background:rgba(37,99,235,0.2);color:#60A5FA;padding:0.2rem 0.5rem;border-radius:6px;font-size:0.78rem;">{app["status"]}</span></td>'
+            f'</tr>'
+        )
 
-    st.markdown(
+    table_html = (
         f'<div class="card" style="padding:0;overflow-x:auto;">'
         f'<table style="width:100%;border-collapse:collapse;font-size:0.88rem;">'
         f'<thead style="background:rgba(255,255,255,0.06);text-align:left;">'
@@ -174,9 +171,9 @@ def _render_admin_dashboard() -> None:
         f'<th style="padding:0.75rem;">Income</th>'
         f'<th style="padding:0.75rem;">Verification Status</th>'
         f'</tr></thead>'
-        f'<tbody>{table_rows}</tbody></table></div>',
-        unsafe_allow_html=True,
+        f'<tbody>{table_rows}</tbody></table></div>'
     )
+    st.markdown(table_html, unsafe_allow_html=True)
 
     # ── Decision Action Controls ─────────────────────────────────────
     spacer(0.5)
