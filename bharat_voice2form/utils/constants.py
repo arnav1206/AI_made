@@ -11,13 +11,13 @@ APP_SUBTITLE: str = "Voice-assisted form filling with multilingual AI extraction
 APP_VERSION: str = "2.0.0"
 POWERED_BY: str = "Powered by Gemma AI & VoiceAssist"
 
-PAGE_HOME: str = "home"
+PAGE_HOME: str = "login"
 APPLICATION_NUMBER: str = "FMT-2026-89412"
 
 PAGE_ORDER: list[str] = [
-    "home",
     "login",
     "register",
+    "home",
     "form_selection",
     "voice_input",
     "ai_processing",
@@ -29,9 +29,9 @@ PAGE_ORDER: list[str] = [
 ]
 
 PAGE_LABELS: dict[str, str] = {
-    "home":           "🏠 Home",
     "login":          "🔑 Login",
     "register":       "📝 Register",
+    "home":           "🏠 Home",
     "form_selection": "📋 Select Form",
     "voice_input":    "🎙️ Voice Input",
     "ai_processing":  "🤖 AI Processing",
@@ -258,7 +258,7 @@ MOCK_TRANSCRIPTS: dict[str, str] = {
     ),
     "Bengali": (
         "আমার নাম রাহুল শর্মা। আমি জয়পুর রাজস্থানে থাকি। "
-        "আমি বি.টেক দ্বিতীয় বর্ষের ছাত্র। আমার বার্ষিক আয় ₹১,৫০,০০০। "
+        "আমি বি.টেک দ্বিতীয় বর্ষের ছাত্র। আমার বার্ষিক আয় ₹১,৫০,০০০। "
         "আমার ফোন নম্বর ৯৮৭৬৫৪৩২১০ এবং ইমেল rahul.sharma@example.com।"
     ),
     "Marathi": (

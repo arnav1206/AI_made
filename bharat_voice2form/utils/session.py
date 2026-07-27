@@ -1,7 +1,7 @@
 """
 utils/session.py
 ================
-Centralised session-state management for Bharat Voice2Form.
+Centralised session-state management for Bharat Voice2Form / Formitra.
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ from utils.constants import (
 
 
 _DEFAULTS: dict = {
-    "page":               PAGE_HOME,
+    "page":               "login",
     "selected_form":      "",
     "selected_language":  "Hindi",
     "is_recording":       False,
