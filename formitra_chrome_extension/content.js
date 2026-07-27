@@ -13,15 +13,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 // Inject Floating Formitra Mic Widget on every webpage containing form inputs
-window.addEventListener("DOMContentLoaded", () => {
-  setTimeout(maybeInjectFloatingWidget, 1000);
-});
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initExtensionWidget);
+} else {
+  initExtensionWidget();
+}
+
+function initExtensionWidget() {
+  setTimeout(maybeInjectFloatingWidget, 800);
+}
 
 function maybeInjectFloatingWidget() {
   if (document.getElementById("formitra-floating-btn")) return;
 
-  const hasInputs = document.querySelectorAll("input[type='text'], input[type='number'], input[type='email'], input[type='tel'], select, textarea").length > 0;
-  if (!hasInputs) return;
+  const inputs = document.querySelectorAll("input, select, textarea");
+  if (inputs.length === 0) return;
 
   const btn = document.createElement("button");
   btn.id = "formitra-floating-btn";
@@ -69,7 +75,7 @@ function openFloatingFormitraWidget() {
     position: fixed;
     bottom: 80px;
     right: 24px;
-    width: 340px;
+    width: 350px;
     z-index: 999999;
     background: #0F172A;
     color: #F8FAFC;
@@ -82,14 +88,14 @@ function openFloatingFormitraWidget() {
 
   modal.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div style="font-weight:800;font-size:14px;color:#FF7A00;">🎙️ Formitra Voice Assistant</div>
+      <div style="font-weight:800;font-size:14px;color:#FF7A00;">🎙️ Formitra Screen Voice Assistant</div>
       <button id="fmt-close-btn" style="background:none;border:none;color:#94A3B8;font-size:16px;cursor:pointer;font-weight:bold;">✕</button>
     </div>
-    <div style="font-size:12px;color:#CBD5E1;margin-bottom:10px;">Speak in your native language (Hindi, Tamil, Telugu, Odia, etc.) to auto-fill this page:</div>
-    <textarea id="fmt-modal-text" style="width:100%;height:80px;background:#1E293B;color:#FFF;border:1px solid rgba(255,122,0,0.4);border-radius:8px;padding:8px;font-size:12px;box-sizing:border-box;margin-bottom:10px;" placeholder="Press mic to speak or paste transcript..."></textarea>
+    <div style="font-size:12px;color:#CBD5E1;margin-bottom:10px;">Speak in your native language to auto-fill the form shown on your screen:</div>
+    <textarea id="fmt-modal-text" style="width:100%;height:85px;background:#1E293B;color:#FFF;border:1px solid rgba(255,122,0,0.4);border-radius:8px;padding:8px;font-size:12px;box-sizing:border-box;margin-bottom:10px;" placeholder="Press mic to speak or paste transcript..."></textarea>
     <div style="display:flex;gap:8px;">
-      <button id="fmt-mic-toggle" style="flex:1;background:#FF7A00;color:#FFF;border:none;padding:8px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">🎙️ Start Mic</button>
-      <button id="fmt-fill-action" style="flex:1;background:#059669;color:#FFF;border:none;padding:8px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">✨ Auto-Fill Form</button>
+      <button id="fmt-mic-toggle" style="flex:1;background:#FF7A00;color:#FFF;border:none;padding:9px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">🎙️ Start Mic</button>
+      <button id="fmt-fill-action" style="flex:1;background:#059669;color:#FFF;border:none;padding:9px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">✨ Auto-Fill Active Form</button>
     </div>
   `;
 
@@ -146,8 +152,8 @@ function openFloatingFormitraWidget() {
     );
 
     const fields = extractFormFieldsFromText(text);
-    const count = fillPageFormFields(fields);
-    alert(`🎉 Formitra auto-filled ${count} form fields on this page!`);
+    const count  = fillPageFormFields(fields);
+    alert(`🎉 Formitra auto-filled ${count} form fields on the active screen!`);
     modal.style.display = "none";
   });
 }
@@ -210,14 +216,33 @@ function matchRule(text, keywords) {
 
 function getFieldLabelText(element) {
   let labelText = "";
+
+  // 1. Standard <label for="...">
   if (element.id) {
     const label = document.querySelector(`label[for="${element.id}"]`);
     if (label) labelText = label.innerText;
   }
+
+  // 2. Streamlit data-testid="stWidgetLabel" or parent container
+  if (!labelText) {
+    const stContainer = element.closest('div[data-testid="stForm"], div[data-testid="stVerticalBlock"], div[data-baseweb="input"], div[data-baseweb="select"], .stTextInput, .stSelectbox, .stNumberInput');
+    if (stContainer) {
+      const stLabel = stContainer.querySelector('label, [data-testid="stWidgetLabel"], p, span');
+      if (stLabel) labelText = stLabel.innerText;
+    }
+  }
+
+  // 3. Parent label fallback
   if (!labelText) {
     const parentLabel = element.closest("label");
     if (parentLabel) labelText = parentLabel.innerText;
   }
+
+  // 4. Preceding sibling
+  if (!labelText && element.previousElementSibling) {
+    labelText = element.previousElementSibling.innerText || "";
+  }
+
   return labelText;
 }
 
@@ -256,7 +281,7 @@ function highlightFilledInput(element, value) {
   const origBorder = element.style.border;
   const origShadow = element.style.boxShadow;
 
-  element.style.border = "2px solid #10B981";
+  element.style.border = "2px dashed #10B981";
   element.style.boxShadow = "0 0 12px rgba(16, 185, 129, 0.6)";
 
   const tooltip = document.createElement("div");
