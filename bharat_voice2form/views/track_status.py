@@ -2,7 +2,7 @@
 views/track_status.py
 ======================
 Reference Number Login & Application Tracker Page for Formitra.
-Allows users to enter their tracking code (e.g. FMT-2026-89412) to view application status and details.
+Allows users to enter their tracking code (e.g. FMT-2026-89412) to view application status, details, and download PDF receipt.
 Dynamic Light/Dark mode contrast support.
 """
 
@@ -13,6 +13,7 @@ import streamlit as st
 from components.layout   import tricolour_bar, section_heading, info_box, spacer
 from components.progress import step_progress_bar
 from utils.translations  import t
+from utils.pdf_generator import generate as generate_pdf
 import utils.session as session
 
 
@@ -76,6 +77,7 @@ def render() -> None:
         st.markdown("<br>", unsafe_allow_html=True)
 
         extracted = session.get("extracted_data", {})
+        form_data = session.get("form_data", {})
         name   = extracted.get("Name")   or session.get("field_name")   or "Rahul Sharma"
         state  = extracted.get("State")  or session.get("field_state")  or "Rajasthan"
         city   = extracted.get("City")   or session.get("field_city")   or "Jaipur"
@@ -98,4 +100,28 @@ def render() -> None:
             unsafe_allow_html=True,
         )
 
+        # PDF Receipt Download on Track Status Page
+        pdf_res = generate_pdf(
+            form_data=form_data if form_data else {
+                "Full Name": name,
+                "State": state,
+                "City": city,
+                "Course": course,
+                "Year": year,
+                "Annual Family Income": f"₹{income}",
+            },
+            application_no=active_ref,
+            form_title=session.get("selected_form") or "Post-Matric Scholarship Scheme",
+        )
+        if pdf_res:
+            st.download_button(
+                label="📄 Download Official Submitted Application PDF",
+                data=pdf_res.pdf_bytes,
+                file_name=pdf_res.filename,
+                mime="application/pdf",
+                use_container_width=True,
+                type="primary",
+            )
+
+        spacer(0.5)
         info_box("💡 Note: Official updates regarding your scholarship disbursement will be sent via SMS to your registered mobile number.")

@@ -2,7 +2,7 @@
 views/success.py
 =================
 Submission success page for Formitra.
-Features celebratory green badge animation & ref code display upon form submission.
+Features celebratory green badge animation, ref code display, and immediate PDF download.
 """
 
 import random
@@ -12,6 +12,7 @@ from components.layout   import tricolour_bar, section_heading, info_box, spacer
 from components.progress import step_progress_bar
 from utils.translations  import t
 from utils.voice_assist  import render_voice_assistant_player
+from utils.pdf_generator import generate as generate_pdf
 import utils.session as session
 
 
@@ -30,9 +31,16 @@ def render() -> None:
 
     form_title = session.get("selected_form") or "Scholarship Application"
     language   = session.get("selected_language", "Hindi")
+    form_data  = session.get("form_data", {})
+
+    # Generate PDF document for download
+    pdf_res = generate_pdf(
+        form_data=form_data,
+        application_no=ref_code,
+        form_title=form_title,
+    )
 
     # ── Celebration HTML/CSS Confetti & Pulse Animation ─────────────
-    # Note: Every line must have 0 leading spaces to prevent Markdown from parsing as code block.
     animation_html = f"""<style>
 .celebration-container {{
 background: linear-gradient(135deg, #065F46 0%, #047857 50%, #064E3B 100%);
@@ -107,14 +115,25 @@ Your voice-assisted application for <b>{form_title}</b> is complete & logged.
 
     spacer()
 
-    c1, c2 = st.columns(2)
+    # Action Buttons: Download PDF, Track Status, Start New
+    c1, c2, c3 = st.columns(3)
     with c1:
-        if st.button("🔍 Track Application Status", use_container_width=True, type="primary"):
-            session.navigate("track_status")
+        if pdf_res:
+            st.download_button(
+                label="📄 Download Official PDF Receipt",
+                data=pdf_res.pdf_bytes,
+                file_name=pdf_res.filename,
+                mime="application/pdf",
+                use_container_width=True,
+                type="primary",
+            )
     with c2:
+        if st.button("🔍 Track Application Status", use_container_width=True):
+            session.navigate("track_status")
+    with c3:
         if st.button("🔄 Start New Application", use_container_width=True):
             session.full_reset()
             session.navigate("home")
 
     spacer()
-    info_box(f"💡 Save your Reference Code <b>{ref_code}</b>. You can use it anytime on the 'Track Status' page to check verification progress and print your application receipt.")
+    info_box(f"💡 Click <b>'Download Official PDF Receipt'</b> to save a copy of your submitted application form for your records. Save your Reference Code <b>{ref_code}</b> to check verification status anytime.")
