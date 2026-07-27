@@ -120,6 +120,7 @@ def render() -> None:
         if st.button(
             "📋 Load Sample Transcript (Demo)",
             use_container_width=True,
+            type="primary",
             help="Load a sample transcript for demonstration",
         ):
             result = transcribe(audio_bytes=None, language=lang)
