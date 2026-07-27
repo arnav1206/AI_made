@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Includes Light/Dark theme switching, high-contrast selectbox text, horizontal step bar, and animated AI avatar styles.
+Comprehensive Light/Dark theme styling covering inputs, text, tabs, cards, selectboxes, and navigation.
 """
 
 from __future__ import annotations
@@ -14,14 +14,17 @@ def inject_global_css() -> None:
     is_dark = st.session_state.get("dark_mode", False)
 
     if is_dark:
-        bg_main      = "#0B0F19"
+        bg_main      = "#0B0F17"
         bg_card      = "#151C2C"
         bg_sidebar   = "#0F172A"
         text_primary = "#F8FAFC"
-        text_sub     = "#94A3B8"
-        border_col   = "rgba(255, 255, 255, 0.12)"
+        text_sub     = "#CBD5E1"
+        border_col   = "rgba(255, 255, 255, 0.15)"
+        input_bg     = "#1E293B"
+        input_text   = "#F8FAFC"
         select_bg    = "#1E293B"
-        select_text  = "#FFFFFF"
+        select_text  = "#F8FAFC"
+        card_shadow  = "0 10px 30px rgba(0, 0, 0, 0.5)"
     else:
         bg_main      = "#F8FAFC"
         bg_card      = "#FFFFFF"
@@ -29,8 +32,11 @@ def inject_global_css() -> None:
         text_primary = "#0F172A"
         text_sub     = "#475569"
         border_col   = "#E2E8F0"
+        input_bg     = "#FFFFFF"
+        input_text   = "#0F172A"
         select_bg    = "#FFFFFF"
         select_text  = "#0F172A"
+        card_shadow  = "0 10px 25px -5px rgba(0, 0, 0, 0.05)"
 
     css_code = f"""
     <style>
@@ -41,14 +47,23 @@ def inject_global_css() -> None:
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }}
 
+        /* ── Global Typography & Text Overrides ── */
+        .stApp p, .stApp span, .stApp label, .stApp div,
+        .stMarkdown p, .stMarkdown span, .stMarkdown label,
+        h1, h2, h3, h4, h5, h6 {{
+            color: {text_primary} !important;
+        }}
+
         /* ── Sidebar ── */
         section[data-testid="stSidebar"] {{
             background-color: {bg_sidebar} !important;
             color: #FFFFFF !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
         }}
         section[data-testid="stSidebar"] .stMarkdown,
-        section[data-testid="stSidebar"] label {{
+        section[data-testid="stSidebar"] label,
+        section[data-testid="stSidebar"] p,
+        section[data-testid="stSidebar"] span {{
             color: #F8FAFC !important;
         }}
 
@@ -70,37 +85,51 @@ def inject_global_css() -> None:
             position: relative !important;
         }}
         .step-circle {{
-            width: 36px !important;
-            height: 36px !important;
+            width: 38px !important;
+            height: 38px !important;
             border-radius: 50% !important;
-            background: rgba(148, 163, 184, 0.2) !important;
+            background: rgba(148, 163, 184, 0.25) !important;
             color: {text_sub} !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             font-weight: 800 !important;
-            font-size: 0.9rem !important;
-            margin-bottom: 0.35rem !important;
+            font-size: 0.95rem !important;
+            margin-bottom: 0.4rem !important;
             border: 2px solid transparent !important;
             transition: all 0.25s ease !important;
         }}
         .step-circle.active {{
             background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
             color: #FFFFFF !important;
-            box-shadow: 0 0 15px rgba(255, 122, 0, 0.5) !important;
+            box-shadow: 0 0 18px rgba(255, 122, 0, 0.55) !important;
         }}
         .step-circle.done {{
             background: #059669 !important;
             color: #FFFFFF !important;
         }}
         .step-label {{
-            font-size: 0.78rem !important;
+            font-size: 0.8rem !important;
             font-weight: 700 !important;
             text-align: center !important;
             color: {text_primary} !important;
         }}
 
-        /* ── FIX: Language & Selectbox Dropdown Visibility ── */
+        /* ── Input Fields & Text Areas ── */
+        .stTextInput input, .stTextArea textarea, .stNumberInput input {{
+            background-color: {input_bg} !important;
+            color: {input_text} !important;
+            border: 1.5px solid {border_col} !important;
+            border-radius: 12px !important;
+            font-size: 0.95rem !important;
+            padding: 0.6rem 0.9rem !important;
+        }}
+        .stTextInput input:focus, .stTextArea textarea:focus {{
+            border-color: #FF7A00 !important;
+            box-shadow: 0 0 0 2px rgba(255, 122, 0, 0.25) !important;
+        }}
+
+        /* ── Selectboxes & Dropdowns ── */
         div[data-baseweb="select"] > div {{
             background-color: {select_bg} !important;
             color: {select_text} !important;
@@ -116,10 +145,26 @@ def inject_global_css() -> None:
         ul[data-baseweb="menu"] {{
             background-color: {select_bg} !important;
             color: {select_text} !important;
+            border: 1px solid {border_col} !important;
         }}
         ul[data-baseweb="menu"] li {{
             color: {select_text} !important;
             font-weight: 600 !important;
+        }}
+        ul[data-baseweb="menu"] li:hover {{
+            background-color: rgba(255, 122, 0, 0.2) !important;
+        }}
+
+        /* ── Tabs Styling ── */
+        button[data-baseweb="tab"] {{
+            color: {text_sub} !important;
+            font-weight: 700 !important;
+            font-size: 0.95rem !important;
+            border-radius: 8px !important;
+        }}
+        button[data-baseweb="tab"][aria-selected="true"] {{
+            color: #FF7A00 !important;
+            border-bottom-color: #FF7A00 !important;
         }}
 
         /* ── Cards & Containers ── */
@@ -129,13 +174,25 @@ def inject_global_css() -> None:
             border-radius: 18px !important;
             padding: 1.5rem !important;
             border: 1px solid {border_col} !important;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03) !important;
+            box-shadow: {card_shadow} !important;
             margin-bottom: 1.25rem !important;
             transition: all 0.25s ease !important;
         }}
         .card:hover {{
             transform: translateY(-2px) !important;
-            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
+        }}
+
+        /* ── Expanders & Accordions ── */
+        .stExpander {{
+            background-color: {bg_card} !important;
+            border: 1px solid {border_col} !important;
+            border-radius: 14px !important;
+            color: {text_primary} !important;
+        }}
+        .stExpander summary {{
+            color: {text_primary} !important;
+            font-weight: 700 !important;
         }}
 
         /* ── Buttons ── */
@@ -154,14 +211,6 @@ def inject_global_css() -> None:
         .stButton > button[kind="primary"]:hover {{
             transform: translateY(-2px) scale(1.02) !important;
             box-shadow: 0 8px 22px rgba(255, 122, 0, 0.5) !important;
-        }}
-
-        /* ── Form Inputs ── */
-        .stTextInput input, .stTextArea textarea, .stSelectbox select {{
-            background-color: {bg_card} !important;
-            color: {text_primary} !important;
-            border: 1.5px solid {border_col} !important;
-            border-radius: 12px !important;
         }}
     </style>
     """
