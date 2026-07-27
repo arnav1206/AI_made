@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, tabs, cards, selectboxes, top header transparency, toolbar icons, and universal high-contrast buttons.
+Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, tabs, cards, selectboxes, top header transparency, toolbar icons, and buttons.
 """
 
 from __future__ import annotations
@@ -87,7 +87,7 @@ def inject_global_css() -> None:
             color: #F8FAFC !important;
         }}
 
-        /* ── Sidebar Navigation Buttons ── */
+        /* ── Sidebar Navigation Buttons Visibility ── */
         section[data-testid="stSidebar"] .stButton > button {{
             background-color: rgba(255, 255, 255, 0.08) !important;
             color: #F8FAFC !important;
@@ -117,57 +117,38 @@ def inject_global_css() -> None:
             color: #FFFFFF !important;
         }}
 
-        /* ── Universal High-Contrast Main Area Buttons Fix ── */
-        .stMainBlockContainer .stButton > button,
-        button[data-testid="stBaseButton-secondary"],
-        button[data-testid="stBaseButton-primary"] {{
+        /* ── Main Content Area Buttons ── */
+        .stMainBlockContainer .stButton > button {{
             border-radius: 50px !important;
-            font-weight: 800 !important;
+            font-weight: 700 !important;
             padding: 0.65rem 1.5rem !important;
             transition: all 0.2s ease !important;
         }}
-
-        /* Secondary Buttons (e.g. Load Sample Transcript, Clear, Edit) */
-        .stMainBlockContainer .stButton > button:not([kind="primary"]),
-        button[data-testid="stBaseButton-secondary"] {{
-            background-color: #1E293B !important;
-            color: #F8FAFC !important;
-            border: 1.5px solid rgba(255, 122, 0, 0.45) !important;
+        .stMainBlockContainer .stButton > button:not([kind="primary"]) {{
+            background-color: {input_bg} !important;
+            color: {text_primary} !important;
+            border: 1.5px solid {border_col} !important;
         }}
         .stMainBlockContainer .stButton > button:not([kind="primary"]) p,
         .stMainBlockContainer .stButton > button:not([kind="primary"]) span,
-        .stMainBlockContainer .stButton > button:not([kind="primary"]) div,
-        button[data-testid="stBaseButton-secondary"] p,
-        button[data-testid="stBaseButton-secondary"] span,
-        button[data-testid="stBaseButton-secondary"] div {{
-            color: #F8FAFC !important;
-            -webkit-text-fill-color: #F8FAFC !important;
-            font-weight: 800 !important;
+        .stMainBlockContainer .stButton > button:not([kind="primary"]) div {{
+            color: {text_primary} !important;
+            font-weight: 700 !important;
         }}
-        .stMainBlockContainer .stButton > button:not([kind="primary"]):hover,
-        button[data-testid="stBaseButton-secondary"]:hover {{
-            border-color: transparent !important;
-            color: #FFFFFF !important;
-            background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
-            box-shadow: 0 4px 15px rgba(255, 122, 0, 0.4) !important;
+        .stMainBlockContainer .stButton > button:not([kind="primary"]):hover {{
+            border-color: #FF7A00 !important;
+            color: #FF7A00 !important;
+            background-color: rgba(255, 122, 0, 0.1) !important;
         }}
         .stMainBlockContainer .stButton > button:not([kind="primary"]):hover p,
-        .stMainBlockContainer .stButton > button:not([kind="primary"]):hover span,
-        button[data-testid="stBaseButton-secondary"]:hover p,
-        button[data-testid="stBaseButton-secondary"]:hover span {{
-            color: #FFFFFF !important;
-            -webkit-text-fill-color: #FFFFFF !important;
+        .stMainBlockContainer .stButton > button:not([kind="primary"]):hover span {{
+            color: #FF7A00 !important;
         }}
 
-        /* Primary Action Buttons */
         .stMainBlockContainer .stButton > button[kind="primary"],
-        button[data-testid="stBaseButton-primary"],
         .stMainBlockContainer .stButton > button[kind="primary"] p,
         .stMainBlockContainer .stButton > button[kind="primary"] span,
-        .stMainBlockContainer .stButton > button[kind="primary"] div,
-        button[data-testid="stBaseButton-primary"] p,
-        button[data-testid="stBaseButton-primary"] span,
-        button[data-testid="stBaseButton-primary"] div {{
+        .stMainBlockContainer .stButton > button[kind="primary"] div {{
             background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
             color: #FFFFFF !important;
             -webkit-text-fill-color: #FFFFFF !important;
