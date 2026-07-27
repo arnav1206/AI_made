@@ -2,10 +2,11 @@
 views/success.py
 =================
 Submission success page for Formitra.
-Features stunning celebratory confetti & badge animations upon form submission.
+Features celebratory green badge animation & ref code display upon form submission.
 """
 
 import random
+import textwrap
 import streamlit as st
 
 from components.layout   import tricolour_bar, section_heading, info_box, spacer
@@ -28,17 +29,17 @@ def render() -> None:
     else:
         ref_code = session.get("reference_code")
 
-    form_title = session.get("selected_form", "Scholarship Application")
+    form_title = session.get("selected_form") or "Scholarship Application"
     language   = session.get("selected_language", "Hindi")
 
     # ── Celebration HTML/CSS Confetti & Pulse Animation ─────────────
-    animation_html = f"""
+    animation_html = textwrap.dedent(f"""\
     <style>
         .celebration-container {{
             background: linear-gradient(135deg, #065F46 0%, #047857 50%, #064E3B 100%);
             border-radius: 24px;
             padding: 3rem 2rem;
-            color: #FFFFFF;
+            color: #FFFFFF !important;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -79,7 +80,6 @@ def render() -> None:
     </style>
 
     <div class="celebration-container">
-        <!-- Confetti Particles -->
         <div class="confetti-particle" style="left:10%;animation-delay:0s;background:#FBBF24;"></div>
         <div class="confetti-particle" style="left:25%;animation-delay:0.4s;background:#34D399;"></div>
         <div class="confetti-particle" style="left:40%;animation-delay:0.8s;background:#F472B6;"></div>
@@ -88,19 +88,19 @@ def render() -> None:
         <div class="confetti-particle" style="left:90%;animation-delay:1s;background:#A7F3D0;"></div>
 
         <div class="badge-ripple">✅</div>
-        <div style="font-size:2.2rem;font-weight:900;letter-spacing:-0.5px;color:#FFFFFF;">
+        <div style="font-size:2.2rem;font-weight:900;letter-spacing:-0.5px;color:#FFFFFF !important;-webkit-text-fill-color:#FFFFFF !important;">
             Application Submitted Successfully!
         </div>
-        <div style="font-size:1.05rem;color:#D1FAE5;margin-top:0.5rem;">
+        <div style="font-size:1.05rem;color:#D1FAE5 !important;-webkit-text-fill-color:#D1FAE5 !important;margin-top:0.5rem;">
             Your voice-assisted application for <b>{form_title}</b> is complete & logged.
         </div>
         
         <div style="margin-top:1.75rem;display:inline-block;background:rgba(255, 255, 255, 0.15);backdrop-filter:blur(8px);padding:1rem 2.2rem;border-radius:50px;border:2px dashed #A7F3D0;">
-            <span style="font-size:0.85rem;color:#E6F4EA;font-weight:700;">FORMITRA REFERENCE CODE: </span>
-            <span style="font-size:1.5rem;font-weight:900;color:#FDE047;letter-spacing:1.5px;">{ref_code}</span>
+            <span style="font-size:0.85rem;color:#E6F4EA !important;-webkit-text-fill-color:#E6F4EA !important;font-weight:700;">FORMITRA REFERENCE CODE: </span>
+            <span style="font-size:1.5rem;font-weight:900;color:#FDE047 !important;-webkit-text-fill-color:#FDE047 !important;letter-spacing:1.5px;">{ref_code}</span>
         </div>
     </div>
-    """
+    """)
     st.markdown(animation_html, unsafe_allow_html=True)
 
     # Voice Speech Announcement
@@ -115,7 +115,7 @@ def render() -> None:
             session.navigate("track_status")
     with c2:
         if st.button("🔄 Start New Application", use_container_width=True):
-            session.reset_all()
+            session.full_reset()
             session.navigate("home")
 
     spacer()
