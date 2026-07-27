@@ -2,8 +2,7 @@
 components/navbar.py
 ====================
 Sidebar navigation component with language selector, user auth status, Admin Portal link & Dark Mode toggle.
-Features active page tab highlighting (glowing orange badge indicator).
-Rebranded for Formitra.
+Features official Formitra multilingual brand logo for Light & Dark modes.
 """
 
 from __future__ import annotations
@@ -48,10 +47,19 @@ def render_sidebar() -> None:
 
 
 def _logo_block() -> None:
+    is_dark  = session.get("dark_mode", False)
+    img_path = (
+        "bharat_voice2form/assets/images/multilingual_dark.jpg"
+        if is_dark
+        else "bharat_voice2form/assets/images/multilingual_light.jpg"
+    )
+
+    st.markdown('<div style="text-align:center;padding:0.5rem 0 0.2rem;">', unsafe_allow_html=True)
+    c1, c2, c3 = st.columns([1, 2, 1])
+    with c2:
+        st.image(img_path, width=80)
     st.markdown(
-        '<div style="text-align:center;padding:0.75rem 0 0.5rem;">'
-        '<div style="font-size:2.4rem;">🎙️</div>'
-        '<div style="font-size:1.3rem;font-weight:900;letter-spacing:-0.4px;color:#FF7A00;">'
+        '<div style="font-size:1.35rem;font-weight:900;letter-spacing:-0.4px;color:#FF7A00;margin-top:0.25rem;">'
         'Formitra</div>'
         '<div style="font-size:0.75rem;opacity:0.8;margin-top:0.1rem;color:#F8FAFC;">'
         'AI Voice-Powered Form Filling</div>'
