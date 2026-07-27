@@ -6,7 +6,13 @@ chrome.runtime.onInstalled.addListener(() => {
     title: "🎙️ Dictate with Formitra for this field",
     contexts: ["editable"]
   });
-  console.log("Formitra Extension installed successfully.");
+
+  // Enable Side Panel click behavior in Chrome
+  if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
+    chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
+  }
+
+  console.log("Formitra Extension V3 Service Worker initialized.");
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
