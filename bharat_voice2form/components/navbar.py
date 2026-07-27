@@ -1,7 +1,7 @@
 """
 components/navbar.py
 ====================
-Sidebar navigation component with language selector & Dark Mode toggle.
+Sidebar navigation component with language selector, user auth status & Dark Mode toggle.
 Rebranded for Formitra.
 """
 
@@ -13,10 +13,13 @@ from utils.constants    import PAGE_ORDER, PAGE_LABELS
 from utils.translations import t, get_available_languages
 from components.layout  import tricolour_divider_inline
 import utils.session as session
+import utils.auth as auth
 
 
 _NAV_KEYS: dict[str, str] = {
     "home":           "nav_home",
+    "login":          "nav_login",
+    "register":       "nav_register",
     "form_selection": "nav_form_selection",
     "voice_input":    "nav_voice_input",
     "ai_processing":  "nav_ai_processing",
@@ -29,9 +32,10 @@ _NAV_KEYS: dict[str, str] = {
 
 
 def render_sidebar() -> None:
-    """Render left sidebar: logo, theme toggle, language picker, nav, badges."""
+    """Render left sidebar: logo, user badge, theme toggle, language picker, nav."""
     with st.sidebar:
         _logo_block()
+        _user_auth_badge()
         _theme_toggle_button()
         st.markdown(tricolour_divider_inline(4), unsafe_allow_html=True)
         _language_selector()
@@ -52,6 +56,29 @@ def _logo_block() -> None:
         '</div>',
         unsafe_allow_html=True,
     )
+
+
+def _user_auth_badge() -> None:
+    """Displays logged-in user profile or quick login link."""
+    if auth.is_logged_in():
+        user = auth.get_logged_in_user()
+        name = user.get("name", "Applicant") if user else "Applicant"
+        st.markdown(
+            f'<div style="background:rgba(5, 150, 105, 0.2);border:1px solid rgba(5, 150, 105, 0.5);'
+            f'border-radius:10px;padding:0.5rem 0.75rem;text-align:center;margin-bottom:0.5rem;color:#F8FAFC;">'
+            f'<div style="font-size:0.75rem;opacity:0.8;">LOGGED IN ACCOUNT</div>'
+            f'<div style="font-size:0.9rem;font-weight:800;color:#10B981;">👤 {name}</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("🔑 Login", key="sb_login_btn", use_container_width=True):
+                session.navigate("login")
+        with c2:
+            if st.button("📝 Register", key="sb_reg_btn", use_container_width=True):
+                session.navigate("register")
 
 
 def _theme_toggle_button() -> None:
@@ -92,7 +119,7 @@ def _nav_section() -> None:
     )
 
     for page_key in PAGE_ORDER:
-        label = t(_NAV_KEYS.get(page_key, "nav_home"))
+        label = t(_NAV_KEYS.get(page_key, f"nav_{page_key}"))
         if st.button(label, key=f"nav_{page_key}", use_container_width=True):
             session.navigate(page_key)
 

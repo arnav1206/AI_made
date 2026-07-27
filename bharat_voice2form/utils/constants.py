@@ -16,6 +16,8 @@ APPLICATION_NUMBER: str = "FMT-2026-89412"
 
 PAGE_ORDER: list[str] = [
     "home",
+    "login",
+    "register",
     "form_selection",
     "voice_input",
     "ai_processing",
@@ -28,13 +30,15 @@ PAGE_ORDER: list[str] = [
 
 PAGE_LABELS: dict[str, str] = {
     "home":           "🏠 Home",
+    "login":          "🔑 Login",
+    "register":       "📝 Register",
     "form_selection": "📋 Select Form",
     "voice_input":    "🎙️ Voice Input",
     "ai_processing":  "🤖 AI Processing",
     "auto_fill":      "✍️ Form Review",
     "preview":        "👁️ Preview",
     "success":        "🎉 Submitted",
-    "track_status":   "🔍 Track / Login",
+    "track_status":   "🔍 Track Status",
     "help_faq":       "❓ Help & FAQ",
 }
 

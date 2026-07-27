@@ -32,6 +32,8 @@ render_ai_assistant_widget()
 
 # ── 6. Page routing ────────────────────────────────────────────────
 import views.home           as _home
+import views.login          as _login
+import views.register       as _register
 import views.form_selection as _form_sel
 import views.voice_input    as _voice
 import views.ai_processing  as _ai
@@ -43,6 +45,8 @@ import views.help_faq       as _help
 
 _ROUTES: dict = {
     "home":           _home,
+    "login":          _login,
+    "register":       _register,
     "form_selection": _form_sel,
     "voice_input":    _voice,
     "ai_processing":  _ai,
