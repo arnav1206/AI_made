@@ -2,7 +2,8 @@
 views/track_status.py
 ======================
 Reference Number Login & Application Tracker Page for Formitra.
-Allows users to enter their tracking code (e.g. FMT-2026-89412) to view application status and PDF details.
+Allows users to enter their tracking code (e.g. FMT-2026-89412) to view application status and details.
+Dynamic Light/Dark mode contrast support.
 """
 
 from __future__ import annotations
@@ -20,15 +21,30 @@ def render() -> None:
 
     section_heading("🔍 Track Application Status / Login", "Enter your Formitra Reference Number to check application status")
 
+    is_dark = st.session_state.get("dark_mode", False)
+
+    if is_dark:
+        card_title  = "#F8FAFC"
+        card_sub    = "#CBD5E1"
+        profile_hdr = "#34D399"
+        txt_main    = "#F8FAFC"
+        hr_border   = "rgba(255, 255, 255, 0.15)"
+    else:
+        card_title  = "#0F172A"
+        card_sub    = "#64748B"
+        profile_hdr = "#065F46"
+        txt_main    = "#0F172A"
+        hr_border   = "#E2E8F0"
+
     c1, c2, c3 = st.columns([1, 2, 1])
     with c2:
         st.markdown(
-            '<div class="card" style="border-top:4px solid #FF7A00;text-align:center;">'
-            '<div style="font-size:2rem;margin-bottom:0.5rem;">🔑</div>'
-            '<div style="font-size:1.1rem;font-weight:800;color:#0F172A;">Applicant Reference Login</div>'
-            '<div style="font-size:0.85rem;color:#64748B;margin-top:0.25rem;">'
-            'Enter the unique reference code provided upon submitting your scholarship form.</div>'
-            '</div>',
+            f'<div class="card" style="border-top:4px solid #FF7A00;text-align:center;">'
+            f'<div style="font-size:2rem;margin-bottom:0.5rem;">🔑</div>'
+            f'<div style="font-size:1.1rem;font-weight:800;color:{card_title};">Applicant Reference Login</div>'
+            f'<div style="font-size:0.85rem;color:{card_sub};margin-top:0.25rem;">'
+            f'Enter the unique reference code provided upon submitting your scholarship form.</div>'
+            f'</div>',
             unsafe_allow_html=True,
         )
 
@@ -44,7 +60,7 @@ def render() -> None:
             st.rerun()
 
     active_ref = session.get("active_ref_code", "FMT-2026-89412")
-    st.markdown("<hr style='border:none;border-top:1px solid #E2E8F0;margin:2rem 0;'>", unsafe_allow_html=True)
+    st.markdown(f"<hr style='border:none;border-top:1px solid {hr_border};margin:2rem 0;'>", unsafe_allow_html=True)
 
     if active_ref:
         st.markdown(f"### 📋 Application Details for Reference: `{active_ref}`")
@@ -53,31 +69,30 @@ def render() -> None:
         with col1:
             st.metric("Application Status", "✅ Verified & Submitted")
         with col2:
-            st.metric("Scheme Portal", session.get("selected_form", "Post-Matric Scholarship"))
+            st.metric("Scheme Portal", session.get("selected_form") or "Post-Matric Scholarship")
         with col3:
             st.metric("Verification Level", "Level 1 (Institute Level)")
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-        extracted = session.get("extracted_data", {
-            "Name": "Rahul Sharma",
-            "City": "Jaipur",
-            "State": "Rajasthan",
-            "Course": "B.Tech",
-            "Year": "Second Year",
-            "Income": "150000",
-        })
+        extracted = session.get("extracted_data", {})
+        name   = extracted.get("Name")   or session.get("field_name")   or "Rahul Sharma"
+        state  = extracted.get("State")  or session.get("field_state")  or "Rajasthan"
+        city   = extracted.get("City")   or session.get("field_city")   or "Jaipur"
+        course = extracted.get("Course") or session.get("field_course") or "B.Tech"
+        year   = extracted.get("Year")   or session.get("field_year")   or "Second Year"
+        income = extracted.get("Income") or session.get("field_income") or "150000"
 
         st.markdown(
             f'<div class="card" style="border-left:4px solid #059669;">'
-            f'<div style="font-weight:800;font-size:1rem;color:#065F46;margin-bottom:0.75rem;">'
+            f'<div style="font-weight:800;font-size:1.05rem;color:{profile_hdr};margin-bottom:0.75rem;">'
             f'👤 Submitted Applicant Profile</div>'
-            f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;font-size:0.9rem;">'
-            f'<div><b>Applicant Name:</b> {extracted.get("Name", "Rahul Sharma")}</div>'
-            f'<div><b>State:</b> {extracted.get("State", "Rajasthan")}</div>'
-            f'<div><b>City:</b> {extracted.get("City", "Jaipur")}</div>'
-            f'<div><b>Course & Year:</b> {extracted.get("Course", "B.Tech")} ({extracted.get("Year", "Second Year")})</div>'
-            f'<div><b>Family Income:</b> ₹{extracted.get("Income", "150000")}</div>'
+            f'<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;font-size:0.9rem;color:{txt_main};">'
+            f'<div><b>Applicant Name:</b> {name}</div>'
+            f'<div><b>State:</b> {state}</div>'
+            f'<div><b>City:</b> {city}</div>'
+            f'<div><b>Course & Year:</b> {course} ({year})</div>'
+            f'<div><b>Family Income:</b> ₹{income}</div>'
             f'<div><b>Submission Date:</b> 26 July 2026</div>'
             f'</div></div>',
             unsafe_allow_html=True,
