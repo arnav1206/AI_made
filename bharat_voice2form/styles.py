@@ -57,12 +57,15 @@ def inject_global_css() -> None:
         header[data-testid="stHeader"] a,
         header[data-testid="stHeader"] span,
         header[data-testid="stHeader"] p {{
-            color: #F8FAFC !important;
-            fill: #F8FAFC !important;
-            stroke: #F8FAFC !important;
+            color: {text_primary} !important;
+            fill: {text_primary} !important;
+            stroke: {text_primary} !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
         }}
         header[data-testid="stHeader"] button:hover {{
-            background-color: rgba(255, 255, 255, 0.15) !important;
+            background-color: rgba(255, 122, 0, 0.15) !important;
             border-radius: 8px !important;
         }}
 
