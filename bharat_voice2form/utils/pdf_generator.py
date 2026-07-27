@@ -2,8 +2,9 @@
 utils/pdf_generator.py
 =======================
 Attractive, high-quality PDF document generator for Formitra.
-Features Government header banner, tricolour accents, structured grid tables,
-self-declaration verification block, and official digital receipt watermark seal.
+Features Government header banner with official multilingual brand logo,
+tricolour accents, structured grid tables, self-declaration verification block,
+and official digital receipt watermark seal.
 Supports ReportLab engine with high-precision pure-Python PDF fallback.
 """
 
@@ -70,7 +71,7 @@ def _generate_reportlab(
     from reportlab.lib.pagesizes import letter
     from reportlab.lib import colors
     from reportlab.platypus import (
-        SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+        SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, Image as RLImage
     )
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
@@ -100,7 +101,7 @@ def _generate_reportlab(
         "GovTitle",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=13,
+        fontSize=12.5,
         textColor=colors.white,
         alignment=0,
         spaceAfter=4,
@@ -109,7 +110,7 @@ def _generate_reportlab(
         "GovSubTitle",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=10,
+        fontSize=9.5,
         textColor=colors.HexColor("#FDE047"),
         alignment=2,
     )
@@ -145,20 +146,44 @@ def _generate_reportlab(
         leading=12,
     )
 
-    # 1. Header Banner Table
-    now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
-    header_data = [
-        [
-            Paragraph("NATIONAL SCHOLARSHIP PORTAL — GOVERNMENT OF INDIA<br/><font size=8.5 color='#E2E8F0'>Formitra AI Voice-Assisted Application Receipt</font>", title_style),
-            Paragraph(f"<b>REFERENCE NO:</b><br/><font size=11 color='#FDE047'><b>{application_no}</b></font><br/><font size=7.5 color='#E2E8F0'>Date: {now_str}</font>", sub_title_style),
+    # 1. Header Banner Table with Official Logo Image
+    now_str  = datetime.now().strftime("%d %b %Y, %I:%M %p")
+    img_path = Path(__file__).parent.parent / "assets" / "images" / "multilingual_light.jpg"
+
+    if img_path.exists():
+        try:
+            logo_img = RLImage(str(img_path), width=46, height=46)
+            header_data = [
+                [
+                    logo_img,
+                    Paragraph("NATIONAL SCHOLARSHIP PORTAL — GOVERNMENT OF INDIA<br/><font size=8.5 color='#E2E8F0'>Formitra AI Voice-Assisted Application Receipt</font>", title_style),
+                    Paragraph(f"<b>REFERENCE NO:</b><br/><font size=11 color='#FDE047'><b>{application_no}</b></font><br/><font size=7.5 color='#E2E8F0'>Date: {now_str}</font>", sub_title_style),
+                ]
+            ]
+            hdr_table = Table(header_data, colWidths=[52, 308, 180])
+        except Exception as img_err:
+            logger.warning("Could not add image to ReportLab header table: %s", img_err)
+            header_data = [
+                [
+                    Paragraph("NATIONAL SCHOLARSHIP PORTAL — GOVERNMENT OF INDIA<br/><font size=8.5 color='#E2E8F0'>Formitra AI Voice-Assisted Application Receipt</font>", title_style),
+                    Paragraph(f"<b>REFERENCE NO:</b><br/><font size=11 color='#FDE047'><b>{application_no}</b></font><br/><font size=7.5 color='#E2E8F0'>Date: {now_str}</font>", sub_title_style),
+                ]
+            ]
+            hdr_table = Table(header_data, colWidths=[350, 190])
+    else:
+        header_data = [
+            [
+                Paragraph("NATIONAL SCHOLARSHIP PORTAL — GOVERNMENT OF INDIA<br/><font size=8.5 color='#E2E8F0'>Formitra AI Voice-Assisted Application Receipt</font>", title_style),
+                Paragraph(f"<b>REFERENCE NO:</b><br/><font size=11 color='#FDE047'><b>{application_no}</b></font><br/><font size=7.5 color='#E2E8F0'>Date: {now_str}</font>", sub_title_style),
+            ]
         ]
-    ]
-    hdr_table = Table(header_data, colWidths=[350, 190])
+        hdr_table = Table(header_data, colWidths=[350, 190])
+
     hdr_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,-1), PRIMARY),
-        ('PADDING', (0,0), (-1,-1), 12),
+        ('PADDING', (0,0), (-1,-1), 10),
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 12),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 10),
     ]))
     story.append(hdr_table)
 
@@ -235,7 +260,7 @@ def _generate_reportlab(
 
     doc.build(story)
     pdf_bytes = buf.getvalue()
-    return PDFResult(pdf_bytes, filename, "ReportLab Beautiful PDF")
+    return PDFResult(pdf_bytes, filename, "ReportLab Beautiful PDF with Logo")
 
 
 # ─── Fallback Styled Engine Implementation ──────────────────────────
