@@ -141,13 +141,13 @@ def json_block(data: dict) -> None:
 
 def field_mapping_row(label: str, value: str, found: bool) -> None:
     """Render one row in the AI field-mapping preview."""
-    bg = "#ECFDF5" if found else "#FEF9C3"
+    bg = "rgba(5, 150, 105, 0.25)" if found else "rgba(234, 179, 8, 0.25)"
     ic = "✅" if found else "⚠️"
     st.markdown(
         f'<div style="display:flex;align-items:center;justify-content:space-between;'
         f'background:{bg};border-radius:8px;padding:0.55rem 0.85rem;margin-bottom:0.35rem;">'
-        f'<div style="font-size:0.85rem;font-weight:600;color:#111827;">{ic} {label}</div>'
-        f'<div style="font-size:0.83rem;color:#374151;">{value}</div>'
+        f'<div style="font-size:0.85rem;font-weight:600;color:#F8FAFC;">{ic} {label}</div>'
+        f'<div style="font-size:0.83rem;color:#F8FAFC;">{value}</div>'
         f'</div>',
         unsafe_allow_html=True,
     )
