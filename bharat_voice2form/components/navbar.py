@@ -1,7 +1,7 @@
 """
 components/navbar.py
 ====================
-Sidebar navigation component with language selector, user auth status & Dark Mode toggle.
+Sidebar navigation component with language selector, user auth status, Admin Portal link & Dark Mode toggle.
 Rebranded for Formitra.
 """
 
@@ -17,9 +17,10 @@ import utils.auth as auth
 
 
 _NAV_KEYS: dict[str, str] = {
-    "home":           "nav_home",
     "login":          "nav_login",
     "register":       "nav_register",
+    "admin":          "nav_admin",
+    "home":           "nav_home",
     "form_selection": "nav_form_selection",
     "voice_input":    "nav_voice_input",
     "ai_processing":  "nav_ai_processing",
@@ -60,7 +61,17 @@ def _logo_block() -> None:
 
 def _user_auth_badge() -> None:
     """Displays logged-in user profile or quick login link."""
-    if auth.is_logged_in():
+    if auth.is_admin_logged_in():
+        admin_user = st.session_state.get("admin_user", "Admin")
+        st.markdown(
+            f'<div style="background:rgba(37, 99, 235, 0.25);border:1px solid rgba(37, 99, 235, 0.6);'
+            f'border-radius:10px;padding:0.5rem 0.75rem;text-align:center;margin-bottom:0.5rem;color:#F8FAFC;">'
+            f'<div style="font-size:0.75rem;opacity:0.8;">ADMINISTRATOR LOGGED IN</div>'
+            f'<div style="font-size:0.9rem;font-weight:800;color:#60A5FA;">🛡️ {admin_user.title()}</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+    elif auth.is_logged_in():
         user = auth.get_logged_in_user()
         name = user.get("name", "Applicant") if user else "Applicant"
         st.markdown(

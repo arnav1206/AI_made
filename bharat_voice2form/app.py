@@ -34,6 +34,7 @@ render_ai_assistant_widget()
 import views.home           as _home
 import views.login          as _login
 import views.register       as _register
+import views.admin          as _admin
 import views.form_selection as _form_sel
 import views.voice_input    as _voice
 import views.ai_processing  as _ai
@@ -47,6 +48,7 @@ _ROUTES: dict = {
     "home":           _home,
     "login":          _login,
     "register":       _register,
+    "admin":          _admin,
     "form_selection": _form_sel,
     "voice_input":    _voice,
     "ai_processing":  _ai,
@@ -57,7 +59,7 @@ _ROUTES: dict = {
     "help_faq":       _help,
 }
 
-page_key = session.get("page", "home")
+page_key = session.get("page", "login")
 module   = _ROUTES.get(page_key)
 
 if module is not None:

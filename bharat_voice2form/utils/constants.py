@@ -17,6 +17,7 @@ APPLICATION_NUMBER: str = "FMT-2026-89412"
 PAGE_ORDER: list[str] = [
     "login",
     "register",
+    "admin",
     "home",
     "form_selection",
     "voice_input",
@@ -29,9 +30,10 @@ PAGE_ORDER: list[str] = [
 ]
 
 PAGE_LABELS: dict[str, str] = {
-    "login":          "🔑 Login",
-    "register":       "📝 Register",
-    "home":           "🏠 Home",
+    "login":          "🔑 User Login",
+    "register":       "📝 Register Account",
+    "admin":          "🛡️ Admin Portal",
+    "home":           "🏠 Home Dashboard",
     "form_selection": "📋 Select Form",
     "voice_input":    "🎙️ Voice Input",
     "ai_processing":  "🤖 AI Processing",
@@ -254,11 +256,11 @@ MOCK_TRANSCRIPTS: dict[str, str] = {
     "Telugu": (
         "నా పేరు రాహుల్ శర్మ. నేను జైపూర్ రాజస్థాన్‌లో నివసిస్తున్నాను. "
         "నేను బి.టెక్ రెండవ సంవత్సరం విద్యార్థిని. నా వార్షిక ఆదాయం ₹1,50,000. "
-        "నా ఫోన్ నంబర్ 9876543210 మరియు ఇమెయిల్ rahul.sharma@example.com."
+        "నా ఫోన్ నంబర్ 9876543210 మరియు ఇమెయિલ rahul.sharma@example.com."
     ),
     "Bengali": (
         "আমার নাম রাহুল শর্মা। আমি জয়পুর রাজস্থানে থাকি। "
-        "আমি বি.টেک দ্বিতীয় বর্ষের ছাত্র। আমার বার্ষিক আয় ₹১,৫০,০০০। "
+        "আমি বি.টেক দ্বিতীয় বর্ষের ছাত্র। আমার বার্ষিক আয় ₹১,৫০,০০০। "
         "আমার ফোন নম্বর ৯৮৭৬৫৪৩২১০ এবং ইমেল rahul.sharma@example.com।"
     ),
     "Marathi": (
@@ -276,7 +278,7 @@ MOCK_TRANSCRIPTS: dict[str, str] = {
         "ഞാൻ ബി.ടെക് രണ്ടാം വർഷ വിദ്യാർത്ഥിയാണ്. എന്റെ വാർഷിക വരുമാനം ₹1,50,000. "
         "എന്റെ ഫോൺ നമ്പർ 9876543210 ഉം ഇമെയിൽ rahul.sharma@example.com ഉം ആണ്."
     ),
-}
+    },
 
 AI_PROCESSING_STEPS: list[tuple[str, str, float]] = [
     ("🎙️", "Converting speech audio & running language detection...", 0.4),
