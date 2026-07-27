@@ -2,7 +2,7 @@
 views/preview.py
 ================
 Application preview page — translated via t().
-Includes live PDF document preview & download.
+Includes live PDF document preview & download option.
 """
 
 import base64
@@ -95,12 +95,33 @@ def render() -> None:
 
     # ── Live PDF Document Preview Box ──────────────────────────────
     if pdf_res:
-        with st.expander("👁️ Live Preview Generated PDF Document Before Download", expanded=False):
+        with st.expander("👁️ Live Document Preview Before Download", expanded=False):
             b64_pdf = base64.b64encode(pdf_res.pdf_bytes).decode("utf-8")
-            st.markdown(
-                f'<iframe src="data:application/pdf;base64,{b64_pdf}" width="100%" height="450" type="application/pdf" style="border:1.5px solid rgba(255,122,0,0.4);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.2);"></iframe>',
-                unsafe_allow_html=True,
-            )
+            
+            # HTML Object with styled document card fallback for strict browser security policies
+            grid_items = "".join(
+                f'<div style="display:flex;justify-content:space-between;padding:0.45rem 0.8rem;border-bottom:1px solid #E2E8F0;'
+                f'background:{"#F8FAFC" if idx % 2 == 0 else "#FFFFFF"};">'
+                f'<span style="font-weight:700;color:#0F172A;font-size:0.85rem;">{k}:</span>'
+                f'<span style="color:#334155;font-size:0.85rem;">{v or "—"}</span></div>'
+                for idx, (k, v) in enumerate(form_data.items())
+            ) if form_data else ""
+
+            doc_fallback = f"""
+            <object data="data:application/pdf;base64,{b64_pdf}" type="application/pdf" width="100%" height="450" style="border:1.5px solid #FF7A00;border-radius:12px;">
+                <div style="background:#FFFFFF;color:#0F172A;padding:1.5rem;border-radius:12px;border:2px solid #FF7A00;">
+                    <div style="background:#0F172A;color:#FFFFFF;padding:1rem;border-radius:8px;margin-bottom:0.75rem;">
+                        <div style="font-weight:800;font-size:1.1rem;color:#FF7A00;">NATIONAL SCHOLARSHIP PORTAL — GOVT OF INDIA</div>
+                        <div style="font-size:0.85rem;color:#E2E8F0;">Formitra AI Voice Application Receipt | Ref: {app_no}</div>
+                    </div>
+                    <div style="margin-bottom:1rem;">{grid_items}</div>
+                    <div style="background:#FEF3C7;border:1px solid #F59E0B;padding:0.75rem;border-radius:6px;font-size:0.8rem;color:#92400E;">
+                        <b>📜 Applicant Self-Declaration Verified & Sealed electronically.</b>
+                    </div>
+                </div>
+            </object>
+            """
+            st.markdown(doc_fallback, unsafe_allow_html=True)
 
     # ── Action buttons ─────────────────────────────────────────────
     spacer()
