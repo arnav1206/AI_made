@@ -2,6 +2,7 @@
 views/home.py
 =============
 Home page for Formitra — AI Voice-Powered Scholarship Portal.
+Updated with ultra-premium Deep Royal Blue to Saffron hero gradient and high contrast typography.
 """
 
 from __future__ import annotations
@@ -20,20 +21,20 @@ def render() -> None:
 
     # ── Hero Banner ────────────────────────────────────────────────
     st.markdown(
-        f'<div style="background:linear-gradient(135deg, #FF7A00 0%, #138808 100%);'
-        f'border-radius:24px;padding:2.5rem 2rem;color:#FFFFFF;text-align:center;'
-        f'box-shadow:0 15px 35px rgba(255, 122, 0, 0.25);margin-bottom:2rem;">'
-        f'<div style="font-size:3rem;margin-bottom:0.4rem;">🎙️</div>'
-        f'<h1 style="font-size:2.2rem;font-weight:900;margin:0;letter-spacing:-0.5px;color:#FFFFFF;">'
+        f'<div style="background:linear-gradient(135deg, #0A192F 0%, #003B95 50%, #FF7A00 100%);'
+        f'border-radius:24px;padding:3rem 2rem;color:#FFFFFF;text-align:center;'
+        f'box-shadow:0 20px 40px rgba(0, 40, 104, 0.35);border:1px solid rgba(255, 255, 255, 0.15);margin-bottom:2rem;">'
+        f'<div style="font-size:3.2rem;margin-bottom:0.5rem;">🎙️</div>'
+        f'<h1 style="font-size:2.4rem;font-weight:900;margin:0;letter-spacing:-0.5px;color:#FFFFFF !important;text-shadow:0 2px 12px rgba(0,0,0,0.5);">'
         f'{t("hero_title")}</h1>'
-        f'<p style="font-size:1.05rem;opacity:0.95;margin-top:0.75rem;max-width:700px;margin-left:auto;margin-right:auto;">'
+        f'<p style="font-size:1.1rem;color:#F8FAFC !important;opacity:0.95;margin-top:0.85rem;max-width:720px;margin-left:auto;margin-right:auto;line-height:1.6;">'
         f'{t("hero_sub")}</p>'
-        f'<div style="margin-top:1.5rem;display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">'
-        f'<span style="background:rgba(255,255,255,0.2);backdrop-filter:blur(5px);'
-        f'padding:0.4rem 1rem;border-radius:50px;font-weight:700;font-size:0.88rem;">'
+        f'<div style="margin-top:1.75rem;display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">'
+        f'<span style="background:rgba(255,255,255,0.18);backdrop-filter:blur(8px);color:#FFFFFF !important;'
+        f'padding:0.45rem 1.2rem;border-radius:50px;font-weight:800;font-size:0.9rem;border:1px solid rgba(255,255,255,0.3);">'
         f'🇮🇳 9 Indian Languages Supported</span>'
-        f'<span style="background:rgba(255,255,255,0.2);backdrop-filter:blur(5px);'
-        f'padding:0.4rem 1rem;border-radius:50px;font-weight:700;font-size:0.88rem;">'
+        f'<span style="background:rgba(255,255,255,0.18);backdrop-filter:blur(8px);color:#FFFFFF !important;'
+        f'padding:0.45rem 1.2rem;border-radius:50px;font-weight:800;font-size:0.9rem;border:1px solid rgba(255,255,255,0.3);">'
         f'🤖 Gemma AI Extraction</span>'
         f'</div>'
         f'</div>',
