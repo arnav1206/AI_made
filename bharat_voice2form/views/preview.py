@@ -2,9 +2,10 @@
 views/preview.py
 ================
 Application preview page — translated via t().
-Dynamic Light/Dark mode theme support for Applicant Self-Declaration & high-contrast buttons.
+Includes live PDF document preview & download.
 """
 
+import base64
 import time
 from datetime import datetime
 
@@ -85,6 +86,22 @@ def render() -> None:
 
     agreed = st.checkbox(t("declaration_check"), key="declaration_agreed")
 
+    # ── Pre-Generate PDF Document for Live Preview ──────────────────
+    pdf_res = generate_pdf(
+        form_data=form_data,
+        application_no=app_no,
+        form_title=form_name,
+    )
+
+    # ── Live PDF Document Preview Box ──────────────────────────────
+    if pdf_res:
+        with st.expander("👁️ Live Preview Generated PDF Document Before Download", expanded=False):
+            b64_pdf = base64.b64encode(pdf_res.pdf_bytes).decode("utf-8")
+            st.markdown(
+                f'<iframe src="data:application/pdf;base64,{b64_pdf}" width="100%" height="450" type="application/pdf" style="border:1.5px solid rgba(255,122,0,0.4);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.2);"></iframe>',
+                unsafe_allow_html=True,
+            )
+
     # ── Action buttons ─────────────────────────────────────────────
     spacer()
     b1, b2, b3 = st.columns(3)
@@ -94,22 +111,14 @@ def render() -> None:
             session.navigate("auto_fill")
 
     with b2:
-        if st.button(t("btn_pdf"), use_container_width=True):
-            with st.spinner("Generating PDF…"):
-                result = generate_pdf(
-                    form_data=form_data,
-                    application_no=app_no,
-                    form_title=form_name,
-                )
-            if result:
-                st.download_button(
-                    label=t("download_pdf"),
-                    data=result.pdf_bytes,
-                    file_name=result.filename,
-                    mime="application/pdf",
-                )
-            else:
-                st.error(f"PDF generation failed: {result.error}")
+        if pdf_res:
+            st.download_button(
+                label="📄 Download Form (PDF)",
+                data=pdf_res.pdf_bytes,
+                file_name=pdf_res.filename,
+                mime="application/pdf",
+                use_container_width=True,
+            )
 
     with b3:
         if st.button(

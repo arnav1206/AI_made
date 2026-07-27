@@ -2,9 +2,10 @@
 views/success.py
 =================
 Submission success page for Formitra.
-Features celebratory green badge animation, ref code display, and immediate PDF download.
+Features celebratory green badge animation, ref code display, live PDF preview & download option.
 """
 
+import base64
 import random
 import streamlit as st
 
@@ -33,7 +34,7 @@ def render() -> None:
     language   = session.get("selected_language", "Hindi")
     form_data  = session.get("form_data", {})
 
-    # Generate PDF document for download
+    # Generate PDF document for preview & download
     pdf_res = generate_pdf(
         form_data=form_data,
         application_no=ref_code,
@@ -115,6 +116,15 @@ Your voice-assisted application for <b>{form_title}</b> is complete & logged.
 
     spacer()
 
+    # Live Interactive PDF Document Preview
+    if pdf_res:
+        with st.expander("👁️ Live Preview Submitted Application PDF Document", expanded=True):
+            b64_pdf = base64.b64encode(pdf_res.pdf_bytes).decode("utf-8")
+            st.markdown(
+                f'<iframe src="data:application/pdf;base64,{b64_pdf}" width="100%" height="450" type="application/pdf" style="border:1.5px solid rgba(52,211,153,0.5);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.2);"></iframe>',
+                unsafe_allow_html=True,
+            )
+
     # Action Buttons: Download PDF, Track Status, Start New
     c1, c2, c3 = st.columns(3)
     with c1:
@@ -136,4 +146,4 @@ Your voice-assisted application for <b>{form_title}</b> is complete & logged.
             session.navigate("home")
 
     spacer()
-    info_box(f"💡 Click <b>'Download Official PDF Receipt'</b> to save a copy of your submitted application form for your records. Save your Reference Code <b>{ref_code}</b> to check verification status anytime.")
+    info_box(f"💡 Preview your generated form above or click <b>'Download Official PDF Receipt'</b> to save a copy for your records. Reference Code: <b>{ref_code}</b>.")
