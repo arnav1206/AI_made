@@ -7,6 +7,7 @@ Features:
 - Converts WebM, OGG, MP3, WAV audio from browser microphone into 16kHz Mono PCM WAV.
 - Safe audio volume normalization with peak clipping.
 - OpenAI Whisper local STT support & SpeechRecognition API.
+- Safe fallback & mock transcripts for 9 Indian languages.
 """
 
 from __future__ import annotations
@@ -97,7 +98,6 @@ def boost_audio_volume(wav_bytes: bytes, target_peak: float = 24000.0) -> bytes:
         max_val = audioop.max(raw_frames, 2)
         if 0 < max_val < target_peak:
             factor = min(target_peak / float(max_val), 10.0)
-            # Ensure factor multiplication doesn't overflow audioop L format
             raw_frames = audioop.mul(raw_frames, 2, min(factor, 8.0))
 
         out_buf = io.BytesIO()
@@ -156,11 +156,24 @@ def _transcribe_whisper(audio_bytes: bytes, language: str) -> TranscriptionResul
 
 
 def get_supported_languages() -> list[str]:
-    return list(MOCK_TRANSCRIPTS.keys())
+    if isinstance(MOCK_TRANSCRIPTS, dict):
+        return list(MOCK_TRANSCRIPTS.keys())
+    return ["Hindi", "English", "Odia", "Tamil", "Telugu", "Bengali", "Marathi", "Kannada", "Malayalam"]
 
 
 def _transcribe_mock(language: str) -> TranscriptionResult:
-    text = MOCK_TRANSCRIPTS.get(language, MOCK_TRANSCRIPTS.get("English", ""))
+    if isinstance(MOCK_TRANSCRIPTS, dict):
+        text = MOCK_TRANSCRIPTS.get(language, MOCK_TRANSCRIPTS.get("English", ""))
+    elif isinstance(MOCK_TRANSCRIPTS, (list, tuple)) and MOCK_TRANSCRIPTS:
+        text = str(MOCK_TRANSCRIPTS[0])
+    else:
+        text = (
+            "मेरा नाम राहुल शर्मा है। मैं जयपुर राजस्थान का रहने वाला हूँ। "
+            "मैं B.Tech द्वितीय वर्ष का छात्र हूँ और बीआईटी संस्थान में पढ़ता हूँ। "
+            "मेरी जन्मतिथि 15/08/2003 है और मेरी परिवार की वार्षिक आय ₹1,50,000 है। "
+            "मेरा फोन नंबर 9876543210 और ईमेल rahul.sharma@example.com है।"
+        )
+
     return TranscriptionResult(
         text=text,
         language=language,
