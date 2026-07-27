@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Comprehensive Light/Dark theme styling covering inputs, text, tabs, cards, selectboxes, and sidebar navigation buttons.
+Comprehensive Light/Dark theme styling covering inputs, text, tabs, cards, selectboxes, top header transparency, and sidebar navigation buttons.
 """
 
 from __future__ import annotations
@@ -47,6 +47,12 @@ def inject_global_css() -> None:
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }}
 
+        /* ── Streamlit Top Header Bar Transparency Fix ── */
+        header[data-testid="stHeader"], [data-testid="stHeader"] {{
+            background-color: transparent !important;
+            background: transparent !important;
+        }}
+
         /* ── Main Canvas Typography & Text ── */
         .stApp p, .stApp label,
         .stMarkdown p, .stMarkdown label,
@@ -65,7 +71,7 @@ def inject_global_css() -> None:
             color: #F8FAFC !important;
         }}
 
-        /* ── FIX: Sidebar Navigation Buttons Visibility ── */
+        /* ── Sidebar Navigation Buttons Visibility ── */
         section[data-testid="stSidebar"] .stButton > button {{
             background-color: rgba(255, 255, 255, 0.08) !important;
             color: #F8FAFC !important;
@@ -240,9 +246,10 @@ def inject_global_css() -> None:
             border-radius: 14px !important;
             color: {text_primary} !important;
         }}
-        .stExpander summary {{
+        .stExpander summary, .stExpander summary p, .stExpander summary span, .stExpander summary svg {{
             color: {text_primary} !important;
             font-weight: 700 !important;
+            fill: {text_primary} !important;
         }}
     </style>
     """
