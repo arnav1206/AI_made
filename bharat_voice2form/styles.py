@@ -191,29 +191,45 @@ def inject_global_css() -> None:
             font-weight: 800 !important;
         }}
 
-        /* ── Voice Dictate Popover Buttons Fix ── */
+        /* ── Voice Dictate Popover Buttons High-Contrast Fix ── */
         div[data-testid="stPopover"] > button,
-        .stPopover > button {{
-            background-color: {input_bg} !important;
-            color: {text_primary} !important;
-            border: 1px solid {border_col} !important;
-            border-radius: 8px !important;
+        .stPopover > button,
+        button[data-testid="stBaseButton-popover"],
+        [data-testid="stPopover"] button {{
+            background-color: #1E293B !important;
+            background: #1E293B !important;
+            color: #F8FAFC !important;
+            border: 1.5px solid rgba(255, 122, 0, 0.45) !important;
+            border-radius: 10px !important;
         }}
         div[data-testid="stPopover"] > button p,
         div[data-testid="stPopover"] > button span,
         div[data-testid="stPopover"] > button div,
         .stPopover > button p,
-        .stPopover > button span {{
-            color: {text_primary} !important;
-            font-weight: 700 !important;
+        .stPopover > button span,
+        button[data-testid="stBaseButton-popover"] p,
+        button[data-testid="stBaseButton-popover"] span,
+        [data-testid="stPopover"] button p,
+        [data-testid="stPopover"] button span {{
+            color: #F8FAFC !important;
+            -webkit-text-fill-color: #F8FAFC !important;
+            font-weight: 800 !important;
         }}
-        div[data-testid="stPopover"] > button:hover {{
+        div[data-testid="stPopover"] > button:hover,
+        .stPopover > button:hover,
+        button[data-testid="stBaseButton-popover"]:hover,
+        [data-testid="stPopover"] button:hover {{
             border-color: #FF7A00 !important;
-            background-color: rgba(255, 122, 0, 0.15) !important;
+            background-color: #FF7A00 !important;
+            background: #FF7A00 !important;
+            color: #FFFFFF !important;
         }}
         div[data-testid="stPopover"] > button:hover p,
-        div[data-testid="stPopover"] > button:hover span {{
-            color: #FF7A00 !important;
+        div[data-testid="stPopover"] > button:hover span,
+        button[data-testid="stBaseButton-popover"]:hover p,
+        button[data-testid="stBaseButton-popover"]:hover span {{
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
         }}
 
         /* ── Step Progress Bar Layout ── */
