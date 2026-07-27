@@ -2,6 +2,7 @@
 views/voice_input.py
 ====================
 Voice input page — live streaming dictation & audio recording with Language Auto-Detector.
+Dynamic Light/Dark mode contrast support.
 """
 
 import hashlib
@@ -32,12 +33,19 @@ def render() -> None:
     tricolour_bar()
     step_progress_bar(current_step=2)
 
-    form_name = session.get("selected_form", "Post-Matric Scholarship Scheme")
+    form_name = session.get("selected_form") or "Post-Matric Scholarship Scheme"
+    is_dark   = st.session_state.get("dark_mode", False)
+
+    badge_bg     = "rgba(255, 122, 0, 0.2)" if is_dark else "#FFF7ED"
+    badge_txt    = "#FF7A00" if is_dark else "#C2410C"
+    badge_border = "rgba(255, 122, 0, 0.5)" if is_dark else "#FFEDD5"
+    sub_color    = "#CBD5E1" if is_dark else "#475569"
+
     st.markdown(
         f'<div style="margin-bottom:1.25rem;">'
-        f'<span style="background:rgba(255, 122, 0, 0.2);color:#FF7A00 !important;'
+        f'<span style="background:{badge_bg};color:{badge_txt} !important;'
         f'border-radius:10px;padding:0.45rem 1rem;font-size:0.88rem;font-weight:800;'
-        f'border:1px solid rgba(255, 122, 0, 0.5);display:inline-block;">'
+        f'border:1px solid {badge_border};display:inline-block;">'
         f'📋 Selected Scheme: {form_name}</span></div>',
         unsafe_allow_html=True,
     )
@@ -86,7 +94,7 @@ def render() -> None:
         if live_text and isinstance(live_text, str) and live_text.strip():
             _update_transcript(live_text)
 
-        st.markdown("<hr style='border:none;border-top:1px solid rgba(255,255,255,0.1);margin:1.25rem 0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='border:none;border-top:1px solid rgba(255,122,0,0.2);margin:1.25rem 0;'>", unsafe_allow_html=True)
 
         # ── 2. Microphone Audio File Clip Recorder ─────────────────
         st.markdown(
@@ -145,8 +153,8 @@ def render() -> None:
         session.set("transcript", transcript)
 
         st.markdown(
-            f'<div style="font-size:0.8rem;opacity:0.85;margin-bottom:0.75rem;">'
-            f'🔧 Active STT Engine: <code style="background:rgba(255,255,255,0.1);padding:0.2rem 0.5rem;border-radius:4px;">'
+            f'<div style="font-size:0.8rem;color:{sub_color};margin-bottom:0.75rem;">'
+            f'🔧 Active STT Engine: <code style="background:rgba(255,122,0,0.1);padding:0.2rem 0.5rem;border-radius:4px;">'
             f'{ENGINE} / Live WebSpeech</code></div>',
             unsafe_allow_html=True,
         )
@@ -171,7 +179,7 @@ def render() -> None:
 
     if not has_transcript:
         st.markdown(
-            f'<div style="text-align:center;font-size:0.85rem;opacity:0.75;margin-top:0.4rem;font-weight:500;">'
+            f'<div style="text-align:center;font-size:0.85rem;color:{sub_color};margin-top:0.4rem;font-weight:500;">'
             f'{t("no_transcript")}'
             f'</div>',
             unsafe_allow_html=True,

@@ -155,15 +155,23 @@ def inject_global_css() -> None:
             color: #FF7A00 !important;
         }}
 
+        /* Primary Action Buttons High Contrast Override */
         .stMainBlockContainer .stButton > button[kind="primary"],
-        .stMainBlockContainer .stButton > button[kind="primary"] p,
-        .stMainBlockContainer .stButton > button[kind="primary"] span,
-        .stMainBlockContainer .stButton > button[kind="primary"] div {{
+        button[data-testid="stBaseButton-primary"] {{
             background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
             color: #FFFFFF !important;
-            -webkit-text-fill-color: #FFFFFF !important;
             border: none !important;
             box-shadow: 0 4px 15px rgba(255, 122, 0, 0.4) !important;
+            font-weight: 800 !important;
+        }}
+        .stMainBlockContainer .stButton > button[kind="primary"] p,
+        .stMainBlockContainer .stButton > button[kind="primary"] span,
+        .stMainBlockContainer .stButton > button[kind="primary"] div,
+        button[data-testid="stBaseButton-primary"] p,
+        button[data-testid="stBaseButton-primary"] span,
+        button[data-testid="stBaseButton-primary"] div {{
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
             font-weight: 800 !important;
         }}
 
