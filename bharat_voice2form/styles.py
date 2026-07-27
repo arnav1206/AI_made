@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Comprehensive Light/Dark theme styling covering inputs, text, tabs, cards, selectboxes, top header transparency, toolbar icons, and main/sidebar buttons.
+Comprehensive Light/Dark theme styling covering inputs, text, placeholders, tabs, cards, selectboxes, top header transparency, toolbar icons, and buttons.
 """
 
 from __future__ import annotations
@@ -142,15 +142,16 @@ def inject_global_css() -> None:
             color: #FF7A00 !important;
         }}
 
-        .stMainBlockContainer .stButton > button[kind="primary"] {{
+        .stMainBlockContainer .stButton > button[kind="primary"],
+        .stMainBlockContainer .stButton > button[kind="primary"] p,
+        .stMainBlockContainer .stButton > button[kind="primary"] span,
+        .stMainBlockContainer .stButton > button[kind="primary"] div {{
             background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
             color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
             border: none !important;
             box-shadow: 0 4px 15px rgba(255, 122, 0, 0.4) !important;
-        }}
-        .stMainBlockContainer .stButton > button[kind="primary"] p,
-        .stMainBlockContainer .stButton > button[kind="primary"] span {{
-            color: #FFFFFF !important;
+            font-weight: 800 !important;
         }}
 
         /* ── Step Progress Bar Layout ── */
@@ -201,7 +202,7 @@ def inject_global_css() -> None:
             color: {text_primary} !important;
         }}
 
-        /* ── Input Fields & Text Areas ── */
+        /* ── Input Fields & Text Area Placeholders Fix ── */
         .stTextInput input, .stTextArea textarea, .stNumberInput input {{
             background-color: {input_bg} !important;
             color: {input_text} !important;
@@ -209,6 +210,13 @@ def inject_global_css() -> None:
             border-radius: 12px !important;
             font-size: 0.95rem !important;
             padding: 0.6rem 0.9rem !important;
+        }}
+        .stTextInput input::placeholder,
+        .stTextArea textarea::placeholder,
+        .stNumberInput input::placeholder {{
+            color: #94A3B8 !important;
+            opacity: 0.85 !important;
+            -webkit-text-fill-color: #94A3B8 !important;
         }}
         .stTextInput input:focus, .stTextArea textarea:focus {{
             border-color: #FF7A00 !important;
