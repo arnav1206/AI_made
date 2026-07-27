@@ -1,7 +1,8 @@
 """
 views/form_selection.py
 =======================
-Form type selection grid page — distinct boxed options for scholarship schemes.
+Form type selection grid page — distinct boxed options for scholarship schemes
+with Google Forms & Custom Form Link Importer.
 """
 
 import streamlit as st
@@ -19,6 +20,45 @@ def render() -> None:
 
     section_heading(t("select_form"), t("select_form_sub"))
 
+    is_dark = st.session_state.get("dark_mode", False)
+    card_bg = "#1E293B" if is_dark else "#F8FAFC"
+    border_col = "rgba(255, 122, 0, 0.4)" if is_dark else "#FED7AA"
+
+    # ── 1. Custom Google Forms & Web Form URL Importer ─────────────
+    st.markdown(
+        f'<div class="card" style="border-left:5px solid #FF7A00;background:{card_bg};border:1px solid {border_col};margin-bottom:2rem;">'
+        f'<div style="font-weight:800;font-size:1.1rem;color:#FF7A00;margin-bottom:0.3rem;">'
+        f'🔗 Import Any External Web Form or Google Forms Link</div>'
+        f'<div style="font-size:0.88rem;opacity:0.85;margin-bottom:0.85rem;line-height:1.5;">'
+        f'Paste any Google Form link or scholarship portal URL. Formitra AI will scan the required fields and prompt you via voice dictation!</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    c_url1, c_url2 = st.columns([3, 1])
+    with c_url1:
+        custom_url = st.text_input(
+            "Paste Form URL (Google Forms / NSP Portal)",
+            placeholder="e.g. https://docs.google.com/forms/d/e/1FAIpQLSc...",
+            key="custom_form_url_input",
+            label_visibility="collapsed",
+        )
+    with c_url2:
+        if st.button("🚀 Analyze & Fill Form →", use_container_width=True, type="primary"):
+            if custom_url.strip():
+                url_str = custom_url.strip()
+                form_title = "Google Forms Application" if "google.com" in url_str else "External Web Form"
+                session.set("selected_form", f"{form_title} ({url_str[:35]}...)")
+                session.set("custom_form_url", url_str)
+                st.toast("✅ Form link imported successfully!")
+                session.navigate("voice_input")
+            else:
+                st.warning("Please paste a valid form URL or select a scheme below.")
+
+    st.markdown("<hr style='border:none;border-top:1px solid rgba(255,122,0,0.2);margin:1.5rem 0;'>", unsafe_allow_html=True)
+    st.markdown("### 🏛️ Select Available Scholarship Application Schemes")
+
+    # ── 2. Standard Scholarship Form Grid ──────────────────────────
     cols = st.columns(3, gap="medium")
 
     for i, form in enumerate(FORM_TYPES):
@@ -28,7 +68,6 @@ def render() -> None:
             cols = st.columns(3, gap="medium")
 
         with cols[col_idx]:
-            # Enclose each scheme option in its own distinct card box
             border_accent = "#FF7A00" if i == 0 else "#2563EB" if i == 1 else "#059669" if i == 2 else "#9333EA" if i == 3 else "#94A3B8"
             
             st.markdown(

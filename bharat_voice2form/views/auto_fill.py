@@ -1,7 +1,7 @@
 """
 views/auto_fill.py
 ==================
-Auto-filled scholarship form with AI Suggestions panel — translated via t().
+Auto-filled scholarship form with AI Suggestions panel & Missing Fields Voice Prompter.
 """
 
 import streamlit as st
@@ -16,6 +16,7 @@ from components.form_fields import (
 )
 from components.suggestions import render_panel as render_suggestions
 from utils.translations     import t
+from utils.voice_assist     import render_voice_assistant_player
 import utils.session as session
 
 
@@ -26,6 +27,59 @@ def render() -> None:
     section_heading(t("autofill_title"), t("autofill_sub"))
 
     extracted = session.get("extracted_data", {})
+    language  = session.get("selected_language", "Hindi")
+
+    # ── Missing Required Fields Detector & AI Voice Assistant ──────
+    required_map = [
+        ("field_name", "Full Name", "आवेदक का नाम"),
+        ("field_dob", "Date of Birth", "जन्मतिथि"),
+        ("field_income", "Annual Family Income", "वार्षिक पारिवारिक आय"),
+        ("field_state", "State", "राज्य"),
+        ("field_college", "Institute Name", "संस्थान का नाम"),
+    ]
+
+    missing_keys = []
+    missing_labels_en = []
+    missing_labels_hi = []
+
+    for f_key, lbl_en, lbl_hi in required_map:
+        val = session.get(f_key, "").strip()
+        if not val:
+            missing_keys.append(f_key)
+            missing_labels_en.append(lbl_en)
+            missing_labels_hi.append(lbl_hi)
+
+    if missing_keys:
+        if language == "Hindi":
+            missing_str = ", ".join(missing_labels_hi)
+            tts_prompt  = f"ध्यान दें! आपके फॉर्म में {len(missing_keys)} आवश्यक जानकारी अधूरी है: {missing_str}। कृपया माइक बटन दबाकर इन बची हुई जानकारियों को बोलें।"
+        else:
+            missing_str = ", ".join(missing_labels_en)
+            tts_prompt  = f"Attention! {len(missing_keys)} required fields are missing in your form: {missing_str}. Please click the microphone button to dictate these remaining details."
+
+        is_dark = st.session_state.get("dark_mode", False)
+        card_bg = "rgba(217, 119, 6, 0.18)" if is_dark else "#FFFBEB"
+        card_border = "rgba(245, 158, 11, 0.6)" if is_dark else "#FDE68A"
+        txt_col = "#FBBF24" if is_dark else "#92400E"
+
+        st.markdown(
+            f'<div class="card" style="background:{card_bg};border:1px solid {card_border};margin-bottom:1.5rem;">'
+            f'<div style="font-weight:800;font-size:1.05rem;color:{txt_col};margin-bottom:0.4rem;">'
+            f'🤖 Formitra AI Assistant: {len(missing_keys)} Required Fields Missing</div>'
+            f'<div style="font-size:0.88rem;color:{txt_col};line-height:1.6;margin-bottom:0.75rem;">'
+            f'{tts_prompt}</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+        c_prompt1, c_prompt2 = st.columns([2, 1])
+        with c_prompt1:
+            render_voice_assistant_player(text=tts_prompt, language=language, label=f"🔊 Listen to AI Missing Fields Request ({language})")
+        with c_prompt2:
+            if st.button("🎙️ Dictate Missing Fields →", use_container_width=True, type="primary"):
+                session.navigate("voice_input")
+
+        spacer(0.5)
 
     form_col, tip_col = st.columns([3, 2], gap="large")
 

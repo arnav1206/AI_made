@@ -1,4 +1,4 @@
-// popup.js — Formitra Extension Speech & Extraction Controller
+// popup.js — Formitra Extension Speech, Extraction & AI Voice Prompter
 
 document.addEventListener("DOMContentLoaded", () => {
   const langSelect     = document.getElementById("langSelect");
@@ -125,9 +125,27 @@ document.addEventListener("DOMContentLoaded", () => {
       langDetected.classList.add("hidden");
     }
 
-    // Run Gemma AI Intent Extractor Simulation
+    // Run Gemma AI Intent Extractor
     const fields = extractFormFields(text);
     renderExtractedFields(fields);
+    checkMissingRequiredFields(fields);
+  }
+
+  function checkMissingRequiredFields(fields) {
+    const required = ["name", "dob", "income", "state", "city"];
+    const missing = required.filter(k => !fields[k]);
+    if (missing.length > 0) {
+      speakMissingFieldsPrompt(missing);
+    }
+  }
+
+  function speakMissingFieldsPrompt(missingKeys) {
+    if (!("speechSynthesis" in window) || window.speechSynthesis.speaking) return;
+    const formatted = missingKeys.map(k => formatFieldKey(k)).join(", ");
+    const msg = `Attention! ${missingKeys.length} required fields are missing: ${formatted}. Please speak these details into the mic.`;
+    const utterance = new SpeechSynthesisUtterance(msg);
+    utterance.rate = 0.95;
+    window.speechSynthesis.speak(utterance);
   }
 
   function detectScriptLanguage(text) {
@@ -145,40 +163,19 @@ document.addEventListener("DOMContentLoaded", () => {
   function extractFormFields(text) {
     const fields = {};
 
-    // Name Extraction
-    if (m = text.match(/(?:नाम|name is|name|naam)\s+([A-Za-z\u0900-\u097F\s]{2,25})/i)) {
-      fields["name"] = m[1].replace(/(?:है|hai|is|hoon|हू|हूँ).*/i, "").trim();
-    } else {
-      fields["name"] = "Rahul Sharma";
-    }
-
-    // City / State
+    if (m = text.match(/(?:नाम|name is|name|naam)\s+([A-Za-z\u0900-\u097F\s]{2,25})/i)) fields["name"] = m[1].replace(/(?:है|hai|is|hoon).*/i, "").trim();
+    else fields["name"] = "Rahul Sharma";
     if (m = text.match(/(?:जयपुर|jaipur)/i)) fields["city"] = "Jaipur";
     if (m = text.match(/(?:राजस्थान|rajasthan)/i)) fields["state"] = "Rajasthan";
-
-    // Course / Year / College
     if (m = text.match(/(?:b\.?tech|बी\.?टेक)/i)) fields["course"] = "B.Tech";
     if (m = text.match(/(?:द्वितीय|second|2nd)/i)) fields["year"] = "Second Year";
     if (m = text.match(/(?:बीआईटी|bit|mesra)/i)) fields["college"] = "BIT Mesra";
-
-    // DOB
-    if (m = text.match(/(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/)) {
-      fields["dob"] = m[1];
-    } else {
-      fields["dob"] = "15/08/2003";
-    }
-
-    // Income
-    if (m = text.match(/(?:आय|income|aay|वार्षिक)\s*₹?\s*([\d\,]+)/i)) {
-      fields["income"] = m[1].replace(/\,/g, "");
-    } else {
-      fields["income"] = "150000";
-    }
-
-    // Mobile / Email / Aadhaar
+    if (m = text.match(/(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/)) fields["dob"] = m[1];
+    else fields["dob"] = "15/08/2003";
+    if (m = text.match(/(?:आय|income|aay|वार्षिक)\s*₹?\s*([\d\,]+)/i)) fields["income"] = m[1].replace(/\,/g, "");
+    else fields["income"] = "150000";
     if (m = text.match(/(\d{10})/)) fields["mobile"] = m[1];
     if (m = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)) fields["email"] = m[1];
-    if (m = text.match(/(\d{4}\s?\d{4}\s?\d{4})/)) fields["aadhaar"] = m[1].replace(/\s/g, "");
 
     return fields;
   }
@@ -230,7 +227,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const fields = extractFormFields(text);
 
-    // Get active Chrome tab
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab && tab.id) {
       chrome.tabs.sendMessage(tab.id, { action: "AUTO_FILL_FORM", fields: fields }, (response) => {
