@@ -3,7 +3,7 @@ views/home.py
 =============
 Home page for Formitra — AI Voice-Powered Scholarship Portal.
 Features dynamic Light/Dark mode hero banner, ultra-high-contrast typography,
-and perfectly centered Multilingual Speech Orbit logo images for Light and Dark themes.
+and centered Multilingual Speech Orbit darkmode logo image.
 """
 
 from __future__ import annotations
@@ -26,12 +26,12 @@ def render() -> None:
         hero_bg     = "linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4F46E5 100%)"
         hero_border = "1px solid rgba(129, 140, 248, 0.4)"
         hero_shadow = "0 20px 40px rgba(79, 70, 229, 0.35)"
-        img_path    = "bharat_voice2form/assets/images/multilingual_dark.jpg"
     else:
         hero_bg     = "linear-gradient(135deg, #0F172A 0%, #003B95 50%, #FF7A00 100%)"
         hero_border = "1px solid rgba(255, 255, 255, 0.2)"
         hero_shadow = "0 20px 40px rgba(0, 40, 104, 0.25)"
-        img_path    = "bharat_voice2form/assets/images/multilingual_light.jpg"
+
+    img_path = "bharat_voice2form/assets/images/multilingual_dark.jpg"
 
     # ── Hero Section with Multilingual Orbit Diagram ───────────────
     h_col1, h_col2 = st.columns([1.3, 1], gap="large")

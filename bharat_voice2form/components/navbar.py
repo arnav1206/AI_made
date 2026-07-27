@@ -2,7 +2,7 @@
 components/navbar.py
 ====================
 Sidebar navigation component with language selector, user auth status, Admin Portal link & Dark Mode toggle.
-Features perfectly centered official Formitra multilingual brand logo for Light & Dark modes.
+Features official Formitra dark mode multilingual brand logo across all themes.
 """
 
 from __future__ import annotations
@@ -48,12 +48,7 @@ def render_sidebar() -> None:
 
 
 def _logo_block() -> None:
-    is_dark  = session.get("dark_mode", False)
-    img_path = (
-        "bharat_voice2form/assets/images/multilingual_dark.jpg"
-        if is_dark
-        else "bharat_voice2form/assets/images/multilingual_light.jpg"
-    )
+    img_path = "bharat_voice2form/assets/images/multilingual_dark.jpg"
 
     try:
         with open(img_path, "rb") as f:

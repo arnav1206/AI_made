@@ -2,7 +2,7 @@
 utils/pdf_generator.py
 =======================
 Attractive, high-quality PDF document generator for Formitra.
-Features Government header banner with official multilingual brand logo,
+Features Government header banner with official darkmode multilingual brand logo,
 tricolour accents, structured grid tables, self-declaration verification block,
 and official digital receipt watermark seal.
 Supports ReportLab engine with high-precision pure-Python PDF fallback.
@@ -146,9 +146,9 @@ def _generate_reportlab(
         leading=12,
     )
 
-    # 1. Header Banner Table with Official Logo Image
+    # 1. Header Banner Table with Official Darkmode Logo Image
     now_str  = datetime.now().strftime("%d %b %Y, %I:%M %p")
-    img_path = Path(__file__).parent.parent / "assets" / "images" / "multilingual_light.jpg"
+    img_path = Path(__file__).parent.parent / "assets" / "images" / "multilingual_dark.jpg"
 
     if img_path.exists():
         try:
@@ -260,7 +260,7 @@ def _generate_reportlab(
 
     doc.build(story)
     pdf_bytes = buf.getvalue()
-    return PDFResult(pdf_bytes, filename, "ReportLab Beautiful PDF with Logo")
+    return PDFResult(pdf_bytes, filename, "ReportLab Beautiful PDF with Darkmode Logo")
 
 
 # ─── Fallback Styled Engine Implementation ──────────────────────────
