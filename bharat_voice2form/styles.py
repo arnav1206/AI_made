@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, hero banner, sidebar active tab highlights, tabs, cards, selectboxes, top header transparency, toolbar icons, and buttons.
+Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, hero banner, sidebar active tab highlights, tabs, cards, selectboxes, top header transparency, toolbar icons, buttons, and expanders.
 """
 
 from __future__ import annotations
@@ -400,17 +400,45 @@ def inject_global_css() -> None:
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
         }}
 
-        /* ── Expanders & Accordions ── */
-        .stExpander {{
+        /* ── Expanders & Accordions High-Contrast Fix ── */
+        .stExpander, div[data-testid="stExpander"] {{
             background-color: {bg_card} !important;
-            border: 1px solid {border_col} !important;
+            border: 1.5px solid {border_col} !important;
             border-radius: 14px !important;
             color: {text_primary} !important;
         }}
-        .stExpander summary, .stExpander summary p, .stExpander summary span, .stExpander summary svg {{
+        .stExpander summary,
+        div[data-testid="stExpander"] summary,
+        details summary {{
+            background-color: {input_bg} !important;
+            background: {input_bg} !important;
             color: {text_primary} !important;
+            border-radius: 12px !important;
+        }}
+        .stExpander summary p,
+        .stExpander summary span,
+        .stExpander summary svg,
+        div[data-testid="stExpander"] summary p,
+        div[data-testid="stExpander"] summary span,
+        div[data-testid="stExpander"] summary svg {{
+            color: {text_primary} !important;
+            -webkit-text-fill-color: {text_primary} !important;
             font-weight: 700 !important;
             fill: {text_primary} !important;
+        }}
+        .stExpander div[data-testid="stExpanderDetails"],
+        div[data-testid="stExpanderDetails"] {{
+            background-color: {bg_card} !important;
+            background: {bg_card} !important;
+            color: {text_primary} !important;
+            border-bottom-left-radius: 14px !important;
+            border-bottom-right-radius: 14px !important;
+        }}
+        .stExpander div[data-testid="stExpanderDetails"] p,
+        div[data-testid="stExpanderDetails"] p,
+        div[data-testid="stExpanderDetails"] span {{
+            color: {text_primary} !important;
+            -webkit-text-fill-color: {text_primary} !important;
         }}
     </style>
     """

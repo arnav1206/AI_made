@@ -3,6 +3,7 @@ views/help_faq.py
 ==================
 Help & FAQ page for Formitra.
 Provides step-by-step instructions, voice command guide, and scholarship assistance.
+Dynamic Light/Dark mode contrast support.
 """
 
 from __future__ import annotations
@@ -19,15 +20,24 @@ def render() -> None:
 
     section_heading("❓ Formitra Help & FAQ Center", "Step-by-step voice form filling guide, scholarship eligibility & support")
 
+    is_dark = st.session_state.get("dark_mode", False)
+
+    if is_dark:
+        step_hdr = "#FF7A00"
+        step_txt = "#F8FAFC"
+    else:
+        step_hdr = "#C2410C"
+        step_txt = "#1E293B"
+
     st.markdown(
-        '<div class="card" style="border-left:4px solid #FF7A00;">'
-        '<div style="font-weight:800;font-size:1.05rem;color:#FF7A00;">🚀 How Formitra Works in 4 Simple Steps</div>'
-        '<div style="margin-top:0.75rem;line-height:1.8;font-size:0.92rem;color:#0F172A;">'
-        '1️⃣ <b>Select Scheme</b>: Choose your scholarship application (Post-Matric, Central Sector, Pre-Matric, State Merit).<br>'
-        '2️⃣ <b>Voice Input</b>: Speak into the mic in your native Indian language (Hindi, Odia, Tamil, Telugu, Bengali, etc.).<br>'
-        '3️⃣ <b>AI Auto-Fill</b>: Gemma AI automatically extracts your Name, City, State, Course, Year & Income.<br>'
-        '4️⃣ <b>Submit & Track</b>: Review your filled form, download your receipt, and track status with your Reference ID.'
-        '</div></div>',
+        f'<div class="card" style="border-left:4px solid #FF7A00;">'
+        f'<div style="font-weight:800;font-size:1.05rem;color:{step_hdr};">🚀 How Formitra Works in 4 Simple Steps</div>'
+        f'<div style="margin-top:0.75rem;line-height:1.8;font-size:0.92rem;color:{step_txt};">'
+        f'1️⃣ <b>Select Scheme</b>: Choose your scholarship application (Post-Matric, Central Sector, Pre-Matric, State Merit).<br>'
+        f'2️⃣ <b>Voice Input</b>: Speak into the mic in your native Indian language (Hindi, Odia, Tamil, Telugu, Bengali, etc.).<br>'
+        f'3️⃣ <b>AI Auto-Fill</b>: Gemma AI automatically extracts your Name, City, State, Course, Year & Income.<br>'
+        f'4️⃣ <b>Submit & Track</b>: Review your filled form, download your receipt, and track status with your Reference ID.'
+        f'</div></div>',
         unsafe_allow_html=True,
     )
 
@@ -36,7 +46,7 @@ def render() -> None:
     with st.expander("🗣️ What languages does Formitra support?", expanded=True):
         st.write(
             "Formitra supports 9 official Indian languages: Hindi (हिन्दी), Odia (ଓଡ଼ିଆ), Tamil (தமிழ்), "
-            "Telugu (తెలుగు), Bengali (বাংলা), Marathi (मराठी), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), and English."
+            "Telugu (తెలుగు), Bengali (বাংলা), Marathi (मराठी), Kannada (<ctrl42>ન્નಡ), Malayalam (മലയാളം), and English."
         )
 
     with st.expander("🎙️ How do I use field-level voice dictation on individual form inputs?"):
