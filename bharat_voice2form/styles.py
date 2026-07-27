@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, audio input, tabs, cards, selectboxes, top header transparency, toolbar icons, and buttons.
+Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, tabs, cards, selectboxes, top header transparency, toolbar icons, and universal high-contrast buttons.
 """
 
 from __future__ import annotations
@@ -174,29 +174,6 @@ def inject_global_css() -> None:
             border: none !important;
             box-shadow: 0 4px 15px rgba(255, 122, 0, 0.4) !important;
             font-weight: 800 !important;
-        }}
-
-        /* ── Streamlit Audio Input Widget Fix ── */
-        div[data-testid="stAudioInput"],
-        [data-testid="stAudioInput"] > div,
-        section[data-testid="stAudioInput"] {{
-            background-color: {input_bg} !important;
-            background: {input_bg} !important;
-            border: 1.5px solid rgba(255, 122, 0, 0.45) !important;
-            border-radius: 16px !important;
-            color: {text_primary} !important;
-        }}
-        div[data-testid="stAudioInput"] button,
-        div[data-testid="stAudioInput"] span,
-        div[data-testid="stAudioInput"] div,
-        div[data-testid="stAudioInput"] svg,
-        div[data-testid="stAudioInput"] p {{
-            color: {text_primary} !important;
-            fill: {text_primary} !important;
-            stroke: {text_primary} !important;
-        }}
-        div[data-testid="stAudioInput"] button:hover {{
-            background-color: rgba(255, 122, 0, 0.2) !important;
         }}
 
         /* ── Voice Dictate Popover Buttons Fix ── */
