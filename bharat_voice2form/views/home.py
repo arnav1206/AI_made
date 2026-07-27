@@ -2,7 +2,7 @@
 views/home.py
 =============
 Home page for Formitra — AI Voice-Powered Scholarship Portal.
-Updated with ultra-premium Deep Royal Blue to Saffron hero gradient and high contrast typography.
+Features dynamic Light/Dark mode hero banner gradients and ultra-high-contrast typography.
 """
 
 from __future__ import annotations
@@ -19,11 +19,21 @@ import utils.session as session
 def render() -> None:
     tricolour_bar()
 
+    is_dark = st.session_state.get("dark_mode", False)
+    if is_dark:
+        hero_bg     = "linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4F46E5 100%)"
+        hero_border = "1px solid rgba(129, 140, 248, 0.4)"
+        hero_shadow = "0 20px 40px rgba(79, 70, 229, 0.35)"
+    else:
+        hero_bg     = "linear-gradient(135deg, #0F172A 0%, #003B95 50%, #FF7A00 100%)"
+        hero_border = "1px solid rgba(255, 255, 255, 0.2)"
+        hero_shadow = "0 20px 40px rgba(0, 40, 104, 0.25)"
+
     # ── Hero Banner ────────────────────────────────────────────────
     st.markdown(
-        f'<div style="background:linear-gradient(135deg, #0A192F 0%, #003B95 50%, #FF7A00 100%);'
-        f'border-radius:24px;padding:3rem 2rem;color:#FFFFFF;text-align:center;'
-        f'box-shadow:0 20px 40px rgba(0, 40, 104, 0.35);border:1px solid rgba(255, 255, 255, 0.15);margin-bottom:2rem;">'
+        f'<div class="hero-banner" style="background:{hero_bg};'
+        f'border-radius:24px;padding:3rem 2rem;color:#FFFFFF !important;text-align:center;'
+        f'box-shadow:{hero_shadow};border:{hero_border};margin-bottom:2rem;">'
         f'<div style="font-size:3.2rem;margin-bottom:0.5rem;">🎙️</div>'
         f'<h1 style="font-size:2.4rem;font-weight:900;margin:0;letter-spacing:-0.5px;color:#FFFFFF !important;text-shadow:0 2px 12px rgba(0,0,0,0.5);">'
         f'{t("hero_title")}</h1>'

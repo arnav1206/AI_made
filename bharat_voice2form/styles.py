@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, tabs, cards, selectboxes, top header transparency, toolbar icons, and buttons.
+Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, hero banner, tabs, cards, selectboxes, top header transparency, toolbar icons, and buttons.
 """
 
 from __future__ import annotations
@@ -74,6 +74,16 @@ def inject_global_css() -> None:
         .stMarkdown p, .stMarkdown label,
         h1, h2, h3, h4, h5, h6 {{
             color: {text_primary} !important;
+        }}
+
+        /* ── Hero Banner High-Contrast White Text Override ── */
+        .hero-banner,
+        .hero-banner h1,
+        .hero-banner p,
+        .hero-banner span,
+        .hero-banner div {{
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
         }}
 
         /* ── Sidebar Container & Typography ── */
