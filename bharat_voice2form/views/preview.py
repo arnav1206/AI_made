@@ -2,6 +2,7 @@
 views/preview.py
 ================
 Application preview page — translated via t().
+Dynamic Light/Dark mode theme support for Applicant Self-Declaration & high-contrast buttons.
 """
 
 import time
@@ -27,6 +28,22 @@ def render() -> None:
     form_data = session.get("form_data", {})
     app_no    = session.generate_application_number()
     now       = datetime.now().strftime("%d %b %Y, %I:%M %p")
+    form_name = session.get("selected_form") or "Merit-cum-Means Scholarship 2025-26"
+
+    is_dark = st.session_state.get("dark_mode", False)
+
+    if is_dark:
+        dec_bg     = "rgba(217, 119, 6, 0.2)"
+        dec_border = "1px solid rgba(245, 158, 11, 0.5)"
+        dec_title  = "#FBBF24"
+        dec_txt    = "#F8FAFC"
+        hint_col   = "#CBD5E1"
+    else:
+        dec_bg     = "linear-gradient(135deg,#FFFBEB,#FEF3C7)"
+        dec_border = "1px solid #FDE68A"
+        dec_title  = "#92400E"
+        dec_txt    = "#374151"
+        hint_col   = "#64748B"
 
     # ── Application header banner ──────────────────────────────────
     st.markdown(
@@ -36,14 +53,14 @@ def render() -> None:
         f'<div>'
         f'<div style="font-size:0.75rem;opacity:0.7;text-transform:uppercase;'
         f'letter-spacing:0.1em;">National Scholarship Portal — Government of India</div>'
-        f'<div style="font-size:1.4rem;font-weight:800;margin:0.3rem 0;">'
-        f'Merit-cum-Means Scholarship 2025-26</div>'
-        f'<div style="font-size:0.88rem;opacity:0.85;">Bharat Voice2Form — AI Assisted Application</div>'
+        f'<div style="font-size:1.4rem;font-weight:800;margin:0.3rem 0;color:#FFFFFF !important;">'
+        f'{form_name}</div>'
+        f'<div style="font-size:0.88rem;opacity:0.85;color:#E0F2FE;">Bharat Voice2Form — AI Assisted Application</div>'
         f'</div>'
         f'<div style="text-align:right;">'
-        f'<div style="font-size:0.75rem;opacity:0.7;">{t("app_number")}</div>'
-        f'<div style="font-size:1rem;font-weight:700;font-family:monospace;">{app_no}</div>'
-        f'<div style="font-size:0.78rem;opacity:0.7;margin-top:0.2rem;">Generated: {now}</div>'
+        f'<div style="font-size:0.75rem;opacity:0.7;color:#E0F2FE;">{t("app_number")}</div>'
+        f'<div style="font-size:1rem;font-weight:700;font-family:monospace;color:#FDE047;">{app_no}</div>'
+        f'<div style="font-size:0.78rem;opacity:0.7;margin-top:0.2rem;color:#E0F2FE;">Generated: {now}</div>'
         f'</div></div></div>',
         unsafe_allow_html=True,
     )
@@ -58,10 +75,9 @@ def render() -> None:
 
     # ── Declaration ────────────────────────────────────────────────
     st.markdown(
-        f'<div class="form-card" style="background:linear-gradient(135deg,#FFFBEB,#FEF3C7);'
-        f'border:1px solid #FDE68A;">'
-        f'<div style="font-weight:700;font-size:0.95rem;margin-bottom:0.5rem;">{t("declaration_title")}</div>'
-        f'<div style="font-size:0.85rem;color:#374151;line-height:1.7;">'
+        f'<div class="form-card" style="background:{dec_bg};border:{dec_border};">'
+        f'<div style="font-weight:800;font-size:0.98rem;color:{dec_title};margin-bottom:0.5rem;">{t("declaration_title")}</div>'
+        f'<div style="font-size:0.88rem;color:{dec_txt};line-height:1.7;">'
         f'{t("declaration_text")}'
         f'</div></div>',
         unsafe_allow_html=True,
@@ -83,7 +99,7 @@ def render() -> None:
                 result = generate_pdf(
                     form_data=form_data,
                     application_no=app_no,
-                    form_title="Scholarship Application",
+                    form_title=form_name,
                 )
             if result:
                 st.download_button(
@@ -106,7 +122,7 @@ def render() -> None:
 
     if not agreed:
         st.markdown(
-            f'<div style="text-align:center;font-size:0.82rem;color:#9CA3AF;margin-top:0.25rem;">'
+            f'<div style="text-align:center;font-size:0.85rem;color:{hint_col};margin-top:0.4rem;font-weight:500;">'
             f'{t("accept_declaration")}'
             f'</div>',
             unsafe_allow_html=True,
