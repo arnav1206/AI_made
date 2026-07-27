@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Comprehensive Light/Dark theme styling covering inputs, text, tabs, cards, selectboxes, and navigation.
+Comprehensive Light/Dark theme styling covering inputs, text, tabs, cards, selectboxes, and sidebar navigation buttons.
 """
 
 from __future__ import annotations
@@ -47,24 +47,74 @@ def inject_global_css() -> None:
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }}
 
-        /* ── Global Typography & Text Overrides ── */
-        .stApp p, .stApp span, .stApp label, .stApp div,
-        .stMarkdown p, .stMarkdown span, .stMarkdown label,
+        /* ── Main Canvas Typography & Text ── */
+        .stApp p, .stApp label,
+        .stMarkdown p, .stMarkdown label,
         h1, h2, h3, h4, h5, h6 {{
             color: {text_primary} !important;
         }}
 
-        /* ── Sidebar ── */
+        /* ── Sidebar Container & Typography ── */
         section[data-testid="stSidebar"] {{
             background-color: {bg_sidebar} !important;
             color: #FFFFFF !important;
             border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
         }}
-        section[data-testid="stSidebar"] .stMarkdown,
-        section[data-testid="stSidebar"] label,
-        section[data-testid="stSidebar"] p,
-        section[data-testid="stSidebar"] span {{
+        section[data-testid="stSidebar"] .stMarkdown p,
+        section[data-testid="stSidebar"] label {{
             color: #F8FAFC !important;
+        }}
+
+        /* ── FIX: Sidebar Navigation Buttons Visibility ── */
+        section[data-testid="stSidebar"] .stButton > button {{
+            background-color: rgba(255, 255, 255, 0.08) !important;
+            color: #F8FAFC !important;
+            border: 1px solid rgba(255, 255, 255, 0.18) !important;
+            border-radius: 50px !important;
+            font-weight: 700 !important;
+            font-size: 0.9rem !important;
+            margin-bottom: 0.35rem !important;
+            transition: all 0.2s ease !important;
+            box-shadow: none !important;
+        }}
+        section[data-testid="stSidebar"] .stButton > button p,
+        section[data-testid="stSidebar"] .stButton > button span,
+        section[data-testid="stSidebar"] .stButton > button div {{
+            color: #F8FAFC !important;
+            font-weight: 700 !important;
+        }}
+        section[data-testid="stSidebar"] .stButton > button:hover {{
+            background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
+            color: #FFFFFF !important;
+            border-color: transparent !important;
+            box-shadow: 0 4px 15px rgba(255, 122, 0, 0.4) !important;
+            transform: translateY(-1px) !important;
+        }}
+        section[data-testid="stSidebar"] .stButton > button:hover p,
+        section[data-testid="stSidebar"] .stButton > button:hover span {{
+            color: #FFFFFF !important;
+        }}
+
+        /* ── Main Content Area Buttons ── */
+        .stMainBlockContainer .stButton > button {{
+            border-radius: 50px !important;
+            font-weight: 700 !important;
+            padding: 0.65rem 1.5rem !important;
+            transition: all 0.2s ease !important;
+        }}
+        .stMainBlockContainer .stButton > button p,
+        .stMainBlockContainer .stButton > button span {{
+            font-weight: 700 !important;
+        }}
+        .stMainBlockContainer .stButton > button[kind="primary"] {{
+            background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
+            color: #FFFFFF !important;
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(255, 122, 0, 0.4) !important;
+        }}
+        .stMainBlockContainer .stButton > button[kind="primary"] p,
+        .stMainBlockContainer .stButton > button[kind="primary"] span {{
+            color: #FFFFFF !important;
         }}
 
         /* ── Step Progress Bar Layout ── */
@@ -193,24 +243,6 @@ def inject_global_css() -> None:
         .stExpander summary {{
             color: {text_primary} !important;
             font-weight: 700 !important;
-        }}
-
-        /* ── Buttons ── */
-        .stButton > button {{
-            border-radius: 50px !important;
-            font-weight: 700 !important;
-            padding: 0.65rem 1.5rem !important;
-            transition: all 0.2s ease !important;
-        }}
-        .stButton > button[kind="primary"] {{
-            background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
-            color: #FFFFFF !important;
-            border: none !important;
-            box-shadow: 0 4px 15px rgba(255, 122, 0, 0.4) !important;
-        }}
-        .stButton > button[kind="primary"]:hover {{
-            transform: translateY(-2px) scale(1.02) !important;
-            box-shadow: 0 8px 22px rgba(255, 122, 0, 0.5) !important;
         }}
     </style>
     """
