@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Comprehensive Light/Dark theme styling with vibrant glowing buttons, high-contrast inputs, selectboxes, cards, and header icons.
+Comprehensive Light/Dark theme styling covering inputs, text, placeholders, tabs, cards, selectboxes, top header transparency, toolbar icons, and buttons.
 """
 
 from __future__ import annotations
@@ -14,35 +14,29 @@ def inject_global_css() -> None:
     is_dark = st.session_state.get("dark_mode", False)
 
     if is_dark:
-        bg_main        = "#0B0F17"
-        bg_card        = "#151C2C"
-        bg_sidebar     = "#0F172A"
-        text_primary   = "#F8FAFC"
-        text_sub       = "#CBD5E1"
-        border_col     = "rgba(255, 255, 255, 0.15)"
-        input_bg       = "#1E293B"
-        input_text     = "#F8FAFC"
-        select_bg      = "#1E293B"
-        select_text    = "#F8FAFC"
-        card_shadow    = "0 10px 30px rgba(0, 0, 0, 0.5)"
-        sec_btn_bg     = "linear-gradient(135deg, #1E293B 0%, #0F172A 100%)"
-        sec_btn_text   = "#F8FAFC"
-        sec_btn_border = "1.5px solid rgba(255, 122, 0, 0.45)"
+        bg_main      = "#0B0F17"
+        bg_card      = "#151C2C"
+        bg_sidebar   = "#0F172A"
+        text_primary = "#F8FAFC"
+        text_sub     = "#CBD5E1"
+        border_col   = "rgba(255, 255, 255, 0.15)"
+        input_bg     = "#1E293B"
+        input_text   = "#F8FAFC"
+        select_bg    = "#1E293B"
+        select_text  = "#F8FAFC"
+        card_shadow  = "0 10px 30px rgba(0, 0, 0, 0.5)"
     else:
-        bg_main        = "#F8FAFC"
-        bg_card        = "#FFFFFF"
-        bg_sidebar     = "#0F172A"
-        text_primary   = "#0F172A"
-        text_sub       = "#475569"
-        border_col     = "#E2E8F0"
-        input_bg       = "#FFFFFF"
-        input_text     = "#0F172A"
-        select_bg      = "#FFFFFF"
-        select_text    = "#0F172A"
-        card_shadow    = "0 10px 25px -5px rgba(0, 0, 0, 0.05)"
-        sec_btn_bg     = "linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 100%)"
-        sec_btn_text   = "#FF7A00"
-        sec_btn_border = "2px solid #FF7A00"
+        bg_main      = "#F8FAFC"
+        bg_card      = "#FFFFFF"
+        bg_sidebar   = "#0F172A"
+        text_primary = "#0F172A"
+        text_sub     = "#475569"
+        border_col   = "#E2E8F0"
+        input_bg     = "#FFFFFF"
+        input_text   = "#0F172A"
+        select_bg    = "#FFFFFF"
+        select_text  = "#0F172A"
+        card_shadow  = "0 10px 25px -5px rgba(0, 0, 0, 0.05)"
 
     css_code = f"""
     <style>
@@ -53,14 +47,13 @@ def inject_global_css() -> None:
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }}
 
-        /* ── Streamlit Top Header Bar & Toolbar Icons Visibility Fix ── */
+        /* ── Streamlit Top Header Bar & Toolbar Icons Fix ── */
         header[data-testid="stHeader"], [data-testid="stHeader"] {{
             background-color: transparent !important;
             background: transparent !important;
         }}
         header[data-testid="stHeader"] button,
         header[data-testid="stHeader"] svg,
-        header[data-testid="stHeader"] path,
         header[data-testid="stHeader"] a,
         header[data-testid="stHeader"] span,
         header[data-testid="stHeader"] p {{
@@ -72,8 +65,8 @@ def inject_global_css() -> None:
             box-shadow: none !important;
         }}
         header[data-testid="stHeader"] button:hover {{
-            background-color: rgba(255, 122, 0, 0.25) !important;
-            border-radius: 50px !important;
+            background-color: rgba(255, 122, 0, 0.15) !important;
+            border-radius: 8px !important;
         }}
 
         /* ── Main Canvas Typography & Text ── */
@@ -94,88 +87,74 @@ def inject_global_css() -> None:
             color: #F8FAFC !important;
         }}
 
-        /* ── Sidebar Navigation Buttons ── */
+        /* ── Sidebar Navigation Buttons Visibility ── */
         section[data-testid="stSidebar"] .stButton > button {{
-            background: rgba(255, 255, 255, 0.12) !important;
+            background-color: rgba(255, 255, 255, 0.08) !important;
             color: #F8FAFC !important;
-            border: 1px solid rgba(255, 255, 255, 0.25) !important;
+            border: 1px solid rgba(255, 255, 255, 0.18) !important;
             border-radius: 50px !important;
-            font-weight: 800 !important;
-            font-size: 0.92rem !important;
-            margin-bottom: 0.4rem !important;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+            font-weight: 700 !important;
+            font-size: 0.9rem !important;
+            margin-bottom: 0.35rem !important;
+            transition: all 0.2s ease !important;
+            box-shadow: none !important;
         }}
         section[data-testid="stSidebar"] .stButton > button p,
         section[data-testid="stSidebar"] .stButton > button span,
         section[data-testid="stSidebar"] .stButton > button div {{
             color: #F8FAFC !important;
-            font-weight: 800 !important;
+            font-weight: 700 !important;
         }}
         section[data-testid="stSidebar"] .stButton > button:hover {{
             background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
             color: #FFFFFF !important;
             border-color: transparent !important;
-            box-shadow: 0 6px 20px rgba(255, 122, 0, 0.6) !important;
-            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 15px rgba(255, 122, 0, 0.4) !important;
+            transform: translateY(-1px) !important;
         }}
         section[data-testid="stSidebar"] .stButton > button:hover p,
         section[data-testid="stSidebar"] .stButton > button:hover span {{
             color: #FFFFFF !important;
         }}
 
-        /* ── Vibrant Main Content Buttons ── */
+        /* ── Main Content Area Buttons ── */
         .stMainBlockContainer .stButton > button {{
             border-radius: 50px !important;
-            font-weight: 800 !important;
-            padding: 0.7rem 1.6rem !important;
-            font-size: 0.95rem !important;
-            letter-spacing: 0.02em !important;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            font-weight: 700 !important;
+            padding: 0.65rem 1.5rem !important;
+            transition: all 0.2s ease !important;
         }}
-
-        /* Secondary Vibrant Buttons */
         .stMainBlockContainer .stButton > button:not([kind="primary"]) {{
-            background: {sec_btn_bg} !important;
-            color: {sec_btn_text} !important;
-            border: {sec_btn_border} !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+            background-color: {input_bg} !important;
+            color: {text_primary} !important;
+            border: 1.5px solid {border_col} !important;
         }}
         .stMainBlockContainer .stButton > button:not([kind="primary"]) p,
         .stMainBlockContainer .stButton > button:not([kind="primary"]) span,
         .stMainBlockContainer .stButton > button:not([kind="primary"]) div {{
-            color: {sec_btn_text} !important;
-            font-weight: 800 !important;
+            color: {text_primary} !important;
+            font-weight: 700 !important;
         }}
         .stMainBlockContainer .stButton > button:not([kind="primary"]):hover {{
-            background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
-            color: #FFFFFF !important;
-            border-color: transparent !important;
-            box-shadow: 0 8px 25px rgba(255, 122, 0, 0.65) !important;
-            transform: translateY(-2px) !important;
+            border-color: #FF7A00 !important;
+            color: #FF7A00 !important;
+            background-color: rgba(255, 122, 0, 0.1) !important;
         }}
         .stMainBlockContainer .stButton > button:not([kind="primary"]):hover p,
         .stMainBlockContainer .stButton > button:not([kind="primary"]):hover span {{
-            color: #FFFFFF !important;
+            color: #FF7A00 !important;
         }}
 
-        /* Primary Glowing Orange Gradient Buttons */
         .stMainBlockContainer .stButton > button[kind="primary"],
         .stMainBlockContainer .stButton > button[kind="primary"] p,
         .stMainBlockContainer .stButton > button[kind="primary"] span,
         .stMainBlockContainer .stButton > button[kind="primary"] div {{
-            background: linear-gradient(135deg, #FF7A00 0%, #FF5500 50%, #EA580C 100%) !important;
+            background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
             color: #FFFFFF !important;
             -webkit-text-fill-color: #FFFFFF !important;
             border: none !important;
-            box-shadow: 0 6px 22px rgba(255, 122, 0, 0.55) !important;
-            font-weight: 900 !important;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-        }}
-        .stMainBlockContainer .stButton > button[kind="primary"]:hover {{
-            background: linear-gradient(135deg, #FF8811 0%, #FF6611 50%, #F97316 100%) !important;
-            box-shadow: 0 10px 30px rgba(255, 122, 0, 0.75) !important;
-            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 15px rgba(255, 122, 0, 0.4) !important;
+            font-weight: 800 !important;
         }}
 
         /* ── Step Progress Bar Layout ── */
