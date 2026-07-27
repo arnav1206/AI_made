@@ -2,6 +2,7 @@
 components/navbar.py
 ====================
 Sidebar navigation component with language selector, user auth status, Admin Portal link & Dark Mode toggle.
+Features active page tab highlighting (glowing orange badge indicator).
 Rebranded for Formitra.
 """
 
@@ -128,6 +129,8 @@ def _language_selector() -> None:
 
 
 def _nav_section() -> None:
+    current_page = session.get("page", "home")
+
     st.markdown(
         f'<div style="font-size:0.72rem;font-weight:700;opacity:0.7;'
         f'text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem;color:#F8FAFC;">'
@@ -137,7 +140,17 @@ def _nav_section() -> None:
 
     for page_key in PAGE_ORDER:
         label = t(_NAV_KEYS.get(page_key, f"nav_{page_key}"))
-        if st.button(label, key=f"nav_{page_key}", use_container_width=True):
+        is_active = (page_key == current_page)
+
+        btn_type  = "primary" if is_active else "secondary"
+        btn_label = f"🔥 {label}" if is_active else label
+
+        if st.button(
+            btn_label,
+            key=f"nav_{page_key}",
+            use_container_width=True,
+            type=btn_type,
+        ):
             session.navigate(page_key)
 
 

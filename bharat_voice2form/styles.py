@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, hero banner, tabs, cards, selectboxes, top header transparency, toolbar icons, and buttons.
+Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, hero banner, sidebar active tab highlights, tabs, cards, selectboxes, top header transparency, toolbar icons, and buttons.
 """
 
 from __future__ import annotations
@@ -97,7 +97,7 @@ def inject_global_css() -> None:
             color: #F8FAFC !important;
         }}
 
-        /* ── Sidebar Navigation Buttons Visibility ── */
+        /* ── Sidebar Navigation Buttons ── */
         section[data-testid="stSidebar"] .stButton > button {{
             background-color: rgba(255, 255, 255, 0.08) !important;
             color: #F8FAFC !important;
@@ -122,9 +122,25 @@ def inject_global_css() -> None:
             box-shadow: 0 4px 15px rgba(255, 122, 0, 0.4) !important;
             transform: translateY(-1px) !important;
         }}
-        section[data-testid="stSidebar"] .stButton > button:hover p,
-        section[data-testid="stSidebar"] .stButton > button:hover span {{
+
+        /* ── Active Sidebar Navigation Tab Highlight ── */
+        section[data-testid="stSidebar"] .stButton > button[kind="primary"],
+        section[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"] {{
+            background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
             color: #FFFFFF !important;
+            border: 2px solid #FFFFFF !important;
+            box-shadow: 0 4px 20px rgba(255, 122, 0, 0.6) !important;
+            font-weight: 900 !important;
+            transform: scale(1.03) !important;
+        }}
+        section[data-testid="stSidebar"] .stButton > button[kind="primary"] p,
+        section[data-testid="stSidebar"] .stButton > button[kind="primary"] span,
+        section[data-testid="stSidebar"] .stButton > button[kind="primary"] div,
+        section[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"] p,
+        section[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"] span {{
+            color: #FFFFFF !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+            font-weight: 900 !important;
         }}
 
         /* ── Main Content Area Buttons ── */
