@@ -99,11 +99,17 @@ def _language_selector() -> None:
     except ValueError:
         idx = 0
 
+    st.markdown(
+        f'<div style="font-size:0.88rem;font-weight:800;color:#F8FAFC;margin-bottom:0.3rem;">'
+        f'{t("ui_language")}</div>',
+        unsafe_allow_html=True,
+    )
     chosen = st.selectbox(
         t("ui_language"),
         langs,
         index=idx,
         key="sidebar_lang_select",
+        label_visibility="collapsed",
     )
     if chosen != current:
         session.set("selected_language", chosen)
