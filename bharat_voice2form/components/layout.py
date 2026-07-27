@@ -2,6 +2,7 @@
 components/layout.py
 ====================
 Reusable layout / structural HTML snippets used across all pages.
+Dynamic Light/Dark mode contrast support for alerts and headings.
 """
 
 from __future__ import annotations
@@ -63,9 +64,11 @@ def info_box(message: str) -> None:
 
 
 def warning_inline(message: str) -> None:
-    """Render a small amber warning note (for missing field hints)."""
+    """Render a high-contrast amber warning note (for missing field hints)."""
+    is_dark = st.session_state.get("dark_mode", False)
+    color   = "#FBBF24" if is_dark else "#D97706"
     st.markdown(
-        f'<div style="color:#B45309;font-size:0.75rem;margin-top:-0.5rem;">'
+        f'<div style="color:{color};font-size:0.82rem;font-weight:700;margin-top:-0.3rem;margin-bottom:0.4rem;">'
         f'⚠️ {message}</div>',
         unsafe_allow_html=True,
     )
@@ -73,8 +76,11 @@ def warning_inline(message: str) -> None:
 
 def success_inline(message: str) -> None:
     """Render a small green success note."""
+    is_dark = st.session_state.get("dark_mode", False)
+    bg  = "rgba(5, 150, 105, 0.25)" if is_dark else "#D1FAE5"
+    txt = "#34D399" if is_dark else "#065F46"
     st.markdown(
-        f'<div style="background:#D1FAE5;color:#065F46;border-radius:8px;'
+        f'<div style="background:{bg};color:{txt};border-radius:8px;'
         f'padding:0.5rem 0.9rem;font-size:0.85rem;font-weight:600;margin-top:0.3rem;">'
         f'{message}</div>',
         unsafe_allow_html=True,
