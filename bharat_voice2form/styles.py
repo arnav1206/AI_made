@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Comprehensive Light/Dark theme styling covering inputs, text, placeholders, tabs, cards, selectboxes, top header transparency, toolbar icons, and buttons.
+Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, tabs, cards, selectboxes, top header transparency, toolbar icons, and buttons.
 """
 
 from __future__ import annotations
@@ -155,6 +155,31 @@ def inject_global_css() -> None:
             border: none !important;
             box-shadow: 0 4px 15px rgba(255, 122, 0, 0.4) !important;
             font-weight: 800 !important;
+        }}
+
+        /* ── Voice Dictate Popover Buttons Fix ── */
+        div[data-testid="stPopover"] > button,
+        .stPopover > button {{
+            background-color: {input_bg} !important;
+            color: {text_primary} !important;
+            border: 1px solid {border_col} !important;
+            border-radius: 8px !important;
+        }}
+        div[data-testid="stPopover"] > button p,
+        div[data-testid="stPopover"] > button span,
+        div[data-testid="stPopover"] > button div,
+        .stPopover > button p,
+        .stPopover > button span {{
+            color: {text_primary} !important;
+            font-weight: 700 !important;
+        }}
+        div[data-testid="stPopover"] > button:hover {{
+            border-color: #FF7A00 !important;
+            background-color: rgba(255, 122, 0, 0.15) !important;
+        }}
+        div[data-testid="stPopover"] > button:hover p,
+        div[data-testid="stPopover"] > button:hover span {{
+            color: #FF7A00 !important;
         }}
 
         /* ── Step Progress Bar Layout ── */
