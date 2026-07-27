@@ -43,9 +43,9 @@ def mic_widget(is_recording: bool, language: str) -> None:
     language : str
         Current selected language — shown in the sub-label.
     """
-    mic_color = "#EF4444" if is_recording else "#002868"
-    mic_bg    = "linear-gradient(135deg,#FEF2F2,#FFF0F0)" if is_recording \
-                else "linear-gradient(135deg,#F0F4FF,#EEF2FF)"
+    mic_color = "#EF4444" if is_recording else "#FF7A00"
+    mic_bg    = "linear-gradient(135deg,rgba(239,68,68,0.2),rgba(239,68,68,0.1))" if is_recording \
+                else "linear-gradient(135deg,rgba(255,122,0,0.2),rgba(255,122,0,0.1))"
     mic_icon  = "⏹️" if is_recording else "🎙️"
     mic_label = "Recording…" if is_recording else "Tap to Record"
     sub_label = (
@@ -54,10 +54,10 @@ def mic_widget(is_recording: bool, language: str) -> None:
     )
 
     st.markdown(
-        f'<div class="mic-container" style="background:{mic_bg};">'
-        f'<div class="mic-icon">{mic_icon}</div>'
-        f'<div style="font-weight:600;font-size:1rem;color:{mic_color};">{mic_label}</div>'
-        f'<div style="font-size:0.83rem;color:#6B7280;margin-top:0.25rem;">{sub_label}</div>'
+        f'<div class="mic-container" style="background:{mic_bg};border:1px solid rgba(255,122,0,0.4);border-radius:14px;padding:1rem;text-align:center;">'
+        f'<div class="mic-icon" style="font-size:2rem;margin-bottom:0.4rem;">{mic_icon}</div>'
+        f'<div style="font-weight:800;font-size:1.05rem;color:{mic_color};">{mic_label}</div>'
+        f'<div style="font-size:0.83rem;color:#F8FAFC;opacity:0.85;margin-top:0.25rem;">{sub_label}</div>'
         f'</div>',
         unsafe_allow_html=True,
     )
@@ -70,8 +70,8 @@ def speech_tips_card() -> None:
     """Render the 'Speech Tips' guidance card shown on the voice input page."""
     st.markdown(
         '<div class="card" style="margin-top:0.5rem;">'
-        '<div style="font-weight:700;font-size:0.9rem;margin-bottom:0.5rem;">💬 Speech Tips</div>'
-        '<ul style="margin:0;padding-left:1.2rem;font-size:0.83rem;color:#6B7280;line-height:1.8;">'
+        '<div style="font-weight:800;font-size:0.95rem;color:#FF7A00;margin-bottom:0.5rem;">💬 Speech Tips & Recommendations</div>'
+        '<ul style="margin:0;padding-left:1.2rem;font-size:0.85rem;color:#F8FAFC;line-height:1.8;">'
         '<li>Speak your full name clearly</li>'
         '<li>Mention your city / district</li>'
         '<li>State your course and year of study</li>'

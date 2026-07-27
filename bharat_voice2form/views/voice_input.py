@@ -32,13 +32,13 @@ def render() -> None:
     tricolour_bar()
     step_progress_bar(current_step=2)
 
-    form_name = session.get("selected_form", "Scholarship Application")
+    form_name = session.get("selected_form", "Post-Matric Scholarship Scheme")
     st.markdown(
         f'<div style="margin-bottom:1.25rem;">'
-        f'<span style="background:linear-gradient(135deg, #EFF6FF, #DBEAFE);'
-        f'color:#1E40AF;border-radius:10px;padding:0.4rem 1rem;'
-        f'font-size:0.88rem;font-weight:700;border:1px solid #BFDBFE;">'
-        f'📋 {form_name}</span></div>',
+        f'<span style="background:rgba(255, 122, 0, 0.2);color:#FF7A00 !important;'
+        f'border-radius:10px;padding:0.45rem 1rem;font-size:0.88rem;font-weight:800;'
+        f'border:1px solid rgba(255, 122, 0, 0.5);display:inline-block;">'
+        f'📋 Selected Scheme: {form_name}</span></div>',
         unsafe_allow_html=True,
     )
 
