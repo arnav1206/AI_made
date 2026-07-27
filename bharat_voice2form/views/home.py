@@ -3,11 +3,12 @@ views/home.py
 =============
 Home page for Formitra — AI Voice-Powered Scholarship Portal.
 Features dynamic Light/Dark mode hero banner, ultra-high-contrast typography,
-and dynamic Multilingual Speech Orbit image assets for Light and Dark themes.
+and perfectly centered Multilingual Speech Orbit logo images for Light and Dark themes.
 """
 
 from __future__ import annotations
 
+import base64
 import streamlit as st
 
 from components.layout import tricolour_bar, section_heading, info_box, spacer
@@ -58,11 +59,25 @@ def render() -> None:
         )
 
     with h_col2:
-        st.image(
-            img_path,
-            use_container_width=True,
-            caption="🌐 Formitra Multilingual Voice Orbit Architecture",
-        )
+        try:
+            with open(img_path, "rb") as f:
+                b64_hero = base64.b64encode(f.read()).decode("utf-8")
+            st.markdown(
+                f'<div style="text-align:center;padding:0.5rem;">'
+                f'<img src="data:image/jpeg;base64,{b64_hero}" '
+                f'style="max-width:270px;width:100%;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,0.25);'
+                f'border:2px solid rgba(255,122,0,0.4);display:block;margin:0 auto;" />'
+                f'<div style="font-size:0.8rem;opacity:0.8;margin-top:0.6rem;font-weight:600;">'
+                f'🌐 Formitra Multilingual Voice Orbit Architecture</div>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+        except Exception:
+            st.image(
+                img_path,
+                use_container_width=True,
+                caption="🌐 Formitra Multilingual Voice Orbit Architecture",
+            )
 
     # ── Action Buttons ─────────────────────────────────────────────
     c1, c2, c3 = st.columns([1, 2, 1])

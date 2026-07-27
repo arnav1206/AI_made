@@ -2,11 +2,12 @@
 components/navbar.py
 ====================
 Sidebar navigation component with language selector, user auth status, Admin Portal link & Dark Mode toggle.
-Features official Formitra multilingual brand logo for Light & Dark modes.
+Features perfectly centered official Formitra multilingual brand logo for Light & Dark modes.
 """
 
 from __future__ import annotations
 
+import base64
 import streamlit as st
 
 from utils.constants    import PAGE_ORDER, PAGE_LABELS
@@ -54,16 +55,26 @@ def _logo_block() -> None:
         else "bharat_voice2form/assets/images/multilingual_light.jpg"
     )
 
-    st.markdown('<div style="text-align:center;padding:0.5rem 0 0.2rem;">', unsafe_allow_html=True)
-    c1, c2, c3 = st.columns([1, 2, 1])
-    with c2:
-        st.image(img_path, width=80)
+    try:
+        with open(img_path, "rb") as f:
+            b64_img = base64.b64encode(f.read()).decode("utf-8")
+        logo_html = (
+            f'<img src="data:image/jpeg;base64,{b64_img}" '
+            f'style="width:90px;height:90px;border-radius:50%;object-fit:cover;'
+            f'box-shadow:0 4px 18px rgba(255,122,0,0.4);border:2.5px solid #FF7A00;'
+            f'display:block;margin:0 auto 0.4rem;" />'
+        )
+    except Exception:
+        logo_html = '<div style="font-size:2.4rem;text-align:center;">🎙️</div>'
+
     st.markdown(
-        '<div style="font-size:1.35rem;font-weight:900;letter-spacing:-0.4px;color:#FF7A00;margin-top:0.25rem;">'
-        'Formitra</div>'
-        '<div style="font-size:0.75rem;opacity:0.8;margin-top:0.1rem;color:#F8FAFC;">'
-        'AI Voice-Powered Form Filling</div>'
-        '</div>',
+        f'<div style="text-align:center;padding:0.5rem 0 0.25rem;">'
+        f'{logo_html}'
+        f'<div style="font-size:1.35rem;font-weight:900;letter-spacing:-0.4px;color:#FF7A00;">'
+        f'Formitra</div>'
+        f'<div style="font-size:0.75rem;opacity:0.85;margin-top:0.1rem;color:#F8FAFC;">'
+        f'AI Voice-Powered Form Filling</div>'
+        f'</div>',
         unsafe_allow_html=True,
     )
 
