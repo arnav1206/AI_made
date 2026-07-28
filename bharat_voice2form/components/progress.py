@@ -37,12 +37,7 @@ def step_progress_bar(current_step: int = 1) -> None:
             cls   = "step-item step-todo"
             badge = str(i)
 
-        steps_html += f"""
-        <div class="{cls}">
-            <div class="step-num">{badge}</div>
-            <div class="step-label">{step_lbl}</div>
-        </div>
-        """
+        steps_html += f'<div class="{cls}"><div class="step-num">{badge}</div><div class="step-label">{step_lbl}</div></div>'
 
     st.markdown(
         f'<div class="progress-bar-container">{steps_html}</div>',
