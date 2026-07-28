@@ -82,10 +82,10 @@ def render() -> None:
     # ── Action Buttons ─────────────────────────────────────────────
     c1, c2, c3 = st.columns([1, 2, 1])
     with c2:
-        if st.button(f'🚀 {t("select_btn")}', use_container_width=True, type="primary"):
+        if st.button(t("select_btn"), use_container_width=True, type="primary"):
             session.navigate("form_selection")
 
-        if st.button(f'🔍 {t("nav_track_status")}', use_container_width=True):
+        if st.button(t("nav_track_status"), use_container_width=True):
             session.navigate("track_status")
 
     spacer()
