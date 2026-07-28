@@ -3,7 +3,7 @@ views/home.py
 =============
 Home page for Formitra — AI Voice-Powered Scholarship Portal.
 Features dynamic Light/Dark mode hero banner, ultra-high-contrast typography,
-and centered Multilingual Speech Orbit darkmode logo image.
+multilingual translation support via t(), and centered darkmode logo.
 """
 
 from __future__ import annotations
@@ -82,10 +82,10 @@ def render() -> None:
     # ── Action Buttons ─────────────────────────────────────────────
     c1, c2, c3 = st.columns([1, 2, 1])
     with c2:
-        if st.button("🚀 Start Voice Application →", use_container_width=True, type="primary"):
+        if st.button(f'🚀 {t("select_btn")}', use_container_width=True, type="primary"):
             session.navigate("form_selection")
 
-        if st.button("🔍 Track Existing Application / Login", use_container_width=True):
+        if st.button(f'🔍 {t("nav_track_status")}', use_container_width=True):
             session.navigate("track_status")
 
     spacer()
@@ -95,13 +95,13 @@ def render() -> None:
 
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        step_card(1, "📋 Select Scheme", "Pick your scholarship application scheme", "🎓")
+        step_card(1, t("nav_form_selection"), "Pick your scholarship application scheme", "🎓")
     with col2:
-        step_card(2, "🎙️ Voice Dictation", "Speak your details in your mother tongue", "🗣️")
+        step_card(2, t("nav_voice_input"), "Speak your details in your mother tongue", "🗣️")
     with col3:
-        step_card(3, "🤖 AI Auto-Fill", "Gemma AI maps your speech to form fields", "✨")
+        step_card(3, t("nav_ai_processing"), "Gemma AI maps your speech to form fields", "✨")
     with col4:
-        step_card(4, "🎉 Track Reference", "Submit & track application status anytime", "📄")
+        step_card(4, t("nav_track_status"), "Submit & track application status anytime", "📄")
 
     spacer()
 
