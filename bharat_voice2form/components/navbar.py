@@ -2,7 +2,7 @@
 components/navbar.py
 ====================
 Sidebar navigation component with language selector, user auth status, Admin Portal link & Dark Mode toggle.
-Features official Formitra darkmode multilingual brand logo.
+Features official Formitra darkmode multilingual brand logo positioned to the left.
 """
 
 from __future__ import annotations
@@ -57,7 +57,7 @@ def _logo_block() -> None:
             f'<img src="data:image/png;base64,{b64_img}" '
             f'style="width:96px;height:96px;border-radius:50%;object-fit:cover;'
             f'box-shadow:0 6px 22px rgba(255,122,0,0.5);border:3px solid #FF7A00;'
-            f'display:block;margin:0 auto 0.6rem auto;" />'
+            f'display:block;margin:0 auto 0.6rem auto;transform:translateX(-18px);" />'
         )
     except Exception:
         logo_html = '<div style="font-size:2.4rem;text-align:center;">🎙️</div>'
