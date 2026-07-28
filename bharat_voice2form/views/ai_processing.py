@@ -22,16 +22,16 @@ import utils.session as session
 
 # All fields required for scholarship application
 _ALL_REQUIRED_FIELDS = [
-    ("Name",        "Full Name"),
-    ("City",        "City / District"),
-    ("State",       "State"),
-    ("Course",      "Course Name"),
-    ("Year",        "Current Year"),
-    ("Income",      "Annual Family Income"),
-    ("DOB",         "Date of Birth"),
-    ("Phone",       "Phone Number"),
-    ("Email",       "Email Address"),
-    ("College",     "College / Institution"),
+    ("Name",    "reg_name",    "Full Name"),
+    ("City",    "lbl_city",    "City / District"),
+    ("State",   "reg_state",   "State"),
+    ("Course",  "lbl_course",  "Course Name"),
+    ("Year",    "lbl_year",    "Current Year"),
+    ("Income",  "lbl_income",  "Annual Family Income"),
+    ("DOB",     "lbl_dob",     "Date of Birth"),
+    ("Phone",   "reg_phone",   "Phone Number"),
+    ("Email",   "reg_email",   "Email Address"),
+    ("College", "lbl_college", "College / Institution"),
 ]
 
 
@@ -104,8 +104,8 @@ def render() -> None:
     extracted = session.get("extracted_data", {})
 
     # Compute Provided vs Missing Required Info
-    provided_fields = [label for key, label in _ALL_REQUIRED_FIELDS if key in extracted and extracted[key]]
-    missing_fields  = [label for key, label in _ALL_REQUIRED_FIELDS if key not in extracted or not extracted[key]]
+    provided_fields = [(key, t(t_key, default_lbl)) for key, t_key, default_lbl in _ALL_REQUIRED_FIELDS if key in extracted and extracted[key]]
+    missing_fields  = [(key, t(t_key, default_lbl)) for key, t_key, default_lbl in _ALL_REQUIRED_FIELDS if key not in extracted or not extracted[key]]
 
     # ── Success & Audit Banner with Voice Assist ───────────────────
     st.markdown(
@@ -162,11 +162,11 @@ def render() -> None:
     # ── Voice Assist Speech Output ────────────────────────────────
     speech_summary_parts = []
     if provided_fields:
-        prov_str = ", ".join([f"{k}: {extracted[k]}" for k, _ in _ALL_REQUIRED_FIELDS if k in extracted and extracted[k]])
+        prov_str = ", ".join([f"{lbl}: {extracted[k]}" for k, lbl in provided_fields])
         speech_summary_parts.append(f"Extracted information: {prov_str}.")
     speech_summary_parts.append(f"You are eligible for {eligible_count} government scholarship schemes.")
     if missing_fields:
-        miss_str = ", ".join(missing_fields)
+        miss_str = ", ".join([lbl for _, lbl in missing_fields])
         speech_summary_parts.append(f"Please provide missing fields: {miss_str}.")
 
     tts_script = " ".join(speech_summary_parts)
@@ -180,7 +180,7 @@ def render() -> None:
     c_prov, c_miss = st.columns(2)
 
     with c_prov:
-        prov_list = "".join(f'<li style="margin-bottom:0.3rem;"><b>{f}</b>: {extracted.get(k, "")}</li>' for k, f in _ALL_REQUIRED_FIELDS if k in extracted and extracted[k])
+        prov_list = "".join(f'<li style="margin-bottom:0.3rem;"><b>{lbl}</b>: {extracted.get(k, "")}</li>' for k, lbl in provided_fields)
         if not prov_list:
             prov_list = '<li>No fields identified directly. Please check transcript.</li>'
         st.markdown(
@@ -192,8 +192,10 @@ def render() -> None:
             unsafe_allow_html=True,
         )
 
+    req_suffix = t("lbl_required", "Required")
+
     with c_miss:
-        miss_list = "".join(f'<li style="margin-bottom:0.3rem;"><b>{f}</b> (Required)</li>' for f in missing_fields)
+        miss_list = "".join(f'<li style="margin-bottom:0.3rem;"><b>{lbl}</b> ({req_suffix})</li>' for _, lbl in missing_fields)
         if not miss_list:
             miss_list = '<li>All required information was provided in your voice! 🎉</li>'
         st.markdown(
@@ -215,10 +217,11 @@ def render() -> None:
 
     with right_col:
         section_heading(t("field_mapping_title"), t("field_mapping_sub"))
-        for key, label in _ALL_REQUIRED_FIELDS:
-            val   = extracted.get(key, "—")
-            found = key in extracted and bool(extracted[key])
-            field_mapping_row(label=label, value=val, found=found)
+        for key, t_key, default_lbl in _ALL_REQUIRED_FIELDS:
+            lbl_trans = t(t_key, default_lbl)
+            val       = extracted.get(key, "—")
+            found     = key in extracted and bool(extracted[key])
+            field_mapping_row(label=lbl_trans, value=val, found=found)
 
     spacer()
     _, center, _ = st.columns([1, 2, 1])

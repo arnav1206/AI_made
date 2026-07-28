@@ -1314,6 +1314,13 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
         "Malayalam": "ഒബിസി, ഇബിസി, ഡിഎൻടി വിദ്യാർത്ഥികൾക്കുള്ള സ്കോളർഷിപ്പ്.",
     },
 
+
+    "lbl_required": {
+        "English": "Required", "Hindi": "आवश्यक", "Odia": "ଆବଶ୍ୟକ",
+        "Tamil": "தேவை", "Telugu": "అవసరం", "Bengali": "প্রয়োজন",
+        "Marathi": "आवश्यक", "Kannada": "ಅಗತ್ಯವಿದೆ", "Malayalam": "ആവശ്യമാണ്",
+    },
+
     # ── AI Assistant Expander Header ───────────────────────────────
     "ai_assistant_expander": {
         "English": "🤖 Formitra AI Assistant (Click for Page Help & Voice Guidance)",
