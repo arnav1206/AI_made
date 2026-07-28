@@ -2,7 +2,7 @@
 components/navbar.py
 ====================
 Sidebar navigation component with language selector, user auth status, Admin Portal link & Dark Mode toggle.
-Features official Formitra darkmode multilingual brand logo positioned higher up in the sidebar.
+Features official Formitra darkmode multilingual brand logo.
 """
 
 from __future__ import annotations
@@ -48,22 +48,22 @@ def render_sidebar() -> None:
 
 
 def _logo_block() -> None:
-    img_path = "bharat_voice2form/assets/images/multilingual_dark.jpg"
+    img_path = "bharat_voice2form/assets/images/logo.png"
 
     try:
         with open(img_path, "rb") as f:
             b64_img = base64.b64encode(f.read()).decode("utf-8")
         logo_html = (
-            f'<img src="data:image/jpeg;base64,{b64_img}" '
-            f'style="width:90px;height:90px;border-radius:50%;object-fit:cover;'
-            f'box-shadow:0 4px 18px rgba(255,122,0,0.4);border:2.5px solid #FF7A00;'
-            f'display:block;margin:-35px auto 0.2rem auto;transform:translateX(-22px);" />'
+            f'<img src="data:image/png;base64,{b64_img}" '
+            f'style="width:96px;height:96px;border-radius:50%;object-fit:cover;'
+            f'box-shadow:0 6px 22px rgba(255,122,0,0.5);border:3px solid #FF7A00;'
+            f'display:block;margin:0 auto 0.6rem auto;" />'
         )
     except Exception:
         logo_html = '<div style="font-size:2.4rem;text-align:center;">🎙️</div>'
 
     st.markdown(
-        f'<div style="text-align:center;padding:0 0 0.25rem;">'
+        f'<div style="text-align:center;padding:0.25rem 0 0.5rem 0;">'
         f'{logo_html}'
         f'<div style="font-size:1.35rem;font-weight:900;letter-spacing:-0.4px;color:#FF7A00;">'
         f'Formitra</div>'
