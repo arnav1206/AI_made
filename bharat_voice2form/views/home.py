@@ -90,7 +90,7 @@ def render() -> None:
     spacer()
 
     # ── 4-Step Process ──────────────────────────────────────────────
-    section_heading("⚡ How Formitra Works", t("how_it_works_sub"))
+    section_heading(t("how_it_works_title", "⚡ How Formitra Works"), t("how_it_works_sub"))
 
     col1, col2, col3, col4 = st.columns(4)
     with col1:
@@ -105,20 +105,24 @@ def render() -> None:
     spacer()
 
     # ── Popular Scholarship Schemes ───────────────────────────────
-    section_heading("🏛️ Government Scholarship Schemes Available", t("scholarships_sub"))
+    section_heading(t("govt_schemes_title", "🏛️ Government Scholarship Schemes Available"), t("scholarships_sub"))
 
     sc_cols = st.columns(2)
     for idx, sf in enumerate(SCHOLARSHIP_FORMS):
         target_col = sc_cols[idx % 2]
+        title_translated = t(f"scheme_{idx}_title", sf["title"])
+        desc_translated  = t(f"scheme_{idx}_desc", sf["description"])
+        tag_translated   = t(f"tag_{idx}", sf["tag"])
+
         with target_col:
             st.markdown(
                 f'<div class="card" style="border-left:4px solid {sf["tag_color"]};">'
                 f'<div style="display:flex;justify-content:space-between;align-items:center;">'
                 f'<span style="font-size:1.8rem;">{sf["icon"]}</span>'
-                f'<span style="background:{sf["tag_color"]}15;color:{sf["tag_color"]};padding:0.25rem 0.65rem;border-radius:20px;font-size:0.75rem;font-weight:800;">{sf["tag"]}</span>'
+                f'<span style="background:{sf["tag_color"]}15;color:{sf["tag_color"]};padding:0.25rem 0.65rem;border-radius:20px;font-size:0.75rem;font-weight:800;">{tag_translated}</span>'
                 f'</div>'
-                f'<div style="font-size:1.1rem;font-weight:800;margin-top:0.75rem;">{sf["title"]}</div>'
-                f'<div style="font-size:0.88rem;opacity:0.8;margin-top:0.35rem;line-height:1.5;">{sf["description"]}</div>'
+                f'<div style="font-size:1.1rem;font-weight:800;margin-top:0.75rem;">{title_translated}</div>'
+                f'<div style="font-size:0.88rem;opacity:0.8;margin-top:0.35rem;line-height:1.5;">{desc_translated}</div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
