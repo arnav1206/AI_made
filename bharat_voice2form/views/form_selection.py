@@ -70,16 +70,19 @@ def render() -> None:
 
         with cols[col_idx]:
             border_accent = "#FF7A00" if i == 0 else "#2563EB" if i == 1 else "#059669" if i == 2 else "#9333EA" if i == 3 else "#94A3B8"
+            scheme_title  = t(f"scheme_{i}_title", form["title"])
+            scheme_desc   = t(f"scheme_{i}_desc", form["desc"])
+            badge_text    = t("available_now", "Available Now") if form["available"] else t("coming_soon", "Coming Soon")
             
             st.markdown(
                 f'<div class="card" style="border-top: 5px solid {border_accent}; min-height: 220px; display: flex; flex-direction: column; justify-content: space-between;">'
                 f'<div>'
                 f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">'
                 f'<span style="font-size:2.2rem;">{form["icon"]}</span>'
-                f'<span style="background:{"rgba(5, 150, 105, 0.15)" if form["available"] else "rgba(148, 163, 184, 0.15)"};color:{"#059669" if form["available"] else "#64748B"};padding:0.25rem 0.65rem;border-radius:20px;font-size:0.75rem;font-weight:800;">{form["badge"]}</span>'
+                f'<span style="background:{"rgba(5, 150, 105, 0.15)" if form["available"] else "rgba(148, 163, 184, 0.15)"};color:{"#059669" if form["available"] else "#64748B"};padding:0.25rem 0.65rem;border-radius:20px;font-size:0.75rem;font-weight:800;">{badge_text}</span>'
                 f'</div>'
-                f'<div style="font-weight:800;font-size:1.08rem;margin-bottom:0.4rem;line-height:1.3;">{form["title"]}</div>'
-                f'<div style="font-size:0.85rem;opacity:0.82;line-height:1.5;margin-bottom:1rem;">{form["desc"]}</div>'
+                f'<div style="font-weight:800;font-size:1.08rem;margin-bottom:0.4rem;line-height:1.3;">{scheme_title}</div>'
+                f'<div style="font-size:0.85rem;opacity:0.82;line-height:1.5;margin-bottom:1rem;">{scheme_desc}</div>'
                 f'</div>'
                 f'</div>',
                 unsafe_allow_html=True,
@@ -92,7 +95,7 @@ def render() -> None:
                     use_container_width=True,
                     type="primary",
                 ):
-                    session.set("selected_form", form["title"])
+                    session.set("selected_form", scheme_title)
                     session.navigate("voice_input")
             else:
                 st.button(
