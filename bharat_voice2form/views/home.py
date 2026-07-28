@@ -2,8 +2,7 @@
 views/home.py
 =============
 Home page for Formitra — AI Voice-Powered Scholarship Portal.
-Features dynamic Light/Dark mode hero banner, ultra-high-contrast typography,
-multilingual translation support via t(), and centered darkmode logo.
+100% Multilingual translation support via t().
 """
 
 from __future__ import annotations
@@ -91,22 +90,22 @@ def render() -> None:
     spacer()
 
     # ── 4-Step Process ──────────────────────────────────────────────
-    section_heading("⚡ How Formitra Works", "4 easy steps to complete your government application")
+    section_heading("⚡ How Formitra Works", t("how_it_works_sub"))
 
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        step_card(1, t("nav_form_selection"), "Pick your scholarship application scheme", "🎓")
+        step_card(1, t("nav_form_selection"), t("step1_sub"), "🎓")
     with col2:
-        step_card(2, t("nav_voice_input"), "Speak your details in your mother tongue", "🗣️")
+        step_card(2, t("nav_voice_input"), t("step2_sub"), "🗣️")
     with col3:
-        step_card(3, t("nav_ai_processing"), "Gemma AI maps your speech to form fields", "✨")
+        step_card(3, t("nav_ai_processing"), t("step3_sub"), "✨")
     with col4:
-        step_card(4, t("nav_track_status"), "Submit & track application status anytime", "📄")
+        step_card(4, t("nav_track_status"), t("step4_sub"), "📄")
 
     spacer()
 
     # ── Popular Scholarship Schemes ───────────────────────────────
-    section_heading("🏛️ Government Scholarship Schemes Available", "Voice-supported official scholarship applications")
+    section_heading("🏛️ Government Scholarship Schemes Available", t("scholarships_sub"))
 
     sc_cols = st.columns(2)
     for idx, sf in enumerate(SCHOLARSHIP_FORMS):

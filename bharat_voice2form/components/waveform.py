@@ -3,21 +3,18 @@ components/waveform.py
 ======================
 Audio waveform animation and microphone-widget components
 used on the Voice Input page with dynamic light/dark theme support.
+100% Multilingual translation support via t().
 """
 
 from __future__ import annotations
 
 import streamlit as st
+from utils.translations import t
 
 
 def waveform(visible: bool = True) -> None:
     """
     Render the animated waveform bars.
-
-    Parameters
-    ----------
-    visible : bool
-        If False the waveform is hidden (call when not recording).
     """
     if not visible:
         return
@@ -34,14 +31,6 @@ def waveform(visible: bool = True) -> None:
 def mic_widget(is_recording: bool, language: str) -> None:
     """
     Render the microphone status card.
-
-    Parameters
-    ----------
-    is_recording : bool
-        When True the widget shows a red "Recording…" state.
-        When False it shows the idle blue "Tap to Record" state.
-    language : str
-        Current selected language — shown in the sub-label.
     """
     is_dark = st.session_state.get("dark_mode", False)
     mic_color = "#EF4444" if is_recording else "#FF7A00"
@@ -49,10 +38,10 @@ def mic_widget(is_recording: bool, language: str) -> None:
     mic_bg    = "linear-gradient(135deg,rgba(239,68,68,0.2),rgba(239,68,68,0.1))" if is_recording \
                 else "linear-gradient(135deg,rgba(255,122,0,0.15),rgba(255,122,0,0.05))"
     mic_icon  = "⏹️" if is_recording else "🎙️"
-    mic_label = "Recording…" if is_recording else "Tap to Record"
+    mic_label = t("recording_active") if is_recording else t("tap_to_record")
     sub_label = (
-        f"Recording in {language}…" if is_recording
-        else "Click the button below to start"
+        f"{t('recording_in')} {language}…" if is_recording
+        else t("click_to_start")
     )
 
     st.markdown(
@@ -74,13 +63,13 @@ def speech_tips_card() -> None:
     text_col = "#F8FAFC" if is_dark else "#475569"
     st.markdown(
         f'<div class="card" style="margin-top:0.5rem;">'
-        f'<div style="font-weight:800;font-size:0.95rem;color:#FF7A00;margin-bottom:0.5rem;">💬 Speech Tips & Recommendations</div>'
+        f'<div style="font-weight:800;font-size:0.95rem;color:#FF7A00;margin-bottom:0.5rem;">{t("speech_tips_title")}</div>'
         f'<ul style="margin:0;padding-left:1.2rem;font-size:0.85rem;color:{text_col};line-height:1.8;">'
-        f'<li>Speak your full name clearly</li>'
-        f'<li>Mention your city / district</li>'
-        f'<li>State your course and year of study</li>'
-        f'<li>Say your family income in words</li>'
-        f'<li>Include phone / email if available</li>'
+        f'<li>{t("tip_name")}</li>'
+        f'<li>{t("tip_city")}</li>'
+        f'<li>{t("tip_course")}</li>'
+        f'<li>{t("tip_income")}</li>'
+        f'<li>{t("tip_contact")}</li>'
         f'</ul></div>',
         unsafe_allow_html=True,
     )

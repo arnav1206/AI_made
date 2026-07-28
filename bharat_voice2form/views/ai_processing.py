@@ -3,6 +3,7 @@ views/ai_processing.py
 ======================
 AI processing page — extracts information from user's audio,
 provides Provided vs Required audit, and runs Formitra Eligibility Finder.
+100% Multilingual translation support via t().
 Dynamic light/dark theme support for ultra-high-contrast rendering.
 """
 
@@ -36,7 +37,7 @@ _ALL_REQUIRED_FIELDS = [
 
 def render() -> None:
     tricolour_bar()
-    step_progress_bar(current_step=3)
+    step_progress_bar(current_step=2)
 
     section_heading(t("ai_title"), t("ai_sub"))
 
@@ -170,7 +171,7 @@ def render() -> None:
 
     tts_script = " ".join(speech_summary_parts)
 
-    st.markdown("### 🔊 Voice Assist Audit Summary")
+    st.markdown(f'### {t("voice_assist_title")}')
     render_voice_assistant_player(text=tts_script, language=language, label=f"🔊 Listen to Voice Assist ({language})")
 
     spacer()
@@ -185,7 +186,7 @@ def render() -> None:
         st.markdown(
             f'<div class="card" style="border-left:4px solid #10B981;background:{card_bg_prov};">'
             f'<div style="font-weight:800;font-size:0.95rem;color:{card_txt_prov};margin-bottom:0.5rem;">'
-            f'✅ Provided from Audio ({len(provided_fields)})</div>'
+            f'{t("provided_audio_title")} ({len(provided_fields)})</div>'
             f'<ul style="font-size:0.88rem;color:{title_color};padding-left:1.2rem;margin:0;">{prov_list}</ul>'
             f'</div>',
             unsafe_allow_html=True,
@@ -198,7 +199,7 @@ def render() -> None:
         st.markdown(
             f'<div class="card" style="border-left:4px solid #F59E0B;background:{card_bg_miss};">'
             f'<div style="font-weight:800;font-size:0.95rem;color:{card_txt_miss};margin-bottom:0.5rem;">'
-            f'⚠️ Missing Information Needed ({len(missing_fields)})</div>'
+            f'{t("missing_info_title")} ({len(missing_fields)})</div>'
             f'<ul style="font-size:0.88rem;color:{title_color};padding-left:1.2rem;margin:0;">{miss_list}</ul>'
             f'</div>',
             unsafe_allow_html=True,
@@ -209,11 +210,11 @@ def render() -> None:
     left_col, right_col = st.columns([1, 1], gap="large")
 
     with left_col:
-        section_heading("📦 Extracted JSON", "Structured data generated from speech")
+        section_heading(t("extracted_json_title"), t("extracted_json_sub"))
         json_block(extracted)
 
     with right_col:
-        section_heading(t("field_mapping"), t("field_mapping_sub"))
+        section_heading(t("field_mapping_title"), t("field_mapping_sub"))
         for key, label in _ALL_REQUIRED_FIELDS:
             val   = extracted.get(key, "—")
             found = key in extracted and bool(extracted[key])
@@ -222,7 +223,7 @@ def render() -> None:
     spacer()
     _, center, _ = st.columns([1, 2, 1])
     with center:
-        if st.button("📝 Auto-Fill Form & Complete Missing Info →", use_container_width=True, type="primary"):
+        if st.button(t("extract_info_btn"), use_container_width=True, type="primary"):
             session.navigate("auto_fill")
 
 

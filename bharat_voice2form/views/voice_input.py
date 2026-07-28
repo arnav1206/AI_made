@@ -2,6 +2,7 @@
 views/voice_input.py
 ====================
 Voice input page — live streaming dictation & audio recording with Language Auto-Detector.
+100% Multilingual translation support via t().
 Dynamic Light/Dark mode contrast support.
 """
 
@@ -31,7 +32,7 @@ def _update_transcript(text: str) -> None:
 
 def render() -> None:
     tricolour_bar()
-    step_progress_bar(current_step=2)
+    step_progress_bar(current_step=1)
 
     form_name = session.get("selected_form") or "Post-Matric Scholarship Scheme"
     is_dark   = st.session_state.get("dark_mode", False)
@@ -46,7 +47,7 @@ def render() -> None:
         f'<span style="background:{badge_bg};color:{badge_txt} !important;'
         f'border-radius:10px;padding:0.45rem 1rem;font-size:0.88rem;font-weight:800;'
         f'border:1px solid {badge_border};display:inline-block;">'
-        f'📋 Selected Scheme: {form_name}</span></div>',
+        f'📋 {t("selected_scheme_badge")}: {form_name}</span></div>',
         unsafe_allow_html=True,
     )
 
@@ -85,8 +86,8 @@ def render() -> None:
 
         # ── 1. Live Streaming Dictation Component ───────────────────
         st.markdown(
-            '<div style="font-weight:800;font-size:1rem;color:#FF7A00;margin:0.5rem 0 0.4rem;">'
-            '⚡ Live Speech Dictation (Real-Time)</div>',
+            f'<div style="font-weight:800;font-size:1rem;color:#FF7A00;margin:0.5rem 0 0.4rem;">'
+            f'{t("live_dictation_title")}</div>',
             unsafe_allow_html=True,
         )
         live_text = render_live_speech_dictation(language=lang)
@@ -98,12 +99,12 @@ def render() -> None:
 
         # ── 2. Microphone Audio File Clip Recorder ─────────────────
         st.markdown(
-            '<div style="font-weight:800;font-size:1rem;color:#FF7A00;margin-bottom:0.4rem;">'
-            '🎙️ Audio Clip Recorder (File Processing)</div>',
+            f'<div style="font-weight:800;font-size:1rem;color:#FF7A00;margin-bottom:0.4rem;">'
+            f'{t("audio_recorder_title")}</div>',
             unsafe_allow_html=True,
         )
         audio_value = st.audio_input(
-            "Press mic to record audio clip",
+            t("audio_record_prompt"),
             key="audio_clip_recorder",
         )
 
@@ -126,7 +127,7 @@ def render() -> None:
 
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button(
-            "📋 Load Sample Transcript (Demo)",
+            t("load_sample_btn"),
             use_container_width=True,
             type="primary",
             help="Load a sample transcript for demonstration",
@@ -139,7 +140,7 @@ def render() -> None:
 
     # ── Right Column: Active Transcribed Speech Display ────────────
     with right_col:
-        section_heading("📝 Active Transcribed Speech", "Transcribed voice text ready for AI extraction")
+        section_heading(t("active_speech_title"), t("active_speech_sub"))
 
         if "transcript_editor" not in st.session_state:
             st.session_state["transcript_editor"] = session.get("transcript", "")
@@ -147,7 +148,7 @@ def render() -> None:
         transcript = st.text_area(
             "Transcribed Speech (editable)",
             height=280,
-            placeholder="Live transcribed speech will stream here as you speak. You can also edit or type directly.",
+            placeholder=t("dictation_placeholder"),
             key="transcript_editor",
         )
         session.set("transcript", transcript)
@@ -169,7 +170,7 @@ def render() -> None:
         has_transcript    = bool(active_transcript)
 
         if st.button(
-            "🤖 Extract Information & Review Required Fields →",
+            t("extract_info_btn"),
             use_container_width=True,
             type="primary",
             disabled=not has_transcript,
