@@ -2,6 +2,7 @@
 views/preview.py
 ================
 Application preview page — translated via t().
+100% Multilingual translation support.
 Includes live PDF document preview & download option.
 """
 
@@ -53,10 +54,10 @@ def render() -> None:
         f'<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
         f'<div>'
         f'<div style="font-size:0.75rem;opacity:0.7;text-transform:uppercase;'
-        f'letter-spacing:0.1em;">National Scholarship Portal — Government of India</div>'
+        f'letter-spacing:0.1em;">{t("nsp_portal_hdr")}</div>'
         f'<div style="font-size:1.4rem;font-weight:800;margin:0.3rem 0;color:#FFFFFF !important;">'
         f'{form_name}</div>'
-        f'<div style="font-size:0.88rem;opacity:0.85;color:#E0F2FE;">Bharat Voice2Form — AI Assisted Application</div>'
+        f'<div style="font-size:0.88rem;opacity:0.85;color:#E0F2FE;">{t("ai_assisted_app_sub")}</div>'
         f'</div>'
         f'<div style="text-align:right;">'
         f'<div style="font-size:0.75rem;opacity:0.7;color:#E0F2FE;">{t("app_number")}</div>'
@@ -66,10 +67,18 @@ def render() -> None:
         unsafe_allow_html=True,
     )
 
+    section_key_map = {
+        "Personal Information":       t("section_personal"),
+        "Address & Domicile Details": t("section_address"),
+        "Academic Information":       t("section_academic"),
+        "Financial & Contact Details": t("section_financial"),
+    }
+
     # ── Section tables ─────────────────────────────────────────────
     for section in SCHOLARSHIP_SECTIONS:
+        sec_title = section_key_map.get(section["title"], f'{section["icon"]} {section["title"]}')
         preview_table(
-            section_title=f'{section["icon"]} {section["title"]}',
+            section_title=sec_title,
             fields=section["fields"],
             form_data=form_data,
         )
@@ -95,10 +104,9 @@ def render() -> None:
 
     # ── Live PDF Document Preview Box ──────────────────────────────
     if pdf_res:
-        with st.expander("👁️ Live Document Preview Before Download", expanded=False):
+        with st.expander(t("preview_doc_title"), expanded=False):
             b64_pdf = base64.b64encode(pdf_res.pdf_bytes).decode("utf-8")
             
-            # HTML Object with styled document card fallback for strict browser security policies
             grid_items = "".join(
                 f'<div style="display:flex;justify-content:space-between;padding:0.45rem 0.8rem;border-bottom:1px solid #E2E8F0;'
                 f'background:{"#F8FAFC" if idx % 2 == 0 else "#FFFFFF"};">'
@@ -111,12 +119,12 @@ def render() -> None:
             <object data="data:application/pdf;base64,{b64_pdf}" type="application/pdf" width="100%" height="450" style="border:1.5px solid #FF7A00;border-radius:12px;">
                 <div style="background:#FFFFFF;color:#0F172A;padding:1.5rem;border-radius:12px;border:2px solid #FF7A00;">
                     <div style="background:#0F172A;color:#FFFFFF;padding:1rem;border-radius:8px;margin-bottom:0.75rem;">
-                        <div style="font-weight:800;font-size:1.1rem;color:#FF7A00;">NATIONAL SCHOLARSHIP PORTAL — GOVT OF INDIA</div>
+                        <div style="font-weight:800;font-size:1.1rem;color:#FF7A00;">{t("nsp_portal_hdr")}</div>
                         <div style="font-size:0.85rem;color:#E2E8F0;">Formitra AI Voice Application Receipt | Ref: {app_no}</div>
                     </div>
                     <div style="margin-bottom:1rem;">{grid_items}</div>
                     <div style="background:#FEF3C7;border:1px solid #F59E0B;padding:0.75rem;border-radius:6px;font-size:0.8rem;color:#92400E;">
-                        <b>📜 Applicant Self-Declaration Verified & Sealed electronically.</b>
+                        <b>📜 {t("receipt_sealed")}</b>
                     </div>
                 </div>
             </object>
@@ -134,7 +142,7 @@ def render() -> None:
     with b2:
         if pdf_res:
             st.download_button(
-                label="📄 Download Form (PDF)",
+                label=t("btn_download_pdf"),
                 data=pdf_res.pdf_bytes,
                 file_name=pdf_res.filename,
                 mime="application/pdf",
