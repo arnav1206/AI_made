@@ -2,6 +2,7 @@
 views/help_faq.py
 ==================
 Help & FAQ page for Formitra.
+100% Multilingual translation support via t().
 Provides step-by-step instructions, voice command guide, scholarship assistance, and Chrome Extension installation details.
 Dynamic Light/Dark mode contrast support.
 """
@@ -18,7 +19,7 @@ import utils.session as session
 def render() -> None:
     tricolour_bar()
 
-    section_heading("❓ Formitra Help & FAQ Center", "Step-by-step voice form filling guide, Chrome Extension setup & support")
+    section_heading(t("faq_page_title"), t("faq_page_sub"))
 
     is_dark = st.session_state.get("dark_mode", False)
 
@@ -31,54 +32,32 @@ def render() -> None:
 
     st.markdown(
         f'<div class="card" style="border-left:4px solid #FF7A00;">'
-        f'<div style="font-weight:800;font-size:1.05rem;color:{step_hdr};">🚀 How Formitra Works in 4 Simple Steps</div>'
+        f'<div style="font-weight:800;font-size:1.05rem;color:{step_hdr};">{t("how_it_works_4steps_title")}</div>'
         f'<div style="margin-top:0.75rem;line-height:1.8;font-size:0.92rem;color:{step_txt};">'
-        f'1️⃣ <b>Select Scheme</b>: Choose your scholarship application (Post-Matric, Central Sector, Pre-Matric, State Merit).<br>'
-        f'2️⃣ <b>Voice Input</b>: Speak into the mic in your native Indian language (Hindi, Odia, Tamil, Telugu, Bengali, etc.).<br>'
-        f'3️⃣ <b>AI Auto-Fill</b>: Gemma AI automatically extracts your Name, City, State, Course, Year & Income.<br>'
-        f'4️⃣ <b>Submit & Track</b>: Review your filled form, download your receipt, and track status with your Reference ID.'
+        f'{t("faq_step_1")}<br>'
+        f'{t("faq_step_2")}<br>'
+        f'{t("faq_step_3")}<br>'
+        f'{t("faq_step_4")}'
         f'</div></div>',
         unsafe_allow_html=True,
     )
 
-    st.markdown("### ❓ Frequently Asked Questions")
+    st.markdown(f'### {t("faq_sec_hdr")}')
 
-    with st.expander("🧩 How do I install the standalone Formitra Chrome Browser Extension?", expanded=True):
-        st.markdown(
-            "Formitra is available as a standalone **Google Chrome Browser Extension (Manifest V3)** that allows you to auto-fill forms on ANY web page!\n\n"
-            "**Installation Steps:**\n"
-            "1. Open Chrome and go to `chrome://extensions/`\n"
-            "2. Turn **ON** 'Developer mode' in the top-right corner.\n"
-            "3. Click **'Load unpacked'** and select the `formitra_chrome_extension/` directory.\n"
-            "4. Open any web form, click the Formitra mic icon, and speak to auto-fill!"
-        )
+    with st.expander(t("faq_q1_title"), expanded=True):
+        st.markdown(t("faq_q1_body"))
 
-    with st.expander("🗣️ What languages does Formitra support?"):
-        st.write(
-            "Formitra supports 9 official Indian languages: Hindi (हिन्दी), Odia (ଓଡ଼ିଆ), Tamil (தமிழ்), "
-            "Telugu (తెలుగు), Bengali (বাংলা), Marathi (मराठी), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), and English."
-        )
+    with st.expander(t("faq_q2_title")):
+        st.markdown(t("faq_q2_body"))
 
-    with st.expander("🎙️ How do I use field-level voice dictation on individual form inputs?"):
-        st.write(
-            "On the 'Form Review' page, click the mic 🎙️ icon next to any input box. Speak into your microphone, "
-            "and Formitra will type your spoken text directly into that specific input field!"
-        )
+    with st.expander(t("faq_q3_title")):
+        st.markdown(t("faq_q3_body"))
 
-    with st.expander("📄 What documents do I need for Scholarship registration?"):
-        st.write(
-            "• Aadhaar Card\n"
-            "• Previous Academic Marksheets\n"
-            "• Annual Family Income Certificate (Issued by Tehsildar/SDO)\n"
-            "• Caste/Category Certificate (if applicable)\n"
-            "• Bank Passbook (Aadhaar seeded account)"
-        )
+    with st.expander(t("faq_q4_title")):
+        st.markdown(t("faq_q4_body"))
 
-    with st.expander("🔍 How do I track my submitted scholarship application?"):
-        st.write(
-            "Go to the 'Track / Login' tab from the sidebar menu, enter your 10-character Reference Code (e.g. FMT-2026-89412), "
-            "and view your application verification status and submitted PDF receipt."
-        )
+    with st.expander(t("faq_q5_title")):
+        st.markdown(t("faq_q5_body"))
 
     spacer()
-    info_box("📞 Need further assistance? Contact Formitra National Toll-Free Helpline: 1800-111-2026 (Mon-Sat 9 AM - 6 PM)")
+    info_box(t("faq_helpline_note"))
