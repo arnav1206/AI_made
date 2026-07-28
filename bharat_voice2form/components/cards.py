@@ -3,11 +3,13 @@ components/cards.py
 ===================
 Reusable card-style HTML widgets used across Home, Form Selection,
 AI Processing, and Success pages.
+100% Multilingual translation support via t().
 """
 
 from __future__ import annotations
 
 import streamlit as st
+from utils.translations import t
 
 
 # ─── Stat card (Home page) ─────────────────────────────────────────
@@ -180,29 +182,52 @@ def ai_loader(step_icon: str, step_message: str) -> str:
 
 def preview_table(section_title: str, fields: list[str], form_data: dict) -> None:
     rows = ""
+    field_translation_map = {
+        "Full Name":            t("reg_name", "Full Name"),
+        "Date of Birth":        t("lbl_dob", "Date of Birth"),
+        "Gender":               t("lbl_gender", "Gender"),
+        "Category":             t("reg_category", "Category"),
+        "Address":              t("lbl_address", "Address"),
+        "City":                 t("lbl_city", "City"),
+        "State":                t("reg_state", "State"),
+        "PIN Code":             t("lbl_pin", "PIN Code"),
+        "College":              t("lbl_college", "College"),
+        "Course":               t("lbl_course", "Course"),
+        "Year":                 t("lbl_year", "Year"),
+        "Percentage / CGPA":    t("lbl_percentage", "Percentage / CGPA"),
+        "Annual Family Income": t("lbl_income", "Annual Family Income"),
+        "Phone Number":         t("reg_phone", "Phone Number"),
+        "Email":                t("reg_email", "Email"),
+    }
+
     for field in fields:
         val = form_data.get(field, "")
+        lbl_translated = field_translation_map.get(field, field)
         if val and val not in ("— Select —",):
             if field == "Annual Family Income" and val.isdigit():
                 val = f"₹ {int(val):,}"
-            tag  = '<span class="tag-filled">✓ Filled</span>'
+            tag  = f'<span class="tag-filled">{t("tag_verified", "✓ Verified")}</span>'
         else:
-            tag  = '<span class="tag-empty">⚠ Missing</span>'
+            tag  = f'<span class="tag-empty">{t("tag_missing", "⚠ Missing")}</span>'
             val  = "—"
 
         rows += (
             f"<tr>"
-            f"<td>{field}</td>"
+            f"<td>{lbl_translated}</td>"
             f"<td>{val}</td>"
             f"<td>{tag}</td>"
             f"</tr>"
         )
 
+    hdr_field  = t("hdr_field", "Field")
+    hdr_value  = t("hdr_value", "Value")
+    hdr_status = t("hdr_status", "Status")
+
     st.markdown(
         f'<div class="form-card">'
         f'<div style="font-weight:700;font-size:1rem;margin-bottom:1rem;">{section_title}</div>'
         f'<table class="preview-table">'
-        f'<thead><tr><th>Field</th><th>Value</th><th>Status</th></tr></thead>'
+        f'<thead><tr><th>{hdr_field}</th><th>{hdr_value}</th><th>{hdr_status}</th></tr></thead>'
         f'<tbody>{rows}</tbody>'
         f'</table></div>',
         unsafe_allow_html=True,

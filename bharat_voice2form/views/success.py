@@ -2,6 +2,7 @@
 views/success.py
 =================
 Submission success page for Formitra.
+100% Multilingual translation support via t().
 Features celebratory green badge animation, ref code display, live document preview & download option.
 """
 
@@ -19,7 +20,7 @@ import utils.session as session
 
 def render() -> None:
     tricolour_bar()
-    step_progress_bar(current_step=6)
+    step_progress_bar(current_step=5)
 
     # Generate or retrieve unique reference tracking code
     if not session.get("reference_code"):
@@ -40,6 +41,9 @@ def render() -> None:
         application_no=ref_code,
         form_title=form_title,
     )
+
+    title_translated = t("success_title", "Application Submitted Successfully!")
+    ref_lbl_translated = t("ref_code_lbl", "FORMITRA REFERENCE CODE:")
 
     # ── Celebration HTML/CSS Confetti & Pulse Animation ─────────────
     animation_html = f"""<style>
@@ -96,14 +100,14 @@ animation: fall 3s infinite ease-in-out;
 
 <div class="badge-ripple">✅</div>
 <div style="font-size:2.2rem;font-weight:900;letter-spacing:-0.5px;color:#FFFFFF !important;-webkit-text-fill-color:#FFFFFF !important;">
-Application Submitted Successfully!
+{title_translated}
 </div>
 <div style="font-size:1.05rem;color:#D1FAE5 !important;-webkit-text-fill-color:#D1FAE5 !important;margin-top:0.5rem;">
-Your voice-assisted application for <b>{form_title}</b> is complete & logged.
+{t("success_sub")} <b>{form_title}</b>
 </div>
 
 <div style="margin-top:1.75rem;display:inline-block;background:rgba(255, 255, 255, 0.15);backdrop-filter:blur(8px);padding:1rem 2.2rem;border-radius:50px;border:2px dashed #A7F3D0;">
-<span style="font-size:0.85rem;color:#E6F4EA !important;-webkit-text-fill-color:#E6F4EA !important;font-weight:700;">FORMITRA REFERENCE CODE: </span>
+<span style="font-size:0.85rem;color:#E6F4EA !important;-webkit-text-fill-color:#E6F4EA !important;font-weight:700;">{ref_lbl_translated} </span>
 <span style="font-size:1.5rem;font-weight:900;color:#FDE047 !important;-webkit-text-fill-color:#FDE047 !important;letter-spacing:1.5px;">{ref_code}</span>
 </div>
 </div>"""
@@ -112,13 +116,13 @@ Your voice-assisted application for <b>{form_title}</b> is complete & logged.
 
     # Voice Speech Announcement
     tts_text = f"Congratulations! Your application for {form_title} has been submitted successfully. Your reference code is {ref_code}."
-    render_voice_assistant_player(text=tts_text, language=language, label=f"🔊 Listen to Submission Confirmation ({language})")
+    render_voice_assistant_player(text=tts_text, language=language, label=f"🔊 {t('success_listen')} ({language})")
 
     spacer()
 
     # Live Interactive Document Preview Box
     if pdf_res:
-        with st.expander("👁️ Live Preview Submitted Application Document", expanded=True):
+        with st.expander(t("preview_doc_title"), expanded=True):
             b64_pdf = base64.b64encode(pdf_res.pdf_bytes).decode("utf-8")
             
             grid_items = "".join(
@@ -138,7 +142,7 @@ Your voice-assisted application for <b>{form_title}</b> is complete & logged.
                     </div>
                     <div style="margin-bottom:1rem;">{grid_items}</div>
                     <div style="background:#ECFDF5;border:1px solid #10B981;padding:0.75rem;border-radius:6px;font-size:0.8rem;color:#065F46;">
-                        <b>📜 Official Digital Receipt Verified & Sealed electronically.</b>
+                        <b>{t("receipt_sealed")}</b>
                     </div>
                 </div>
             </object>
@@ -150,7 +154,7 @@ Your voice-assisted application for <b>{form_title}</b> is complete & logged.
     with c1:
         if pdf_res:
             st.download_button(
-                label="📄 Download Official PDF Receipt",
+                label=t("btn_download_pdf"),
                 data=pdf_res.pdf_bytes,
                 file_name=pdf_res.filename,
                 mime="application/pdf",
@@ -158,12 +162,12 @@ Your voice-assisted application for <b>{form_title}</b> is complete & logged.
                 type="primary",
             )
     with c2:
-        if st.button("🔍 Track Application Status", use_container_width=True):
+        if st.button(t("btn_track_status"), use_container_width=True):
             session.navigate("track_status")
     with c3:
-        if st.button("🔄 Start New Application", use_container_width=True):
+        if st.button(t("btn_start_new"), use_container_width=True):
             session.full_reset()
             session.navigate("home")
 
     spacer()
-    info_box(f"💡 Preview your generated form above or click <b>'Download Official PDF Receipt'</b> to save a copy for your records. Reference Code: <b>{ref_code}</b>.")
+    info_box(f"💡 Preview your generated form above or click <b>'{t('btn_download_pdf')}'</b> to save a copy for your records. Reference Code: <b>{ref_code}</b>.")

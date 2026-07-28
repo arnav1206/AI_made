@@ -2,6 +2,7 @@
 components/form_fields.py
 =========================
 Reusable grouped form-field renderers for the Scholarship application.
+100% Multilingual translation support via t().
 Includes field-level live audio dictation & text dictation support with canonical Streamlit state binding.
 """
 
@@ -18,7 +19,8 @@ from utils.speech_to_text import transcribe
 
 def _field_mic_helper(field_key: str, label: str):
     """Inline audio mic toggle for individual form fields with live audio & text dictation."""
-    with st.popover(f"🎙️ Voice Dictate", help=f"Speak to fill {label}"):
+    dictate_btn_lbl = t("btn_voice_dictate", "🎙️ Voice Dictate")
+    with st.popover(dictate_btn_lbl, help=f"Speak to fill {label}"):
         st.markdown(f"### 🎙️ Dictate {label}")
         st.markdown(f"<div style='font-size:0.83rem;opacity:0.85;margin-bottom:0.5rem;'>Record an audio clip or type to update <b>{label}</b> directly:</div>", unsafe_allow_html=True)
         
@@ -64,21 +66,21 @@ def personal_info_fields(extracted: dict) -> dict:
 
     with c1:
         full_name = st.text_input(
-            "Full Name",
+            t("reg_name", "Full Name"),
             key="field_name",
             placeholder="e.g. Rahul Sharma",
         )
-        _field_mic_helper("field_name", "Full Name")
+        _field_mic_helper("field_name", t("reg_name", "Full Name"))
 
     with c2:
         dob = st.text_input(
-            "Date of Birth",
+            t("lbl_dob", "Date of Birth"),
             key="field_dob",
             placeholder="DD/MM/YYYY",
         )
         if not dob:
             warning_inline("Date of Birth required for verification")
-        _field_mic_helper("field_dob", "Date of Birth")
+        _field_mic_helper("field_dob", t("lbl_dob", "Date of Birth"))
 
     c3, c4 = st.columns(2)
 
@@ -89,7 +91,7 @@ def personal_info_fields(extracted: dict) -> dict:
             st.session_state["field_gender"] = gender_val if gender_val in gender_opts else gender_opts[0]
         
         gender = st.selectbox(
-            "Gender",
+            t("lbl_gender", "Gender"),
             gender_opts,
             key="field_gender",
         )
@@ -100,7 +102,7 @@ def personal_info_fields(extracted: dict) -> dict:
             st.session_state["field_category"] = cat_opts[0]
 
         category = st.selectbox(
-            "Category",
+            t("reg_category", "Category"),
             cat_opts,
             key="field_category",
         )
@@ -124,21 +126,21 @@ def address_fields(extracted: dict) -> dict:
         st.session_state["field_pin"] = extracted.get("PIN", "")
 
     address = st.text_area(
-        "Full Residential Address",
+        t("lbl_address", "Full Residential Address"),
         key="field_address",
         placeholder="House/Street, Locality, Landmark",
         height=80,
     )
-    _field_mic_helper("field_address", "Address")
+    _field_mic_helper("field_address", t("lbl_address", "Address"))
 
     c5, c6 = st.columns(2)
 
     with c5:
         city = st.text_input(
-            "City / District",
+            t("lbl_city", "City / District"),
             key="field_city",
         )
-        _field_mic_helper("field_city", "City")
+        _field_mic_helper("field_city", t("lbl_city", "City"))
 
     with c6:
         state_val = extracted.get("State", INDIAN_STATES[0])
@@ -146,17 +148,17 @@ def address_fields(extracted: dict) -> dict:
             st.session_state["field_state"] = state_val if state_val in INDIAN_STATES else INDIAN_STATES[0]
 
         state = st.selectbox(
-            "State of Domicile",
+            t("reg_state", "State of Domicile"),
             INDIAN_STATES,
             key="field_state",
         )
 
     pin = st.text_input(
-        "PIN Code",
+        t("lbl_pin", "PIN Code"),
         key="field_pin",
         placeholder="6-digit PIN code",
     )
-    _field_mic_helper("field_pin", "PIN Code")
+    _field_mic_helper("field_pin", t("lbl_pin", "PIN Code"))
 
     return {
         "Address":  address,
@@ -180,18 +182,18 @@ def academic_fields(extracted: dict) -> dict:
 
     with c7:
         college = st.text_input(
-            "College / Institution",
+            t("lbl_college", "College / Institution"),
             key="field_college",
             placeholder="e.g. BIT Mesra / Jaipur National University",
         )
-        _field_mic_helper("field_college", "College")
+        _field_mic_helper("field_college", t("lbl_college", "College"))
 
     with c8:
         course = st.text_input(
-            "Course Name",
+            t("lbl_course", "Course Name"),
             key="field_course",
         )
-        _field_mic_helper("field_course", "Course")
+        _field_mic_helper("field_course", t("lbl_course", "Course"))
 
     c9, c10 = st.columns(2)
 
@@ -202,18 +204,18 @@ def academic_fields(extracted: dict) -> dict:
 
     with c9:
         year = st.selectbox(
-            "Current Academic Year",
+            t("lbl_year", "Current Academic Year"),
             year_opts,
             key="field_year",
         )
 
     with c10:
         percentage = st.text_input(
-            "Percentage / CGPA",
+            t("lbl_percentage", "Percentage / CGPA"),
             key="field_percentage",
             placeholder="e.g. 85.5% or 8.8 CGPA",
         )
-        _field_mic_helper("field_percentage", "Percentage")
+        _field_mic_helper("field_percentage", t("lbl_percentage", "Percentage"))
 
     return {
         "College":           college,
@@ -234,10 +236,10 @@ def financial_contact_fields(extracted: dict) -> dict:
         st.session_state["field_email"] = extracted.get("Email", "")
 
     income = st.text_input(
-        "Annual Family Income (₹)",
+        t("lbl_income", "Annual Family Income (₹)"),
         key="field_income",
     )
-    _field_mic_helper("field_income", "Annual Income")
+    _field_mic_helper("field_income", t("lbl_income", "Annual Income"))
 
     if income and income.replace(",", "").isdigit():
         amt = int(income.replace(",", ""))
@@ -248,23 +250,23 @@ def financial_contact_fields(extracted: dict) -> dict:
 
     with c11:
         phone = st.text_input(
-            "Mobile Number",
+            t("reg_phone", "Mobile Number"),
             key="field_phone",
             placeholder="10-digit mobile number",
         )
         if not phone:
             warning_inline("Required for SMS tracking & OTP")
-        _field_mic_helper("field_phone", "Phone Number")
+        _field_mic_helper("field_phone", t("reg_phone", "Phone Number"))
 
     with c12:
         email = st.text_input(
-            "Email Address",
+            t("reg_email", "Email Address"),
             key="field_email",
             placeholder="e.g. student@example.com",
         )
         if not email:
             warning_inline("Required for digital receipt & acknowledgment")
-        _field_mic_helper("field_email", "Email Address")
+        _field_mic_helper("field_email", t("reg_email", "Email Address"))
 
     return {
         "Annual Family Income": income,
