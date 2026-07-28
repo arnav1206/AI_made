@@ -3,9 +3,11 @@ utils/eligibility_engine.py
 ============================
 Formitra Eligibility Engine.
 Evaluates user's extracted data against top Indian government scholarship schemes.
+100% Multilingual translation support via t().
 """
 
 from __future__ import annotations
+from utils.translations import t
 
 
 def evaluate_eligibility(extracted_data: dict) -> list[dict]:
@@ -24,45 +26,44 @@ def evaluate_eligibility(extracted_data: dict) -> list[dict]:
     """
     raw_income = extracted_data.get("Income", "0")
     try:
-        income = float(raw_income.replace(",", "").replace("₹", ""))
+        income = float(str(raw_income).replace(",", "").replace("₹", ""))
     except ValueError:
         income = 150000.0
 
     state = extracted_data.get("State", "General")
-    course = extracted_data.get("Course", "Degree")
 
     schemes = [
         {
             "id": "post_matric",
-            "title": "Post-Matric Scholarship (SC/ST/OBC/EBC)",
+            "title": t("scheme_0_title", "Post-Matric Scholarship (SC/ST/OBC/EBC)"),
             "limit": 250000.0,
-            "badge": "Central Government",
+            "badge": t("badge_central_govt", "Central Government"),
             "badge_color": "#FF7A00",
-            "desc": "Full fee waiver and maintenance allowance for post-matric students.",
+            "desc": t("scheme_0_desc", "Full fee waiver and maintenance allowance for post-matric students."),
         },
         {
             "id": "central_sector",
-            "title": "Central Sector Scheme for College/University Students",
+            "title": t("scheme_1_title", "Central Sector Scheme for College/University Students"),
             "limit": 450000.0,
-            "badge": "Ministry of Education",
+            "badge": t("badge_min_edu", "Ministry of Education"),
             "badge_color": "#2563EB",
-            "desc": "₹12,000 per annum for graduation studies based on academic performance.",
+            "desc": t("scheme_1_desc", "₹12,000 per annum for graduation studies based on academic performance."),
         },
         {
             "id": "pm_yasasvi",
-            "title": "PM-YASASVI Scholarship Scheme",
+            "title": t("scheme_pm_yasasvi_title", "PM-YASASVI Scholarship Scheme"),
             "limit": 250000.0,
-            "badge": "PM Welfare Scheme",
+            "badge": t("badge_pm_welfare", "PM Welfare Scheme"),
             "badge_color": "#059669",
-            "desc": "Top class education scholarship for OBC, EBC and DNT students.",
+            "desc": t("scheme_pm_yasasvi_desc", "Top class education scholarship for OBC, EBC and DNT students."),
         },
         {
             "id": "state_merit",
-            "title": f"{state if state != '— Select —' else 'State'} Merit Scholarship Scheme",
+            "title": t("scheme_3_title", f"{state if state != '— Select —' else 'State'} Merit Scholarship Scheme"),
             "limit": 600000.0,
-            "badge": "State Scholarship",
+            "badge": t("badge_state_scholarship", "State Scholarship"),
             "badge_color": "#7C3AED",
-            "desc": "Merit-cum-means assistance for degree and diploma courses.",
+            "desc": t("scheme_3_desc", "Merit-cum-means assistance for degree and diploma courses."),
         },
     ]
 
@@ -71,11 +72,11 @@ def evaluate_eligibility(extracted_data: dict) -> list[dict]:
         if income <= s["limit"]:
             eligible = True
             score = 100 if income <= (s["limit"] * 0.6) else 85
-            reason = f"Annual family income ₹{int(income):,} is below the ₹{int(s['limit']):,} threshold."
+            reason = f"{t('lbl_income', 'Annual family income')} ₹{int(income):,} <= ₹{int(s['limit']):,}."
         else:
             eligible = False
             score = 40
-            reason = f"Annual income ₹{int(income):,} exceeds the maximum limit of ₹{int(s['limit']):,}."
+            reason = f"{t('lbl_income', 'Annual income')} ₹{int(income):,} > ₹{int(s['limit']):,}."
 
         results.append({
             "title": s["title"],

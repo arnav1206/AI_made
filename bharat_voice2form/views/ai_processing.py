@@ -88,7 +88,7 @@ def render() -> None:
     st.markdown(
         f'<div class="card" style="border-left:4px solid #FF7A00;">'
         f'<div style="font-weight:800;font-size:0.85rem;color:#FF7A00;margin-bottom:0.4rem;">'
-        f'🎙️ YOUR SPEECH TRANSCRIPT USED</div>'
+        f'{t("transcript_used_hdr")}</div>'
         f'<div style="font-size:0.95rem;line-height:1.7;color:{title_color};font-weight:500;">{transcript}</div>'
         f'</div>',
         unsafe_allow_html=True,
@@ -115,23 +115,23 @@ def render() -> None:
         f'<div style="display:flex;align-items:center;gap:0.75rem;">'
         f'<span style="font-size:1.8rem;">✅</span>'
         f'<div><div style="font-weight:800;font-size:1.1rem;color:{banner_title};">'
-        f'Voice Information Processed Successfully!</div>'
+        f'{t("voice_proc_success")}</div>'
         f'<div style="font-size:0.9rem;color:{banner_text};margin-top:0.2rem;">'
-        f'Extracted <b>{len(provided_fields)} fields</b> from your speech audio. '
-        f'<b>{len(missing_fields)} fields</b> require manual verification.</div>'
+        f'Extracted <b>{len(provided_fields)} fields</b>. '
+        f'<b>{len(missing_fields)} fields</b> require verification.</div>'
         f'</div></div></div></div>',
         unsafe_allow_html=True,
     )
 
     # ── Formitra Eligibility Finder Card ───────────────────────────
-    st.markdown("### 🏆 Formitra Scholarship Eligibility Finder")
+    st.markdown(f'### 🏆 {t("eligibility_finder_title")}')
     eligibility_list = evaluate_eligibility(extracted)
     eligible_count   = sum(1 for e in eligibility_list if e["eligible"])
 
     st.markdown(
         f'<div style="background:{matched_bg};border:1px solid {matched_border};border-radius:14px;padding:1rem;margin-bottom:1.25rem;">'
         f'<div style="font-weight:800;color:{matched_txt};font-size:0.98rem;">'
-        f'🎯 Matched {eligible_count} Govt Scholarship Schemes for your profile!</div>'
+        f'🎯 Matched {eligible_count} Govt Scholarship Schemes!</div>'
         f'</div>',
         unsafe_allow_html=True,
     )
@@ -141,7 +141,7 @@ def render() -> None:
         target_col = col_e1 if idx % 2 == 0 else col_e2
         badge_bg   = badge_bg_elig if e["eligible"] else badge_bg_inel
         badge_txt  = badge_txt_elig if e["eligible"] else badge_txt_inel
-        status_tag = "ELIGIBLE ✅" if e["eligible"] else "INELIGIBLE ❌"
+        status_tag = t("tag_eligible") if e["eligible"] else t("tag_ineligible")
 
         with target_col:
             st.markdown(
@@ -172,7 +172,7 @@ def render() -> None:
     tts_script = " ".join(speech_summary_parts)
 
     st.markdown(f'### {t("voice_assist_title")}')
-    render_voice_assistant_player(text=tts_script, language=language, label=f"🔊 Listen to Voice Assist ({language})")
+    render_voice_assistant_player(text=tts_script, language=language, label=f"🔊 {t('voice_assist_title')} ({language})")
 
     spacer()
 
