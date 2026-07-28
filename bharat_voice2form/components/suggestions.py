@@ -2,11 +2,7 @@
 components/suggestions.py
 =========================
 AI Suggestions panel component rendered alongside the auto-fill form.
-
-To update suggestion logic when Gemma is integrated:
-  - Replace the static AI_SUGGESTIONS list in utils/constants.py
-    with dynamically generated suggestions from gemma_processor output.
-  - Call render_panel(suggestions=dynamic_list) to override defaults.
+100% Multilingual translation support via t().
 """
 
 from __future__ import annotations
@@ -15,7 +11,7 @@ import streamlit as st
 
 from components.cards import suggestion_card
 from components.progress import completion_meter
-from utils.constants import AI_SUGGESTIONS
+from utils.translations import t
 
 
 def render_panel(
@@ -25,27 +21,37 @@ def render_panel(
 ) -> None:
     """
     Render the full AI Suggestions panel.
-
-    Parameters
-    ----------
-    suggestions : list[dict] | None
-        Override the default suggestion list.
-        Each dict must have keys: icon, title, body, color.
-    extracted : dict | None
-        AI-extracted data dict — used to compute the completion meter.
-        If None, detected count defaults to 0.
-    total_fields : int
-        Total number of fields in the form (for the completion meter).
     """
     st.markdown(
-        '<div style="font-size:1.1rem;font-weight:700;color:#111827;margin-bottom:0.75rem;">'
-        '🤖 AI Suggestions</div>'
-        '<div style="font-size:0.85rem;color:#6B7280;margin-bottom:1rem;">'
-        'Gemma recommends the following</div>',
+        f'<div style="font-size:1.1rem;font-weight:700;color:#FF7A00;margin-bottom:0.4rem;">'
+        f'{t("ai_suggestions_title")}</div>'
+        f'<div style="font-size:0.85rem;opacity:0.8;margin-bottom:1rem;">'
+        f'{t("ai_suggestions_sub")}</div>',
         unsafe_allow_html=True,
     )
 
-    items = suggestions or AI_SUGGESTIONS
+    default_suggestions = [
+        {
+            "icon": "🎓",
+            "title": t("sug_0_title", "State Domicile Scholarship Match"),
+            "body": t("sug_0_body", "Based on your address state, you qualify for State Merit & Domicile Fee Concessions."),
+            "color": "#FF7A00",
+        },
+        {
+            "icon": "💰",
+            "title": t("sug_1_title", "Income Certificate Requirement"),
+            "body": t("sug_1_body", "Ensure your Tehsildar-issued Income Certificate is updated for FY 2025-26."),
+            "color": "#059669",
+        },
+        {
+            "icon": "🏛️",
+            "title": t("sug_2_title", "Bank Account Seeding Notice"),
+            "body": t("sug_2_body", "Your bank account must be Aadhaar-seeded for direct DBT scholarship transfer."),
+            "color": "#2563EB",
+        },
+    ]
+
+    items = suggestions or default_suggestions
     for s in items:
         suggestion_card(
             icon=s["icon"],

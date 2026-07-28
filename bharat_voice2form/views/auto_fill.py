@@ -2,6 +2,7 @@
 views/auto_fill.py
 ==================
 Auto-filled scholarship form with AI Suggestions panel & Missing Fields Voice Prompter.
+100% Multilingual translation support via t().
 """
 
 import streamlit as st
@@ -31,11 +32,11 @@ def render() -> None:
 
     # ── Missing Required Fields Detector & AI Voice Assistant ──────
     required_map = [
-        ("field_name", "Full Name", "आवेदक का नाम"),
-        ("field_dob", "Date of Birth", "जन्मतिथि"),
-        ("field_income", "Annual Family Income", "वार्षिक पारिवारिक आय"),
-        ("field_state", "State", "राज्य"),
-        ("field_college", "Institute Name", "संस्थान का नाम"),
+        ("field_name", "Full Name", t("reg_name", "Full Name")),
+        ("field_dob", "Date of Birth", t("lbl_dob", "Date of Birth")),
+        ("field_income", "Annual Family Income", t("lbl_income", "Annual Family Income")),
+        ("field_state", "State", t("reg_state", "State")),
+        ("field_college", "Institute Name", t("lbl_college", "Institute Name")),
     ]
 
     missing_keys = []
@@ -74,9 +75,9 @@ def render() -> None:
 
         c_prompt1, c_prompt2 = st.columns([2, 1])
         with c_prompt1:
-            render_voice_assistant_player(text=tts_prompt, language=language, label=f"🔊 Listen to AI Missing Fields Request ({language})")
+            render_voice_assistant_player(text=tts_prompt, language=language, label=f"🔊 {t('listen_missing_req')} ({language})")
         with c_prompt2:
-            if st.button("🎙️ Dictate Missing Fields →", use_container_width=True, type="primary"):
+            if st.button(t("dictate_missing_btn"), use_container_width=True, type="primary"):
                 session.navigate("voice_input")
 
         spacer(0.5)
