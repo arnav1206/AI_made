@@ -3,6 +3,7 @@ components/progress.py
 =======================
 Step-progress bar component for top of pages, plus form completion meter.
 100% Multilingual translation support via t().
+Inline CSS flexbox layout guarantees horizontal rendering across all themes & viewports.
 """
 
 from __future__ import annotations
@@ -22,27 +23,54 @@ _STEPS = [
 
 def step_progress_bar(current_step: int = 1) -> None:
     """
-    Render horizontal 6-step progress bar.
+    Render horizontal 6-step progress bar with explicit inline CSS flexbox layout.
     """
+    is_dark = st.session_state.get("dark_mode", False)
+
     steps_html = ""
     for i, step_key in enumerate(_STEPS, start=1):
-        step_lbl = t(step_key)
+        step_lbl = t(step_key, f"{i}. Step")
+
         if i < current_step:
-            cls   = "step-item step-done"
-            badge = "✓"
+            bg_num   = "#10B981"
+            txt_num  = "#FFFFFF"
+            txt_lbl  = "#34D399" if is_dark else "#059669"
+            badge    = "✓"
+            border_c = "#10B981"
         elif i == current_step:
-            cls   = "step-item step-active"
-            badge = str(i)
+            bg_num   = "#FF7A00"
+            txt_num  = "#FFFFFF"
+            txt_lbl  = "#FDBA74" if is_dark else "#C2410C"
+            badge    = str(i)
+            border_c = "#FF7A00"
         else:
-            cls   = "step-item step-todo"
-            badge = str(i)
+            bg_num   = "rgba(148, 163, 184, 0.25)" if is_dark else "#E2E8F0"
+            txt_num  = "#94A3B8" if is_dark else "#64748B"
+            txt_lbl  = "#64748B" if is_dark else "#64748B"
+            badge    = str(i)
+            border_c = "transparent"
 
-        steps_html += f'<div class="{cls}"><div class="step-num">{badge}</div><div class="step-label">{step_lbl}</div></div>'
+        steps_html += (
+            f'<div style="display:flex;flex-direction:column;align-items:center;gap:0.35rem;flex:1;text-align:center;">'
+            f'<div style="width:32px;height:32px;border-radius:50%;background:{bg_num};color:{txt_num};'
+            f'display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;'
+            f'border:2px solid {border_c};box-shadow:0 2px 6px rgba(0,0,0,0.12);">{badge}</div>'
+            f'<div style="font-size:0.8rem;font-weight:700;color:{txt_lbl};white-space:nowrap;">{step_lbl}</div>'
+            f'</div>'
+        )
 
-    st.markdown(
-        f'<div class="progress-bar-container">{steps_html}</div>',
-        unsafe_allow_html=True,
+    container_bg     = "rgba(30, 41, 59, 0.7)" if is_dark else "#F8FAFC"
+    container_border = "1px solid rgba(255, 122, 0, 0.3)" if is_dark else "1px solid #E2E8F0"
+
+    full_html = (
+        f'<div style="display:flex;justify-content:space-between;align-items:center;width:100%;'
+        f'background:{container_bg};border:{container_border};border-radius:16px;'
+        f'padding:0.85rem 1rem;margin-bottom:1.5rem;box-shadow:0 4px 12px rgba(0,0,0,0.05);">'
+        f'{steps_html}'
+        f'</div>'
     )
+
+    st.markdown(full_html, unsafe_allow_html=True)
 
 
 def completion_meter(detected: int, total: int = 15, label: str = "") -> None:

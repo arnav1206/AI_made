@@ -1387,6 +1387,39 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
         "Malayalam": "ഭാരത് വോയ്‌സ്2ഫോം — AI അപേക്ഷ",
     },
 
+
+    # ── Step Progress Bar Keys ──────────────────────────────────────
+    "step_1": {
+        "English": "1. Select Form", "Hindi": "1. फॉर्म चुनें", "Odia": "1. ଫର୍ମ ବାଛନ୍ତୁ",
+        "Tamil": "1. படிவம் தேர்வு", "Telugu": "1. ఫారమ్ ఎంపిక", "Bengali": "1. ফর্ম নির্বাচন",
+        "Marathi": "1. फॉर्म निवडा", "Kannada": "1. ಫಾರ್ಮ್ ಆಯ್ಕೆ", "Malayalam": "1. ഫോം തിരഞ്ഞെടുക്കുക",
+    },
+    "step_2": {
+        "English": "2. Voice Input", "Hindi": "2. वॉइस इनपुट", "Odia": "2. ଭଏସ୍ ଇନପୁଟ୍",
+        "Tamil": "2. குரல் உள்ளீடு", "Telugu": "2. వాయిస్ ఇన్‌పుట్", "Bengali": "2. ভয়েস ইনপুট",
+        "Marathi": "2. व्हॉइस इनपुट", "Kannada": "2. ಧ್ವನಿ ಇನ್ಪುಟ್", "Malayalam": "2. വോയ്‌സ് ഇൻപുട്ട്",
+    },
+    "step_3": {
+        "English": "3. AI Processing", "Hindi": "3. एआई प्रोसेसिंग", "Odia": "3. AI ପ୍ରସେସିଂ",
+        "Tamil": "3. AI செயலாக்கம்", "Telugu": "3. AI ప్రాసెసింగ్", "Bengali": "3. এআই প্রসেসিং",
+        "Marathi": "3. AI प्रोसेसिंग", "Kannada": "3. AI ಪ್ರಕ್ರಿಯೆ", "Malayalam": "3. AI പ്രോസസിംഗ്",
+    },
+    "step_4": {
+        "English": "4. Form Review", "Hindi": "4. फॉर्म समीक्षा", "Odia": "4. ଫର୍ମ ସମୀକ୍ଷା",
+        "Tamil": "4. படிவ ஆய்வு", "Telugu": "4. ఫారమ్ సమీక్ష", "Bengali": "4. ফর্ম পর্যালোচনা",
+        "Marathi": "4. फॉर्म पुनरावलोकन", "Kannada": "4. ಫಾರ್ಮ್ ಪರಿಶೀಲನೆ", "Malayalam": "4. ഫോം അവലോകനം",
+    },
+    "step_5": {
+        "English": "5. Preview", "Hindi": "5. पूर्वावलोकन", "Odia": "5. ପୂର୍ବାବଲୋକନ",
+        "Tamil": "5. முன்னோட்டம்", "Telugu": "5. పూర్వవీక్షణం", "Bengali": "5. প্রাকদর্শন",
+        "Marathi": "5. पूर्वदृश्य", "Kannada": "5. ಮುನ್ನೋಟ", "Malayalam": "5. പ്രിവ്യൂ",
+    },
+    "step_6": {
+        "English": "6. Submitted", "Hindi": "6. जमा हुआ", "Odia": "6. ଦାଖଲ ହେଲା",
+        "Tamil": "6. சமர்ப்பிக்கப்பட்டது", "Telugu": "6. సమర్పించబడింది", "Bengali": "6. জমা দেওয়া হয়েছে",
+        "Marathi": "6. सबमिट झाले", "Kannada": "6. ಸಲ್ಲಿಸಲಾಗಿದೆ", "Malayalam": "6. സമർപ്പിച്ചു",
+    },
+
     # ── AI Assistant Expander Header ───────────────────────────────
     "ai_assistant_expander": {
         "English": "🤖 Formitra AI Assistant (Click for Page Help & Voice Guidance)",
