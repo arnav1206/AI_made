@@ -3,12 +3,14 @@ components/web_speech.py
 ========================
 Live streaming speech dictation component.
 Performs real-time HTML5 browser speech-to-text in 8 Indian languages.
+100% Multilingual translation support via t().
 Transcribes live as user speaks, and returns the final transcribed text on stop.
 """
 
 from __future__ import annotations
 
 import streamlit as st
+from utils.translations import t
 
 _LOCALE_MAP: dict[str, str] = {
     "Hindi":     "hi-IN",
@@ -37,6 +39,13 @@ def render_live_speech_dictation(language: str = "Hindi") -> str | None:
         Live transcribed speech text.
     """
     locale = _LOCALE_MAP.get(language, "hi-IN")
+
+    start_btn_txt     = t("start_dictation_btn", "Start Live Dictation")
+    stop_btn_txt      = t("stop_dictation", "Stop & Use Live Speech")
+    tap_start_txt     = t("tap_to_start", "Tap button to start live voice transcription")
+    placeholder_txt   = t("dictation_placeholder", "Live speech text will stream here as you speak...")
+    recording_in_prog = t("recording_in_progress", "🗣️ Live recording in progress... Speak into mic")
+    recording_stopped = t("recording_stopped", "✅ Recording stopped. Live speech captured!")
 
     html_code = f"""
     <!DOCTYPE html>
@@ -114,10 +123,10 @@ def render_live_speech_dictation(language: str = "Hindi") -> str | None:
     <body>
         <div class="dictation-card">
             <button id="recordBtn" class="mic-btn" onclick="toggleDictation()">
-                <span id="micIcon">🎙️</span> <span id="btnText">Start Live Dictation ({language})</span>
+                <span id="micIcon">🎙️</span> <span id="btnText">{start_btn_txt} ({language})</span>
             </button>
-            <div id="statusText" class="status-text">Tap button to start live voice transcription</div>
-            <div id="liveOutput" class="live-box"><em>Live speech text will stream here as you speak...</em></div>
+            <div id="statusText" class="status-text">{tap_start_txt}</div>
+            <div id="liveOutput" class="live-box"><em>{placeholder_txt}</em></div>
         </div>
 
         <script>
@@ -138,8 +147,8 @@ def render_live_speech_dictation(language: str = "Hindi") -> str | None:
                     finalTranscript = '';
                     document.getElementById('recordBtn').classList.add('recording');
                     document.getElementById('micIcon').innerText = '⏹';
-                    document.getElementById('btnText').innerText = 'Stop & Use Live Speech';
-                    document.getElementById('statusText').innerText = '🗣️ Live recording in progress... Speak into mic ({language})';
+                    document.getElementById('btnText').innerText = "{stop_btn_txt}";
+                    document.getElementById('statusText').innerText = "{recording_in_prog} ({language})";
                 }};
 
                 recognition.onresult = function(event) {{
@@ -152,7 +161,7 @@ def render_live_speech_dictation(language: str = "Hindi") -> str | None:
                         }}
                     }}
                     const fullDisplay = finalTranscript + '<span class="interim">' + interimTranscript + '</span>';
-                    document.getElementById('liveOutput').innerHTML = fullDisplay || '<em>Listening...</em>';
+                    document.getElementById('liveOutput').innerHTML = fullDisplay || '<em>...</em>';
 
                     const currentFullText = (finalTranscript + ' ' + interimTranscript).trim();
                     if (currentFullText) {{
@@ -193,8 +202,8 @@ def render_live_speech_dictation(language: str = "Hindi") -> str | None:
                 isRecording = false;
                 document.getElementById('recordBtn').classList.remove('recording');
                 document.getElementById('micIcon').innerText = '🎙️';
-                document.getElementById('btnText').innerText = 'Start Live Dictation ({language})';
-                document.getElementById('statusText').innerText = '✅ Recording stopped. Live speech captured!';
+                document.getElementById('btnText').innerText = "{start_btn_txt} ({language})";
+                document.getElementById('statusText').innerText = "{recording_stopped}";
             }}
         </script>
     </body>
