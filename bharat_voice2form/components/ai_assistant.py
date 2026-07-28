@@ -2,6 +2,7 @@
 components/ai_assistant.py
 ===========================
 Animated Floating AI Assistant Widget for Formitra.
+100% Multilingual translation support via t().
 Renders on every page with page-contextual voice help and interactive guidance.
 """
 
@@ -61,7 +62,7 @@ def render_ai_assistant_widget() -> None:
     tip_en, tip_hi = _PAGE_TIPS.get(current_page, _PAGE_TIPS["home"])
     active_tip = tip_hi if language == "Hindi" else tip_en
 
-    with st.expander("🤖 Formitra AI Assistant (Click for Page Help & Voice Guidance)", expanded=False):
+    with st.expander(t("ai_assistant_expander"), expanded=False):
         c1, c2 = st.columns([1, 4])
         with c1:
             st.markdown(

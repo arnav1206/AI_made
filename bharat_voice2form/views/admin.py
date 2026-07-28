@@ -2,6 +2,7 @@
 views/admin.py
 ==============
 Administrator & Nodal Officer Portal for Formitra.
+100% Multilingual translation support via t().
 Provides Admin Authentication, KPI Analytics, Application Review, Decision Workflow & Data Export.
 """
 
@@ -10,6 +11,7 @@ from __future__ import annotations
 import streamlit as st
 
 from components.layout import tricolour_bar, section_heading, info_box, spacer
+from utils.translations import t
 import utils.auth as auth
 import utils.session as session
 
@@ -17,7 +19,7 @@ import utils.session as session
 def render() -> None:
     tricolour_bar()
 
-    section_heading("🛡️ Formitra Nodal Officer & Admin Portal", "Government scholarship verification engine, voice audit & application processing center")
+    section_heading(t("admin_portal_title"), t("admin_portal_sub"))
 
     # ── Admin Login Gate ──────────────────────────────────────────────
     if not auth.is_admin_logged_in():
@@ -33,23 +35,23 @@ def _render_admin_login_card() -> None:
     c1, c2, c3 = st.columns([1, 2.2, 1])
     with c2:
         st.markdown(
-            '<div class="card" style="border-top:5px solid #2563EB;text-align:center;padding:2rem 1.5rem;">'
-            '<div style="font-size:2.8rem;margin-bottom:0.4rem;">🏛️</div>'
-            '<div style="font-size:1.35rem;font-weight:900;color:#2563EB;">Government Nodal Officer Login</div>'
-            '<div style="font-size:0.88rem;opacity:0.85;margin-top:0.3rem;">'
-            'Authorized access for scholarship verifiers & state department officials.</div>'
-            '</div>',
+            f'<div class="card" style="border-top:5px solid #2563EB;text-align:center;padding:2rem 1.5rem;">'
+            f'<div style="font-size:2.8rem;margin-bottom:0.4rem;">🏛️</div>'
+            f'<div style="font-size:1.35rem;font-weight:900;color:#2563EB;">{t("admin_card_title")}</div>'
+            f'<div style="font-size:0.88rem;opacity:0.85;margin-top:0.3rem;">'
+            f'{t("admin_card_sub")}</div>'
+            f'</div>',
             unsafe_allow_html=True,
         )
 
         admin_user = st.text_input(
-            "Administrator Username",
+            t("admin_username"),
             value="admin",
             placeholder="Enter admin username (e.g. admin)",
             key="admin_username_input",
         )
         admin_pass = st.text_input(
-            "Administrator Password",
+            t("admin_password"),
             value="admin123",
             type="password",
             placeholder="Enter admin password",
@@ -58,7 +60,7 @@ def _render_admin_login_card() -> None:
 
         col_a, col_b = st.columns(2)
         with col_a:
-            if st.button("🔐 Login as Admin →", use_container_width=True, type="primary"):
+            if st.button(t("admin_login_btn"), use_container_width=True, type="primary"):
                 success, msg = auth.admin_login(admin_user, admin_pass)
                 if success:
                     st.toast(msg)
@@ -66,7 +68,7 @@ def _render_admin_login_card() -> None:
                 else:
                     st.error(msg)
         with col_b:
-            if st.button("⚡ Quick Admin Demo Login", use_container_width=True):
+            if st.button(t("admin_demo_btn"), use_container_width=True):
                 auth.admin_login("admin", "admin123")
                 st.toast("Logged in as Admin (Demo Officer)")
                 st.rerun()
@@ -145,7 +147,6 @@ def _render_admin_dashboard() -> None:
     if filter_status != "All Statuses":
         filtered_apps = [a for a in applications if a["status"] == filter_status]
 
-    # Render Clean Inline HTML Applications Table (single-line continuous string)
     table_rows = ""
     for app in filtered_apps:
         table_rows += (
