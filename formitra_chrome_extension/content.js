@@ -158,7 +158,7 @@ function openFloatingFormitraWidget() {
 
     const fields = extractFormFieldsFromText(text);
     const count  = fillPageFormFields(fields);
-    alert(`🎉 Formitra auto-filled ${count} form fields on this form!`);
+    alert(`🎉 Formitra auto-filled ${count} form fields on this Google Form!`);
     modal.style.display = "none";
   });
 }
@@ -178,41 +178,67 @@ function extractFormFieldsFromText(text) {
   else fields["income"] = "150000";
   if (m = text.match(/(\d{10})/)) fields["mobile"] = m[1];
   if (m = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)) fields["email"] = m[1];
+
+  fields["gender"] = "Male";
+  fields["category"] = "General";
+
   return fields;
 }
 
 function fillPageFormFields(fields) {
   let count = 0;
 
-  // ── 1. Specialized Google Forms Engine Scanner ────────────────────
+  // ── 1. Dedicated Google Forms Deep Auto-Fill Engine ────────────────
   const isGoogleForms = window.location.href.includes("docs.google.com/forms");
   if (isGoogleForms) {
-    const gfQuestions = document.querySelectorAll('div[role="listitem"], div[jsmodel], .ge2dfc, .QrT82d, .freebirdFormviewerComponentsQuestionBaseRoot');
+    const gfQuestions = document.querySelectorAll('div[role="listitem"], div[jsmodel], .ge2dfc, .QrT82d, .freebirdFormviewerComponentsQuestionBaseRoot, .o3b8eb');
+    
     gfQuestions.forEach((qContainer) => {
       const titleElem = qContainer.querySelector('.M7eMe, [role="heading"], .HoLwm, .freebirdFormviewerComponentsQuestionBaseHeaderTitle, span');
       if (!titleElem) return;
 
       const qTitle = titleElem.innerText.toLowerCase();
-      const input = qContainer.querySelector('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], textarea, [role="textbox"]');
 
-      if (!input) return;
-
+      // A. Text / Textarea / Rich Text Inputs in Google Forms
+      const textInput = qContainer.querySelector('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], textarea, [role="textbox"]');
+      
       let valToSet = null;
-      if (matchRule(qTitle, ["name", "full name", "applicant name", "candidate name", "नाम"])) valToSet = fields.name;
-      else if (matchRule(qTitle, ["city", "town", "district", "शहर"])) valToSet = fields.city;
+      if (matchRule(qTitle, ["name", "full name", "applicant name", "candidate name", "first name", "last name", "नाम", "पूरा नाम"])) valToSet = fields.name;
+      else if (matchRule(qTitle, ["city", "town", "district", "शहर", "जिला"])) valToSet = fields.city;
       else if (matchRule(qTitle, ["state", "domicile", "राज्य"])) valToSet = fields.state;
-      else if (matchRule(qTitle, ["income", "annual income", "family income", "आय"])) valToSet = fields.income;
-      else if (matchRule(qTitle, ["course", "degree", "program", "पाठ्यक्रम"])) valToSet = fields.course;
-      else if (matchRule(qTitle, ["year", "academic year", "वर्ष"])) valToSet = fields.year;
-      else if (matchRule(qTitle, ["college", "institute", "school", "university", "संस्थान"])) valToSet = fields.college;
-      else if (matchRule(qTitle, ["dob", "date of birth", "birth date", "जन्मतिथि"])) valToSet = fields.dob;
-      else if (matchRule(qTitle, ["mobile", "phone", "contact", "फोन"])) valToSet = fields.mobile;
+      else if (matchRule(qTitle, ["income", "annual income", "family income", "आय", "वार्षिक आय"])) valToSet = fields.income;
+      else if (matchRule(qTitle, ["course", "degree", "program", "branch", "पाठ्यक्रम"])) valToSet = fields.course;
+      else if (matchRule(qTitle, ["year", "academic year", "year of study", "वर्ष"])) valToSet = fields.year;
+      else if (matchRule(qTitle, ["college", "institute", "school", "university", "संस्थान", "कॉलेज"])) valToSet = fields.college;
+      else if (matchRule(qTitle, ["dob", "date of birth", "birth date", "birthdate", "जन्मतिथि"])) valToSet = fields.dob;
+      else if (matchRule(qTitle, ["mobile", "phone", "contact", "फोन", "मोबाइल"])) valToSet = fields.mobile;
       else if (matchRule(qTitle, ["email", "e-mail", "ईमेल"])) valToSet = fields.email;
 
-      if (valToSet !== null && valToSet !== undefined) {
-        setNativeInputValue(input, valToSet);
-        highlightFilledInput(input, valToSet);
+      if (textInput && valToSet !== null && valToSet !== undefined) {
+        setGoogleFormsInputValue(textInput, valToSet);
+        highlightFilledInput(textInput, valToSet);
         count++;
+        return;
+      }
+
+      // B. Radio Buttons / Checkboxes / Options in Google Forms
+      const options = qContainer.querySelectorAll('[role="radio"], [role="checkbox"], [role="option"]');
+      if (options.length > 0) {
+        let targetVal = null;
+        if (matchRule(qTitle, ["gender", "sex", "लिंग"])) targetVal = fields.gender;
+        else if (matchRule(qTitle, ["category", "caste", "वर्ग", "श्रेणी"])) targetVal = fields.category;
+        else if (matchRule(qTitle, ["course", "degree"])) targetVal = fields.course;
+
+        if (targetVal) {
+          options.forEach((opt) => {
+            const optText = opt.innerText || opt.getAttribute("aria-label") || "";
+            if (optText.toLowerCase().includes(targetVal.toLowerCase())) {
+              opt.click();
+              highlightFilledInput(opt, targetVal);
+              count++;
+            }
+          });
+        }
       }
     });
 
@@ -242,7 +268,7 @@ function fillPageFormFields(fields) {
     else if (matchRule(fullSearch, ["email", "e-mail", "ईमेल"])) valToSet = fields.email;
 
     if (valToSet !== null && valToSet !== undefined) {
-      setNativeInputValue(input, valToSet);
+      setGoogleFormsInputValue(input, valToSet);
       highlightFilledInput(input, valToSet);
       count++;
     }
@@ -287,8 +313,8 @@ function getFieldLabelText(element) {
   return labelText;
 }
 
-function setNativeInputValue(element, value) {
-  if (element.tagName.toLowerCase() === "select") {
+function setGoogleFormsInputValue(element, value) {
+  if (element.tagName && element.tagName.toLowerCase() === "select") {
     let matched = false;
     for (let option of element.options) {
       if (option.text.toLowerCase().includes(value.toLowerCase()) || option.value.toLowerCase().includes(value.toLowerCase())) {
@@ -301,25 +327,25 @@ function setNativeInputValue(element, value) {
       element.selectedIndex = 1;
     }
   } else {
-    // Native React & Google Forms internal input setter
-    const valueSetter = Object.getOwnPropertyDescriptor(element, 'value')?.set;
-    const prototypeSetter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(element), 'value')?.set;
+    element.focus();
 
-    if (prototypeSetter && valueSetter !== prototypeSetter) {
-      prototypeSetter.call(element, value);
-    } else if (valueSetter) {
-      valueSetter.call(element, value);
+    // Native Property Value Setter for Google Forms & React
+    const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set ||
+                         Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
+
+    if (nativeSetter) {
+      nativeSetter.call(element, value);
     } else {
       element.value = value;
     }
   }
 
-  // Dispatch events to trigger Google Forms internal JS model update
-  element.dispatchEvent(new Event("input", { bubbles: true }));
-  element.dispatchEvent(new Event("change", { bubbles: true }));
-  element.dispatchEvent(new Event("blur", { bubbles: true }));
-  element.dispatchEvent(new KeyboardEvent("keydown", { key: "a", bubbles: true }));
-  element.dispatchEvent(new KeyboardEvent("keyup", { key: "a", bubbles: true }));
+  // Dispatch full event sequence to update Google Forms JS model (jsaction & jsname)
+  element.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+  element.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+  element.dispatchEvent(new KeyboardEvent("keydown", { key: "a", bubbles: true, composed: true }));
+  element.dispatchEvent(new KeyboardEvent("keyup", { key: "a", bubbles: true, composed: true }));
+  element.dispatchEvent(new Event("blur", { bubbles: true, composed: true }));
 }
 
 function highlightFilledInput(element, value) {
@@ -327,7 +353,7 @@ function highlightFilledInput(element, value) {
   const origShadow = element.style.boxShadow;
 
   element.style.border = "2px dashed #10B981";
-  element.style.boxShadow = "0 0 12px rgba(16, 185, 129, 0.6)";
+  element.style.boxShadow = "0 0 14px rgba(16, 185, 129, 0.7)";
 
   const tooltip = document.createElement("div");
   tooltip.innerText = "✨ Auto-filled by Formitra Voice";
