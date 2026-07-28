@@ -2,6 +2,7 @@
 views/login.py
 ==============
 Initial Login & Authentication Page for Formitra.
+100% Multilingual translation support via t().
 Supports Password/OTP authentication, Reference Number tracking, Guest mode & New Registration.
 """
 
@@ -18,7 +19,7 @@ import utils.session as session
 def render() -> None:
     tricolour_bar()
 
-    section_heading("🔐 Welcome to Formitra — Please Log In", "Authenticate your applicant identity to start AI voice form filling & track applications")
+    section_heading(t("login_heading"), t("login_sub"))
 
     if auth.is_logged_in():
         user = auth.get_logged_in_user()
@@ -36,7 +37,7 @@ def render() -> None:
 
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("📋 Select Scholarship Scheme →", use_container_width=True, type="primary"):
+            if st.button(f'📋 {t("select_form")} →', use_container_width=True, type="primary"):
                 session.navigate("form_selection")
         with col2:
             if st.button("🚪 Logout Account", use_container_width=True):
@@ -50,33 +51,33 @@ def render() -> None:
     c1, c2, c3 = st.columns([1, 2.4, 1])
     with c2:
         st.markdown(
-            '<div class="card" style="border-top:5px solid #FF7A00;text-align:center;padding:2rem 1.5rem;">'
-            '<div style="font-size:2.8rem;margin-bottom:0.4rem;">🎙️</div>'
-            '<div style="font-size:1.35rem;font-weight:900;color:#FF7A00;">Formitra Portal Authentication</div>'
-            '<div style="font-size:0.88rem;opacity:0.85;margin-top:0.3rem;line-height:1.5;">'
-            'Sign in using your Mobile Number, Email, or Reference Code to begin.</div>'
-            '</div>',
+            f'<div class="card" style="border-top:5px solid #FF7A00;text-align:center;padding:2rem 1.5rem;">'
+            f'<div style="font-size:2.8rem;margin-bottom:0.4rem;">🎙️</div>'
+            f'<div style="font-size:1.35rem;font-weight:900;color:#FF7A00;">{t("login_card_title")}</div>'
+            f'<div style="font-size:0.88rem;opacity:0.85;margin-top:0.3rem;line-height:1.5;">'
+            f'{t("login_card_sub")}</div>'
+            f'</div>',
             unsafe_allow_html=True,
         )
 
-        tab1, tab2, tab3 = st.tabs(["📱 Password / OTP Login", "⚡ Quick Demo Mode", "🔍 Reference Code"])
+        tab1, tab2, tab3 = st.tabs([t("login_tab_pwd"), t("login_tab_demo"), t("login_tab_ref")])
 
         with tab1:
             identifier = st.text_input(
-                "Mobile Number / Email Address",
+                t("login_id_label"),
                 value="9876543210",
                 placeholder="e.g. 9876543210 or rahul@example.com",
                 key="login_identifier",
             )
             password = st.text_input(
-                "Password",
+                t("login_pwd_label"),
                 value="password123",
                 type="password",
                 placeholder="Enter your account password",
                 key="login_password",
             )
 
-            if st.button("🔐 Login to Formitra →", use_container_width=True, type="primary"):
+            if st.button(t("login_submit_btn"), use_container_width=True, type="primary"):
                 if identifier.strip() and password.strip():
                     success, msg = auth.login(identifier, password)
                     if success:
@@ -94,14 +95,14 @@ def render() -> None:
                 '</div>',
                 unsafe_allow_html=True,
             )
-            if st.button("🚀 Log In as Demo Applicant (Rahul Sharma)", use_container_width=True, type="primary"):
+            if st.button(t("login_demo_btn"), use_container_width=True, type="primary"):
                 auth.login("9876543210", "password123")
                 st.toast("Logged in as Rahul Sharma (Demo Account)")
                 session.navigate("home")
 
         with tab3:
             ref_code = st.text_input(
-                "Formitra Application Reference Code",
+                t("app_number"),
                 placeholder="e.g. FMT-2026-89412",
                 key="login_ref_code",
             )
@@ -114,12 +115,12 @@ def render() -> None:
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
-            '<div style="text-align:center;font-size:0.9rem;">'
-            'Don\'t have a Formitra account yet?'
-            '</div>',
+            f'<div style="text-align:center;font-size:0.9rem;">'
+            f'{t("login_no_acct")}'
+            f'</div>',
             unsafe_allow_html=True,
         )
-        if st.button("📝 Create New Account (Register) →", use_container_width=True):
+        if st.button(t("login_create_acct"), use_container_width=True):
             session.navigate("register")
 
     spacer()

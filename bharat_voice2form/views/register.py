@@ -2,6 +2,7 @@
 views/register.py
 =================
 Registration / Account Creation Page for Formitra.
+100% Multilingual translation support via t().
 Allows new applicants to create an account profile.
 """
 
@@ -11,6 +12,7 @@ import streamlit as st
 
 from components.layout import tricolour_bar, section_heading, info_box, spacer
 from utils.constants   import INDIAN_STATES
+from utils.translations import t
 import utils.auth as auth
 import utils.session as session
 
@@ -18,22 +20,22 @@ import utils.session as session
 def render() -> None:
     tricolour_bar()
 
-    section_heading("📝 Register Formitra Applicant Account", "Create your official profile for automated voice form filling")
+    section_heading(t("reg_heading"), t("reg_sub"))
 
     c1, c2, c3 = st.columns([1, 2.4, 1])
     with c2:
         st.markdown(
-            '<div class="card" style="border-top:4px solid #138808;text-align:center;">'
-            '<div style="font-size:2.2rem;margin-bottom:0.3rem;">📋</div>'
-            '<div style="font-size:1.2rem;font-weight:900;color:#138808;">New Student Registration</div>'
-            '<div style="font-size:0.85rem;opacity:0.8;margin-top:0.2rem;">'
-            'Your profile info will automatically pre-fill all scholarship forms.</div>'
-            '</div>',
+            f'<div class="card" style="border-top:4px solid #138808;text-align:center;">'
+            f'<div style="font-size:2.2rem;margin-bottom:0.3rem;">📋</div>'
+            f'<div style="font-size:1.2rem;font-weight:900;color:#138808;">{t("reg_card_title")}</div>'
+            f'<div style="font-size:0.85rem;opacity:0.8;margin-top:0.2rem;">'
+            f'{t("reg_card_sub")}</div>'
+            f'</div>',
             unsafe_allow_html=True,
         )
 
         name = st.text_input(
-            "Full Applicant Name *",
+            t("reg_name"),
             placeholder="e.g. Rahul Sharma",
             key="reg_name",
         )
@@ -41,13 +43,13 @@ def render() -> None:
         col_p, col_e = st.columns(2)
         with col_p:
             phone = st.text_input(
-                "Mobile Number *",
+                t("reg_phone"),
                 placeholder="10-digit mobile number",
                 key="reg_phone",
             )
         with col_e:
             email = st.text_input(
-                "Email Address *",
+                t("reg_email"),
                 placeholder="e.g. rahul@example.com",
                 key="reg_email",
             )
@@ -55,32 +57,32 @@ def render() -> None:
         col_s, col_c = st.columns(2)
         with col_s:
             state = st.selectbox(
-                "State of Domicile",
+                t("reg_state"),
                 INDIAN_STATES,
                 index=19 if len(INDIAN_STATES) > 19 else 0, # Rajasthan
                 key="reg_state",
             )
         with col_c:
             category = st.selectbox(
-                "Category",
+                t("reg_category"),
                 ["General", "OBC", "SC", "ST", "EWS / EBC"],
                 key="reg_category",
             )
 
         pass1 = st.text_input(
-            "Create Password *",
+            t("reg_pass1"),
             type="password",
             placeholder="At least 6 characters",
             key="reg_pass1",
         )
         pass2 = st.text_input(
-            "Confirm Password *",
+            t("reg_pass2"),
             type="password",
             placeholder="Re-enter password",
             key="reg_pass2",
         )
 
-        if st.button("🚀 Complete Registration & Continue →", use_container_width=True, type="primary"):
+        if st.button(t("reg_submit"), use_container_width=True, type="primary"):
             if not name.strip():
                 st.error("Please enter your Full Name.")
             elif not phone.strip() or len(phone.strip()) < 10:
@@ -106,12 +108,12 @@ def render() -> None:
 
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown(
-            '<div style="text-align:center;font-size:0.9rem;">'
-            'Already registered with Formitra?'
-            '</div>',
+            f'<div style="text-align:center;font-size:0.9rem;">'
+            f'{t("reg_has_acct")}'
+            f'</div>',
             unsafe_allow_html=True,
         )
-        if st.button("🔑 Log in to Existing Account", use_container_width=True):
+        if st.button(t("reg_login_link"), use_container_width=True):
             session.navigate("login")
 
     spacer()
