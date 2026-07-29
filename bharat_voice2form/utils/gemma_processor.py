@@ -357,8 +357,10 @@ def _extract_gemma4(transcript: str, language: str) -> ExtractionResult:
         try:
             response = client.models.generate_content(
                 model=model_id,
-                contents=prompt,
+                contents=f"Transcript language: {language}\nTranscript:\n{transcript}",
                 config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
+                    response_mime_type="application/json",
                     temperature=0.1,
                     max_output_tokens=512,
                 ),
