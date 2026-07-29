@@ -132,10 +132,37 @@ def _render_admin_dashboard() -> None:
 
     spacer(0.5)
 
-    # ── Application Review Table ──────────────────────────────────────
+    # ── Application Review Table & Batch Export ──────────────────────
     st.markdown('<div style="font-weight:800;font-size:1.15rem;margin-bottom:0.75rem;">📋 Master Application Audit Table</div>', unsafe_allow_html=True)
 
     applications = auth.get_submitted_applications()
+
+    import json
+    import pandas as pd
+
+    c_exp1, c_exp2 = st.columns([1, 1])
+    with c_exp1:
+        df = pd.DataFrame(applications)
+        csv_bytes = df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            "📥 Export All Applications (CSV)",
+            data=csv_bytes,
+            file_name="formitra_submitted_applications.csv",
+            mime="text/csv",
+            use_container_width=True,
+            type="primary",
+        )
+    with c_exp2:
+        json_bytes = json.dumps(applications, indent=2).encode('utf-8')
+        st.download_button(
+            "📦 Export All Applications (JSON)",
+            data=json_bytes,
+            file_name="formitra_submitted_applications.json",
+            mime="application/json",
+            use_container_width=True,
+        )
+
+    spacer(0.3)
 
     filter_status = st.selectbox(
         "Filter by Application Status",

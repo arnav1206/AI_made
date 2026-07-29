@@ -16,6 +16,7 @@ from components.web_speech import render_live_speech_dictation
 from utils.translations    import t, get_available_languages
 from utils.speech_to_text  import transcribe, ENGINE
 from utils.lang_detector   import detect_language
+from utils.voice_assist    import render_voice_assistant_player
 import utils.session as session
 
 
@@ -153,8 +154,15 @@ def render() -> None:
         )
         session.set("transcript", transcript)
 
+        if transcript.strip():
+            render_voice_assistant_player(
+                text=transcript,
+                language=lang,
+                label=f"🔊 Listen to Transcript in {lang}",
+            )
+
         st.markdown(
-            f'<div style="font-size:0.8rem;color:{sub_color};margin-bottom:0.75rem;">'
+            f'<div style="font-size:0.8rem;color:{sub_color};margin-bottom:0.75rem;margin-top:0.5rem;">'
             f'🔧 Active STT Engine: <code style="background:rgba(255,122,0,0.1);padding:0.2rem 0.5rem;border-radius:4px;">'
             f'{ENGINE} / Live WebSpeech</code></div>',
             unsafe_allow_html=True,

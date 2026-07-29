@@ -24,8 +24,18 @@ document.addEventListener("DOMContentLoaded", () => {
   let recognition = null;
   let isRecording = false;
   
-  // Transient single-session questions (deleted after auto-fill / session end)
+  // Transient single-session questions (persisted via chrome.storage.local)
   let importedQuestions = [];
+
+  chrome.storage.local.get(["storedFormitraQuestions"], (data) => {
+    if (data && data.storedFormitraQuestions && data.storedFormitraQuestions.length > 0) {
+      importedQuestions = data.storedFormitraQuestions;
+      if (typeof renderImportedQuestions === "function") {
+        renderImportedQuestions(importedQuestions);
+        if (questionsCard) questionsCard.classList.remove("hidden");
+      }
+    }
+  });
 
   // Grant Mic Button Handler
   if (grantMicBtn) {
@@ -264,6 +274,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderImportedQuestions(questions) {
+    if (chrome.storage && chrome.storage.local) {
+      chrome.storage.local.set({ storedFormitraQuestions: questions });
+    }
     questionsCount.innerText = questions.length;
     questionsList.innerHTML = "";
 

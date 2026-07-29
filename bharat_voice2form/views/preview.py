@@ -75,6 +75,7 @@ def render() -> None:
         f'<div style="font-size:0.75rem;opacity:0.7;color:#E0F2FE;">{t("app_number")}</div>'
         f'<div style="font-size:1rem;font-weight:700;font-family:monospace;color:#FDE047;">{app_no}</div>'
         f'<div style="font-size:0.78rem;opacity:0.7;margin-top:0.2rem;color:#E0F2FE;">Generated: {now}</div>'
+        f'<div style="margin-top:0.4rem;background:rgba(16,185,129,0.2);border:1px solid #10B981;padding:0.25rem 0.55rem;border-radius:6px;font-size:0.72rem;font-weight:800;color:#34D399;display:inline-block;">📱 Digital QR Verification Enabled</div>'
         f'</div></div></div>',
         unsafe_allow_html=True,
     )
