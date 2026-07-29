@@ -121,10 +121,14 @@ function openFloatingFormitraWidget() {
   let pageQuestions = [];
 
   document.getElementById("fmt-scrape-btn").addEventListener("click", () => {
-    pageQuestions = scrapePageQuestions();
     const statusDiv = document.getElementById("fmt-q-status");
     statusDiv.style.display = "block";
-    statusDiv.innerText = `📋 Imported ${pageQuestions.length} questions from Google Form!`;
+    statusDiv.innerText = "⏳ Importing Questions...";
+
+    setTimeout(() => {
+      pageQuestions = scrapePageQuestions();
+      statusDiv.innerText = `📋 Imported ${pageQuestions.length} questions from Google Form!`;
+    }, 200);
   });
 
   document.getElementById("fmt-speak-btn").addEventListener("click", () => {
@@ -195,23 +199,29 @@ function openFloatingFormitraWidget() {
   });
 }
 
-// ── Google Forms & Web Page Deep Question Extractor ────────────────
+// ── Multi-Strategy Google Forms & Web Form Question Extractor ────────
 function scrapePageQuestions() {
   const questions = [];
   const isGoogleForms = window.location.href.includes("docs.google.com/forms");
 
   if (isGoogleForms) {
-    // Primary Google Forms Question Containers & Heading Selectors
+    // Strategy 1: Google Forms Question Heading Elements (.M7eMe, role="heading", etc.)
     const gfHeaders = document.querySelectorAll(
-      '.M7eMe, div[role="listitem"] div[role="heading"] span, div[role="listitem"] [role="heading"], .ge2dfc [role="heading"], .freebirdFormviewerComponentsQuestionBaseHeaderTitle, .HoLwm, .F9iA2e'
+      '.M7eMe, div[role="listitem"] [role="heading"], div[role="heading"] span, [role="heading"], .ge2dfc [role="heading"], .freebirdFormviewerComponentsQuestionBaseHeaderTitle, .HoLwm, .F9iA2e, [data-params], [aria-level="2"], [aria-level="3"]'
     );
 
     gfHeaders.forEach((hElem, idx) => {
       let rawText = hElem.innerText || hElem.textContent || "";
+      if (rawText.includes("\n")) rawText = rawText.split("\n")[0];
       let cleanText = rawText.replace(/\*/g, "").trim();
 
-      // Filter out form main header title or short empty noise
-      if (cleanText && cleanText.length >= 3 && !questions.some(q => q.title.toLowerCase() === cleanText.toLowerCase())) {
+      // Exclude main form title or submit text noise
+      const lower = cleanText.toLowerCase();
+      if (
+        cleanText && cleanText.length >= 2 &&
+        !lower.includes("submit") && !lower.includes("clear form") && !lower.includes("never submit passwords") &&
+        !questions.some(q => q.title.toLowerCase() === lower)
+      ) {
         const parentCard = hElem.closest('div[role="listitem"], div[jsmodel], .ge2dfc, .o3b8eb, div[data-params]') || hElem.parentElement;
         const isReq = parentCard ? (parentCard.innerText.includes("*") || parentCard.querySelector('.codefx, [aria-label*="required"]') !== null) : false;
 
@@ -222,16 +232,29 @@ function scrapePageQuestions() {
         });
       }
     });
+
+    // Strategy 2: Google Forms Input aria-label / title attributes
+    const gfInputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], textarea, [role="textbox"], [role="radio"], [role="checkbox"]');
+    gfInputs.forEach((inp, idx) => {
+      const ariaLbl = (inp.getAttribute("aria-label") || inp.getAttribute("title") || "").replace(/\*/g, "").trim();
+      if (ariaLbl && ariaLbl.length >= 2 && !questions.some(q => q.title.toLowerCase() === ariaLbl.toLowerCase())) {
+        questions.push({
+          id: `gf_inp_${idx}`,
+          title: ariaLbl,
+          required: inp.required || inp.getAttribute("aria-required") === "true",
+        });
+      }
+    });
   }
 
-  // Standard HTML Web Form Input Scanner
+  // Strategy 3: Standard Web Form Inputs
   if (questions.length === 0) {
     const inputs = document.querySelectorAll("input, select, textarea");
     inputs.forEach((inp, idx) => {
       if (inp.type === "hidden" || inp.type === "submit" || inp.type === "button") return;
 
       const labelText  = getFieldLabelText(inp).replace(/\*/g, "").trim();
-      const placeholder = inp.placeholder || inp.name || inp.id || "";
+      const placeholder = inp.placeholder || inp.name || inp.id || inp.getAttribute("aria-label") || "";
       const displayTitle = labelText || placeholder;
 
       if (displayTitle && displayTitle.length >= 2 && !questions.some(q => q.title.toLowerCase() === displayTitle.toLowerCase())) {
@@ -239,6 +262,23 @@ function scrapePageQuestions() {
           id: `inp_q_${idx}`,
           title: displayTitle,
           required: inp.required || labelText.includes("*"),
+        });
+      }
+    });
+  }
+
+  // Strategy 4: Fallback scan all h1-h4 & label tags on page
+  if (questions.length === 0) {
+    const allLabels = document.querySelectorAll("label, h1, h2, h3, h4, legend");
+    allLabels.forEach((lbl, idx) => {
+      let txt = (lbl.innerText || lbl.textContent || "").replace(/\*/g, "").trim();
+      if (txt.includes("\n")) txt = txt.split("\n")[0].trim();
+
+      if (txt && txt.length >= 3 && !questions.some(q => q.title.toLowerCase() === txt.toLowerCase())) {
+        questions.push({
+          id: `lbl_q_${idx}`,
+          title: txt,
+          required: false,
         });
       }
     });

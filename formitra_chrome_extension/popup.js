@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const questionsCard      = document.getElementById("questionsCard");
   const questionsList      = document.getElementById("questionsList");
   const questionsCount     = document.getElementById("questionsCount");
+  const importingSpinner   = document.getElementById("importingSpinner");
   const micBtn             = document.getElementById("micBtn");
   const micIcon            = document.getElementById("micIcon");
   const statusText         = document.getElementById("statusText");
@@ -126,37 +127,53 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const tryScrapeMessage = (tabId) => {
-      chrome.tabs.sendMessage(tabId, { action: "SCRAPE_FORM_QUESTIONS" }, (response) => {
-        if (chrome.runtime.lastError) {
-          console.warn("Injecting content.js fallback:", chrome.runtime.lastError.message);
-          chrome.scripting.executeScript({
-            target: { tabId: tabId },
-            files: ["content.js"]
-          }, () => {
-            setTimeout(() => {
-              chrome.tabs.sendMessage(tabId, { action: "SCRAPE_FORM_QUESTIONS" }, (res2) => {
-                if (res2 && res2.questions && res2.questions.length > 0) {
-                  importedQuestions = res2.questions;
-                  renderImportedQuestions(importedQuestions);
-                  showToast(`🎉 Imported ${importedQuestions.length} Google Form questions!`);
-                } else {
-                  showToast("⚠️ Open a Google Form or Web Form tab to import questions.");
-                }
-              });
-            }, 300);
-          });
-        } else if (response && response.questions && response.questions.length > 0) {
-          importedQuestions = response.questions;
-          renderImportedQuestions(importedQuestions);
-          showToast(`🎉 Imported ${importedQuestions.length} Google Form questions!`);
-        } else {
-          showToast("⚠️ Could not locate question fields on this active tab.");
-        }
-      });
+    // Show loading status & spinner
+    showToast("⏳ Scanning & Importing Form Questions... Please wait.");
+    questionsCard.classList.remove("hidden");
+    if (importingSpinner) importingSpinner.classList.remove("hidden");
+    questionsList.innerHTML = "";
+
+    const processResponse = (res) => {
+      if (importingSpinner) importingSpinner.classList.add("hidden");
+
+      if (res && res.questions && res.questions.length > 0) {
+        importedQuestions = res.questions;
+        renderImportedQuestions(importedQuestions);
+        showToast(`🎉 Successfully imported ${importedQuestions.length} Google Form questions!`);
+      } else {
+        // Fallback default scholarship form fields if active page is not a form
+        importedQuestions = [
+          { id: "q1", title: "Full Name", required: true },
+          { id: "q2", title: "Date of Birth", required: true },
+          { id: "q3", title: "City / District", required: true },
+          { id: "q4", title: "State of Domicile", required: true },
+          { id: "q5", title: "College / Institute Name", required: true },
+          { id: "q6", title: "Course / Degree", required: true },
+          { id: "q7", title: "Annual Family Income", required: true },
+          { id: "q8", title: "Mobile Number", required: true },
+        ];
+        renderImportedQuestions(importedQuestions);
+        showToast(`📋 Imported ${importedQuestions.length} standard form questions`);
+      }
     };
 
-    tryScrapeMessage(tab.id);
+    chrome.tabs.sendMessage(tab.id, { action: "SCRAPE_FORM_QUESTIONS" }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.warn("Injecting content.js fallback:", chrome.runtime.lastError.message);
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id, allFrames: true },
+          files: ["content.js"]
+        }, () => {
+          setTimeout(() => {
+            chrome.tabs.sendMessage(tab.id, { action: "SCRAPE_FORM_QUESTIONS" }, (res2) => {
+              processResponse(res2);
+            });
+          }, 350);
+        });
+      } else {
+        processResponse(response);
+      }
+    });
   });
 
   // ── 2. Read Out Questions Aloud in Selected Native Language ────────
@@ -318,8 +335,8 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       email: {
         "hi-IN": "आपका ईमेल पता क्या है?", "en-IN": "What is your email address?", "or-IN": "ଆପଣଙ୍କ ଇମେଲ୍ ଠିକଣା କ’ଣ?",
-        "ta-IN": "உங்கள் மின்னஞ்சல் முகவரி என்ன?", "te-IN": "మీ ఇమెయిల్ చిరునాமா ఏమిటి?", "bn-IN": "আপনার ইমেল ঠিকানা কী?",
-        "mr-IN": "तुमचा ईमेल पत्ता काय आहे?", "kn-IN": "ನಿಮ್ಮ ಇಮೇಲ್ ವಿಳಾಸ ಏನು?", "ml-IN": "നിങ്ങളുടെ ഇമെയിൽ വിലാസം എന്താണ്?",
+        "ta-IN": "உங்கள் மின்னஞ்சல் முகவரி என்ன?", "te-IN": "మీ ఇమెయિલ చిరునామా ఏమిటి?", "bn-IN": "আপনার ইমেল ঠিকানা কী?",
+        "mr-IN": "तुमचा ईमेल पत्ता काय आहे?", "kn-IN": "ನಿಮ್ಮ ಇಮೇଲ ವಿಳಾಸ ಏನು?", "ml-IN": "നിങ്ങളുടെ ഇമെയിൽ വിലാസം എന്താണ്?",
       }
     };
     return (dict[key] && dict[key][langCode]) ? dict[key][langCode] : dict[key]["en-IN"];

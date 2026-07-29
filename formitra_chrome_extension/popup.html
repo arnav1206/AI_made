@@ -50,10 +50,13 @@
         </div>
       </div>
 
-      <!-- Imported Questions Card -->
+      <!-- Imported Questions Card & Loading Spinner -->
       <div id="questionsCard" class="questions-card hidden">
         <div class="questions-header">
           <span>📋 Imported Form Questions (<span id="questionsCount">0</span>)</span>
+        </div>
+        <div id="importingSpinner" class="hidden" style="text-align:center;padding:12px;color:#FF7A00;font-weight:bold;font-size:12px;">
+          <span class="spinner-ring">⏳</span> Importing & Analyzing Form Questions...
         </div>
         <div id="questionsList" class="questions-list"></div>
       </div>
