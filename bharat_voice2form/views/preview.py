@@ -4,7 +4,7 @@ views/preview.py
 Application preview page — translated via t().
 100% Multilingual translation support.
 Includes live, large-format high-fidelity PDF document receipt card & download option.
-Immune to browser ERR_BLOCKED_BY_CLIENT errors.
+Uses components.html for 100% clean, unblocked native rendering across all browsers.
 """
 
 import base64
@@ -12,6 +12,7 @@ from datetime import datetime
 from pathlib import Path
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from components.layout   import tricolour_bar, section_heading, spacer
 from components.progress import step_progress_bar
@@ -113,9 +114,9 @@ def render() -> None:
         form_title=form_name,
     )
 
-    # ── High-Fidelity Official PDF Receipt Document Card (100% Reliable across all Browsers) ──
+    # ── High-Fidelity Official PDF Receipt Document Card ──
     st.markdown("<br>", unsafe_allow_html=True)
-    with st.expander("📄 Official Form PDF Application Receipt Preview (Full Document View)", expanded=True):
+    with st.expander("📄 Official PDF Application Receipt Preview (Full Document View)", expanded=True):
         logo_b64 = _get_logo_b64()
         logo_tag = f'<img src="data:image/png;base64,{logo_b64}" width="48" height="48" style="border-radius:8px;object-fit:contain;background:#0F172A;padding:2px;" />' if logo_b64 else '<span style="font-size:2rem;">🏛️</span>'
 
@@ -139,58 +140,46 @@ def render() -> None:
         grid_rows = ""
         for idx, (k, v) in enumerate(items):
             bg = "#F8FAFC" if idx % 2 == 0 else "#FFFFFF"
-            grid_rows += f"""
-            <div style="display:flex;justify-content:space-between;padding:0.65rem 1rem;background:{bg};border-bottom:1px solid #E2E8F0;">
-                <span style="font-weight:700;color:#0F172A;font-size:0.9rem;">{k}</span>
-                <span style="font-weight:500;color:#334155;font-size:0.9rem;">{v or "—"}</span>
-            </div>
-            """
+            grid_rows += (
+                f'<div style="display:flex;justify-content:space-between;padding:0.65rem 1rem;background:{bg};border-bottom:1px solid #E2E8F0;">'
+                f'<span style="font-weight:700;color:#0F172A;font-size:0.9rem;">{k}</span>'
+                f'<span style="font-weight:500;color:#334155;font-size:0.9rem;">{v or "—"}</span>'
+                f'</div>'
+            )
 
-        card_html = f"""
-        <div style="background:#FFFFFF;color:#0F172A;border-radius:18px;padding:2rem;border:3px solid #FF7A00;box-shadow:0 15px 45px rgba(255, 122, 0, 0.35);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;margin-top:0.5rem;">
-            <div style="background:#0B132B;color:#FFFFFF;padding:1.25rem 1.5rem;border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:0;">
-                <div style="display:flex;align-items:center;gap:1rem;">
-                    {logo_tag}
-                    <div>
-                        <div style="font-weight:900;font-size:1.1rem;color:#FFFFFF;letter-spacing:-0.3px;">NATIONAL SCHOLARSHIP PORTAL — GOVT OF INDIA</div>
-                        <div style="font-size:0.82rem;color:#CBD5E1;margin-top:0.2rem;">Formitra AI Voice-Assisted Official Application Receipt</div>
-                    </div>
-                </div>
-                <div style="text-align:right;">
-                    <div style="font-size:0.75rem;color:#94A3B8;font-weight:700;">APPLICATION REF NO</div>
-                    <div style="font-size:1.15rem;font-weight:900;color:#FDE047;font-family:monospace;">{app_no}</div>
-                    <div style="font-size:0.75rem;color:#CBD5E1;margin-top:0.1rem;">Date: {now}</div>
-                </div>
-            </div>
-
-            <div style="display:flex;height:4px;margin-bottom:1.25rem;">
-                <div style="flex:1;background:#FF7A00;"></div>
-                <div style="flex:1;background:#FFFFFF;"></div>
-                <div style="flex:1;background:#059669;"></div>
-            </div>
-
-            <div style="font-size:1.1rem;font-weight:800;color:#0F172A;margin-bottom:0.4rem;">
-                📋 Application Details: {form_name}
-            </div>
-            <hr style="border:none;border-top:2px solid #FF7A00;margin-bottom:1.25rem;" />
-
-            <div style="border:1px solid #CBD5E1;border-radius:10px;overflow:hidden;margin-bottom:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
-                {grid_rows}
-            </div>
-
-            <div style="background:#FEF3C7;border:1.5px solid #F59E0B;padding:0.9rem 1.25rem;border-radius:10px;margin-bottom:1.25rem;">
-                <div style="font-weight:800;font-size:0.92rem;color:#92400E;margin-bottom:0.25rem;">📜 Applicant Self-Declaration & Authenticity Verification</div>
-                <div style="font-size:0.85rem;color:#78350F;line-height:1.5;">
-                    I hereby declare that all information provided above is true and correct to the best of my knowledge. I understand that any false statement will disqualify my scholarship application under the National Scholarship Portal rules.
-                </div>
-            </div>
-
-            <div style="text-align:center;padding:0.75rem;background:#F1F5F9;border-radius:8px;font-size:0.85rem;color:#334155;font-weight:700;border:1px dashed #94A3B8;">
-                ✅ Official Formitra Digital Application Receipt | Ref: <b>{app_no}</b> | Verified & Sealed Electronically
-            </div>
-        </div>
-        """
-        st.markdown(card_html, unsafe_allow_html=True)
+        card_html = (
+            f'<!DOCTYPE html><html><head><meta charset="utf-8"/></head><body style="margin:0;padding:10px;background:transparent;">'
+            f'<div style="background:#FFFFFF;color:#0F172A;border-radius:16px;padding:1.5rem;border:3px solid #FF7A00;box-shadow:0 12px 35px rgba(255, 122, 0, 0.35);font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;">'
+            f'<div style="background:#0B132B;color:#FFFFFF;padding:1.25rem 1.5rem;border-radius:12px;display:flex;justify-content:space-between;align-items:center;margin-bottom:0;">'
+            f'<div style="display:flex;align-items:center;gap:1rem;">'
+            f'{logo_tag}'
+            f'<div>'
+            f'<div style="font-weight:900;font-size:1.1rem;color:#FFFFFF;letter-spacing:-0.3px;">NATIONAL SCHOLARSHIP PORTAL — GOVT OF INDIA</div>'
+            f'<div style="font-size:0.82rem;color:#CBD5E1;margin-top:0.2rem;">Formitra AI Voice-Assisted Official Application Receipt</div>'
+            f'</div>'
+            f'</div>'
+            f'<div style="text-align:right;">'
+            f'<div style="font-size:0.75rem;color:#94A3B8;font-weight:700;">APPLICATION REF NO</div>'
+            f'<div style="font-size:1.15rem;font-weight:900;color:#FDE047;font-family:monospace;">{app_no}</div>'
+            f'<div style="font-size:0.75rem;color:#CBD5E1;margin-top:0.1rem;">Date: {now}</div>'
+            f'</div>'
+            f'</div>'
+            f'<div style="display:flex;height:4px;margin-bottom:1.25rem;">'
+            f'<div style="flex:1;background:#FF7A00;"></div>'
+            f'<div style="flex:1;background:#FFFFFF;"></div>'
+            f'<div style="flex:1;background:#059669;"></div>'
+            f'</div>'
+            f'<div style="font-size:1.1rem;font-weight:800;color:#0F172A;margin-bottom:0.4rem;">📋 Application Details: {form_name}</div>'
+            f'<hr style="border:none;border-top:2px solid #FF7A00;margin-bottom:1.25rem;" />'
+            f'<div style="border:1px solid #CBD5E1;border-radius:10px;overflow:hidden;margin-bottom:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">{grid_rows}</div>'
+            f'<div style="background:#FEF3C7;border:1.5px solid #F59E0B;padding:0.9rem 1.25rem;border-radius:10px;margin-bottom:1.25rem;">'
+            f'<div style="font-weight:800;font-size:0.92rem;color:#92400E;margin-bottom:0.25rem;">📜 Applicant Self-Declaration & Authenticity Verification</div>'
+            f'<div style="font-size:0.85rem;color:#78350F;line-height:1.5;">I hereby declare that all information provided above is true and correct to the best of my knowledge. I understand that any false statement will disqualify my scholarship application under the National Scholarship Portal rules.</div>'
+            f'</div>'
+            f'<div style="text-align:center;padding:0.75rem;background:#F1F5F9;border-radius:8px;font-size:0.85rem;color:#334155;font-weight:700;border:1px dashed #94A3B8;">✅ Official Formitra Digital Application Receipt | Ref: <b>{app_no}</b> | Verified & Sealed Electronically</div>'
+            f'</div></body></html>'
+        )
+        components.html(card_html, height=720, scrolling=True)
 
     # ── Action buttons ─────────────────────────────────────────────
     spacer()
