@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, hero banner, sidebar active tab highlights, tabs, cards, selectboxes, audio inputs, top header transparency, toolbar icons, buttons, and expanders.
+Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, hero banner, sidebar active tab highlights, tabs, cards, selectboxes, audio inputs, code badges, top header transparency, toolbar icons, buttons, and expanders.
 """
 
 from __future__ import annotations
@@ -25,6 +25,7 @@ def inject_global_css() -> None:
         select_bg    = "#1E293B"
         select_text  = "#F8FAFC"
         card_shadow  = "0 10px 30px rgba(0, 0, 0, 0.5)"
+        code_text    = "#34D399"
     else:
         bg_main      = "#F8FAFC"
         bg_card      = "#FFFFFF"
@@ -37,6 +38,7 @@ def inject_global_css() -> None:
         select_bg    = "#FFFFFF"
         select_text  = "#0F172A"
         card_shadow  = "0 10px 25px -5px rgba(0, 0, 0, 0.05)"
+        code_text    = "#059669"
 
     css_code = f"""
     <style>
@@ -318,9 +320,10 @@ def inject_global_css() -> None:
             color: {text_primary} !important;
         }}
 
-        /* ── Input Fields & Text Area Placeholders Fix ── */
+        /* ── Input Fields & Text Area Placeholders ── */
         .stTextInput input, .stTextArea textarea, .stNumberInput input {{
             background-color: {input_bg} !important;
+            background: {input_bg} !important;
             color: {input_text} !important;
             border: 1.5px solid {border_col} !important;
             border-radius: 12px !important;
@@ -339,9 +342,17 @@ def inject_global_css() -> None:
             box-shadow: 0 0 0 2px rgba(255, 122, 0, 0.25) !important;
         }}
 
-        /* ── Selectboxes & Dropdowns ── */
-        div[data-baseweb="select"] > div {{
+        /* ── Selectboxes & Dropdowns Dynamic Light/Dark Theme ── */
+        .stSelectbox,
+        .stSelectbox > div,
+        .stSelectbox div[data-baseweb="select"],
+        div[data-baseweb="select"],
+        div[data-baseweb="select"] > div,
+        div[data-baseweb="select"] [role="combobox"],
+        div[data-baseweb="select"] [aria-haspopup="listbox"],
+        div[data-baseweb="select"] > div > div {{
             background-color: {select_bg} !important;
+            background: {select_bg} !important;
             color: {select_text} !important;
             border: 2px solid #FF7A00 !important;
             border-radius: 12px !important;
@@ -350,22 +361,47 @@ def inject_global_css() -> None:
         }}
         div[data-baseweb="select"] span,
         div[data-baseweb="select"] div,
-        div[data-baseweb="select"] input {{
+        div[data-baseweb="select"] p,
+        div[data-baseweb="select"] label,
+        div[data-baseweb="select"] input,
+        div[data-baseweb="select"] svg,
+        div[data-baseweb="select"] path {{
             color: {select_text} !important;
+            fill: {select_text} !important;
+            stroke: {select_text} !important;
             -webkit-text-fill-color: {select_text} !important;
             font-weight: 700 !important;
         }}
-        ul[data-baseweb="menu"] {{
+        ul[data-baseweb="menu"],
+        [data-baseweb="popover"] ul,
+        div[data-baseweb="popover"] {{
             background-color: {select_bg} !important;
+            background: {select_bg} !important;
             color: {select_text} !important;
             border: 1px solid {border_col} !important;
+            box-shadow: {card_shadow} !important;
         }}
-        ul[data-baseweb="menu"] li {{
+        ul[data-baseweb="menu"] li,
+        [data-baseweb="popover"] ul li {{
+            background-color: {select_bg} !important;
             color: {select_text} !important;
             font-weight: 600 !important;
         }}
-        ul[data-baseweb="menu"] li:hover {{
+        ul[data-baseweb="menu"] li:hover,
+        [data-baseweb="popover"] ul li:hover {{
             background-color: rgba(255, 122, 0, 0.2) !important;
+        }}
+
+        /* ── Inline Code Elements Dynamic Theme ── */
+        code, .stMarkdown code, p code, span code, h1 code, h2 code, h3 code {{
+            background-color: {input_bg} !important;
+            background: {input_bg} !important;
+            color: {code_text} !important;
+            border: 1px solid {border_col} !important;
+            border-radius: 6px !important;
+            padding: 0.2rem 0.6rem !important;
+            font-family: monospace !important;
+            font-weight: 800 !important;
         }}
 
         /* ── Tabs Styling ── */
