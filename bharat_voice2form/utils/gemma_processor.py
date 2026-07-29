@@ -347,11 +347,9 @@ def _extract_gemma4(transcript: str, language: str) -> ExtractionResult:
     client = genai.Client(api_key=api_key)
 
     prompt = (
-        f"Extract all personal and application information from this transcript in any language.\n"
-        f"Output ONLY a raw JSON object with these exact keys (use null for missing values):\n"
-        f'"{{"Name": "...", "DOB": "...", "Gender": "...", "Category": "...", "City": "...", "State": "...", '
-        f'"PinCode": "...", "College": "...", "Course": "...", "Year": "...", "Income": "...", "Phone": "...", '
-        f'"Email": "...", "Percentage": "...", "Aadhaar": "..."}}"\n\n'
+        f"Extract all personal and application details from the transcript below.\n"
+        f"Return ONLY the JSON object with keys: Name, DOB, Gender, Category, City, State, PinCode, College, Course, Year, Income, Phone, Email, Percentage, Aadhaar.\n"
+        f"Do not add any explanation or intro text.\n\n"
         f"Transcript ({language}):\n{transcript}"
     )
 
@@ -400,21 +398,27 @@ def _parse_json_from_llm(raw_text: str) -> dict:
     if not raw_text:
         raise ValueError("Empty text received from LLM")
 
-    # 1. Strip top/bottom markdown code fences
+    # 1. Search for ```json ... ``` code fence
+    fence_matches = re.findall(r"```(?:json)?\s*(\{.*?\})\s*```", raw_text, re.DOTALL | re.IGNORECASE)
+    for block in reversed(fence_matches):
+        try:
+            return json.loads(block.strip())
+        except Exception:
+            pass
+
+    # 2. Try direct json.loads after stripping top/bottom code fences
     cleaned = re.sub(r"^```(?:json)?\s*", "", raw_text.strip(), flags=re.IGNORECASE)
     cleaned = re.sub(r"\s*```$", "", cleaned).strip()
-
-    # 2. Try direct json.loads
     try:
         return json.loads(cleaned)
     except Exception:
         pass
 
-    # 3. Extract JSON object bounded by outermost '{' and '}'
-    first_brace = raw_text.find('{')
-    last_brace = raw_text.rfind('}')
+    # 3. Extract JSON object bounded by last '{' block
+    first_brace = cleaned.find('{')
+    last_brace = cleaned.rfind('}')
     if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
-        candidate = raw_text[first_brace:last_brace + 1]
+        candidate = cleaned[first_brace:last_brace + 1]
         try:
             return json.loads(candidate)
         except Exception as err:
