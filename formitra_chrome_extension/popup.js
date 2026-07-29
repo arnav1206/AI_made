@@ -1,4 +1,4 @@
-// popup.js — Formitra Single-Session Form Question Scraper & Transient Multilingual Voice Prompter
+// popup.js — Formitra Extension Speech, Google Forms Scraper & Multilingual Voice Prompter
 
 document.addEventListener("DOMContentLoaded", () => {
   const langSelect         = document.getElementById("langSelect");
@@ -140,12 +140,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (importingSpinner) importingSpinner.classList.add("hidden");
 
       if (res && res.questions && res.questions.length > 0) {
-        // Save ONLY the questions given in this form for this session
+        // Save ONLY the questions given in this form
         importedQuestions = res.questions;
         renderImportedQuestions(importedQuestions);
         showToast(`🎉 Imported ${importedQuestions.length} questions from this form!`);
       } else {
-        // Strictly NO hardcoded default fallback questions!
+        // NO hardcoded default fallback questions!
         importedQuestions = [];
         questionsCard.classList.add("hidden");
         showToast("⚠️ No question fields detected on active page.");
@@ -296,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
       city: {
         "hi-IN": "आपका शहर या जिला कौन सा है?", "en-IN": "Which city or district do you live in?", "or-IN": "ଆପଣଙ୍କ ସହର କିମ୍ବା ଜିଲ୍ଲା କ’ଣ?",
         "ta-IN": "உங்கள் நகரம் அல்லது மாவட்டம் எது?", "te-IN": "మీ నగరం లేదా జిల్లా ఏది?", "bn-IN": "আপনার শহর বা জেলা কোনটি?",
-        "mr-IN": "तुमचे शहर किंवा जिल्हा कोणता आहे?", "kn-IN": "ನಿಮ್ಮ ನಗರ ಅಥವಾ ಜಿಲ್ಲೆ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ നഗരം അല്ലെങ്കിൽ ജില്ല ഏതാണ്?",
+        "mr-IN": "तुमचे शहर किंवा जिल्हा कोणता आहे?", "kn-IN": "ನಿಮ್ಮ ನಗರ किंवा जिल्हा ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ നഗരം അല്ലെങ്കിൽ ജില്ല ഏതാണ്?",
       },
       state: {
         "hi-IN": "आपका राज्य कौन सा है?", "en-IN": "What is your state of domicile?", "or-IN": "ଆପଣଙ୍କ ରାଜ୍ୟ କ’ଣ?",
@@ -316,7 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
       course: {
         "hi-IN": "आपका पाठ्यक्रम या कोर्स कौन सा है?", "en-IN": "What course are you enrolled in?", "or-IN": "ଆପଣଙ୍କ ପାଠ୍ୟକ୍ରମ କ’ଣ?",
         "ta-IN": "உங்கள் படிப்பு என்ன?", "te-IN": "మీ కోర్సు ఏమిటి?", "bn-IN": "আপনার কোর্স কোনটি?",
-        "mr-IN": "तुमचा कोर्स कोणता आहे?", "kn-IN": "ನಿಮ್ಮ ಕೋರ್ಸ್ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ ಕೋರ್ಸ್ ഏതാണ്?",
+        "mr-IN": "तुमचा कोर्स कोणता आहे?", "kn-IN": "ನಿಮ್ಮ ಕೋರ್ಸ್ ಯಾವುದು?", "ml-IN": "ನಿങ്ങളുടെ ಕೋರ್ಸ್ ಏതാണ്?",
       },
       year: {
         "hi-IN": "आपका अध्ययन का वर्ष कौन सा है?", "en-IN": "What is your year of study?", "or-IN": "ଆପଣଙ୍କ ପାଠପଢ଼ା ବର୍ଷ କ’ଣ?",
@@ -325,12 +325,12 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       mobile: {
         "hi-IN": "आपका मोबाइल नंबर क्या है?", "en-IN": "What is your mobile number?", "or-IN": "ଆପଣଙ୍କ ମୋବାଇଲ୍ ନମ୍ବର କ’ଣ?",
-        "ta-IN": "உங்கள் அலைபேசி எண் என்ன?", "te-IN": "మీ మొబైಲ್ నంబర్ ఏమిటి?", "bn-IN": "আপনার মোবাইল নম্বর কী?",
-        "mr-IN": "तुमचा मोबाईल नंबर काय आहे?", "kn-IN": "ನಿಮ್ಮ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ಏನು?", "ml-IN": "ನಿങ്ങളുടെ മൊബൈಲ್ നമ്പർ എന്താണ്?",
+        "ta-IN": "உங்கள் அலைபேசி எண் என்ன?", "te-IN": "మీ మొబైల్ నంబర్ ఏమిటి?", "bn-IN": "আপনার মোবাইল নম্বর কী?",
+        "mr-IN": "तुमचा मोबाईल नंबर काय आहे?", "kn-IN": "ನಿಮ್ಮ ಮೊಬೈଲ୍ ಸಂಖ್ಯೆ ಏನು?", "ml-IN": "നിങ്ങളുടെ മൊബൈൽ നമ്പർ എന്താണ്?",
       },
       email: {
         "hi-IN": "आपका ईमेल पता क्या है?", "en-IN": "What is your email address?", "or-IN": "ଆପଣଙ୍କ ଇମେଲ୍ ଠିକଣା କ’ଣ?",
-        "ta-IN": "உங்கள் மின்னஞ்சல் முகவரி என்ன?", "te-IN": "మీ ఇమెయਿਲ చిరునామా ఏమిటి?", "bn-IN": "আপনার ইমেল ঠিকানা কী?",
+        "ta-IN": "உங்கள் மின்னஞ்சல் முகவரி என்ன?", "te-IN": "మీ ఇమెయిల్ చిరునామా ఏమిటి?", "bn-IN": "আপনার ইমেল ঠিকানা কী?",
         "mr-IN": "तुमचा ईमेल पत्ता काय आहे?", "kn-IN": "ನಿಮ್ಮ ಇಮೇಲ್ ವಿಳಾಸ ಏನು?", "ml-IN": "നിങ്ങളുടെ ഇമെയിൽ വിലാസം എന്താണ്?",
       }
     };
@@ -388,21 +388,18 @@ document.addEventListener("DOMContentLoaded", () => {
     return "English";
   }
 
-  // Pattern Intent Extractor
+  // Pattern Intent Extractor (Strictly no default fallbacks!)
   function extractFormFields(text) {
     const fields = {};
 
     if (m = text.match(/(?:नाम|name is|name|naam)\s+([A-Za-z\u0900-\u097F\s]{2,25})/i)) fields["name"] = m[1].replace(/(?:है|hai|is|hoon).*/i, "").trim();
-    else fields["name"] = "Rahul Sharma";
     if (m = text.match(/(?:जयपुर|jaipur)/i)) fields["city"] = "Jaipur";
     if (m = text.match(/(?:राजस्थान|rajasthan)/i)) fields["state"] = "Rajasthan";
     if (m = text.match(/(?:b\.?tech|बी\.?टेक)/i)) fields["course"] = "B.Tech";
     if (m = text.match(/(?:द्वितीय|second|2nd)/i)) fields["year"] = "Second Year";
     if (m = text.match(/(?:बीआईटी|bit|mesra)/i)) fields["college"] = "BIT Mesra";
     if (m = text.match(/(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/)) fields["dob"] = m[1];
-    else fields["dob"] = "15/08/2003";
     if (m = text.match(/(?:आय|income|aay|वार्षिक)\s*₹?\s*([\d\,]+)/i)) fields["income"] = m[1].replace(/\,/g, "");
-    else fields["income"] = "150000";
     if (m = text.match(/(\d{10})/)) fields["mobile"] = m[1];
     if (m = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)) fields["email"] = m[1];
 

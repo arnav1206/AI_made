@@ -186,11 +186,11 @@ function openFloatingFormitraWidget() {
   });
 
   document.getElementById("fmt-fill-action").addEventListener("click", () => {
-    const text = modalText.value.trim() || (
-      "मेरा नाम राहुल शर्मा है। मैं जयपुर राजस्थान का रहने वाला हूँ। " +
-      "मैं B.Tech द्वितीय वर्ष का छात्र हूँ और बीआईटी संस्थान में पढ़ता हूँ। " +
-      "मेरी जन्मतिथि 15/08/2003 है और मेरी परिवार की वार्षिक आय ₹1,50,000 है।"
-    );
+    const text = modalText.value.trim();
+    if (!text) {
+      alert("⚠️ Please speak or paste transcript text first.");
+      return;
+    }
 
     const fields = extractFormFieldsFromText(text);
     const count  = fillPageFormFields(fields);
@@ -285,28 +285,21 @@ function scrapePageQuestions() {
 function extractFormFieldsFromText(text) {
   const fields = {};
   if (m = text.match(/(?:नाम|name is|name|naam)\s+([A-Za-z\u0900-\u097F\s]{2,25})/i)) fields["name"] = m[1].replace(/(?:है|hai|is|hoon).*/i, "").trim();
-  else fields["name"] = "Rahul Sharma";
   if (m = text.match(/(?:जयपुर|jaipur)/i)) fields["city"] = "Jaipur";
   if (m = text.match(/(?:राजस्थान|rajasthan)/i)) fields["state"] = "Rajasthan";
   if (m = text.match(/(?:b\.?tech|बी\.?टेक)/i)) fields["course"] = "B.Tech";
   if (m = text.match(/(?:द्वितीय|second|2nd)/i)) fields["year"] = "Second Year";
   if (m = text.match(/(?:बीआईटी|bit|mesra)/i)) fields["college"] = "BIT Mesra";
   if (m = text.match(/(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/)) fields["dob"] = m[1];
-  else fields["dob"] = "15/08/2003";
   if (m = text.match(/(?:आय|income|aay|वार्षिक)\s*₹?\s*([\d\,]+)/i)) fields["income"] = m[1].replace(/\,/g, "");
-  else fields["income"] = "150000";
   if (m = text.match(/(\d{10})/)) fields["mobile"] = m[1];
   if (m = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)) fields["email"] = m[1];
-
-  fields["gender"] = "Male";
-  fields["category"] = "General";
 
   return fields;
 }
 
 // ── Target Form Language Detector & Transliteration Engine ──────────────
 function detectFormTargetLanguage() {
-  // Scrape headings and labels of the form specifically
   const formHeadings = Array.from(document.querySelectorAll('.M7eMe, label, [role="heading"], h1, h2, h3, .HoLwm'))
     .map(el => el.innerText || "")
     .join(" ");
@@ -319,11 +312,9 @@ function detectFormTargetLanguage() {
   if (/[\u0D00-\u0D7F]/.test(formHeadings)) return "Malayalam";
   if (/[\u0C80-\u0CFF]/.test(formHeadings)) return "Kannada";
 
-  // Default to English if form headings are in Latin / ASCII
   return "English";
 }
 
-// Transliteration Matrix from Hindi / Devanagari to English Roman script
 const DEVANAGARI_TO_ENGLISH_DICT = {
   "राहुल": "Rahul",
   "शर्मा": "Sharma",
@@ -350,7 +341,7 @@ const ENGLISH_TO_NATIVE_DICT = {
   "city": {
     "Jaipur": { Hindi: "जयपुर", Odia: "ଜୟପୁର", Tamil: "ஜெய்பூர்", Telugu: "జైపూర్", Bengali: "জয়পুর", Marathi: "जयपूर", Kannada: "ಜೈಪುರ", Malayalam: "ജയ്പൂർ", English: "Jaipur" },
     "Delhi": { Hindi: "दिल्ली", Odia: "ଦିଲ୍ଲୀ", Tamil: "டெல்லி", Telugu: "ఢిల్లీ", Bengali: "দিল্লি", Marathi: "दिल्ली", Kannada: "ದೆಹಲಿ", Malayalam: "ഡൽഹി", English: "Delhi" },
-    "Bhubaneswar": { Hindi: "भुवनेश्वर", Odia: "ଭୁବନେଶ୍ୱର", Tamil: "ପୁବନେଶ୍ବର", Telugu: "భువనేశ్వర్", Bengali: "ভুবনেশ্বর", Marathi: "भुवनेश्वर", Kannada: "ಭುವನೇಶ್ವರ", Malayalam: "ഭുവനേശ്വർ", English: "Bhubaneswar" }
+    "Bhubaneswar": { Hindi: "भुवनेश्वर", Odia: "ଭୁବନେଶ୍ୱର", Tamil: "ପୁବନେଶ୍ବର", Telugu: "భువనేశ్వర్", Bengali: "ভুবনেশ্বর", Marathi: "भुवनेश्वर", Kannada: "<ctrl42><ctrl42><ctrl42>", Malayalam: "ഭുവനേശ്വർ", English: "Bhubaneswar" }
   },
   "state": {
     "Rajasthan": { Hindi: "राजस्थान", Odia: "ରାଜସ୍ଥାନ", Tamil: "ராஜஸ்தான்", Telugu: "రాజస్థాన్", Bengali: "রাজস্থান", Marathi: "राजस्थान", Kannada: "ರಾಜಸ್ಥಾನ", Malayalam: "രാജസ്ഥാൻ", English: "Rajasthan" },
@@ -400,13 +391,11 @@ function transliterateToTargetFormLanguage(key, rawVal, targetFormLang) {
   if (!rawVal) return rawVal;
 
   if (targetFormLang === "English") {
-    // If input contains non-ASCII Devanagari or regional characters, convert strictly to English Roman script!
     if (/[^\x00-\x7F]/.test(rawVal)) {
       return devanagariPhoneticToEnglish(rawVal);
     }
     return rawVal;
   } else {
-    // Target Form is Hindi / Odia / Tamil / Telugu / etc.
     if (ENGLISH_TO_NATIVE_DICT[key] && ENGLISH_TO_NATIVE_DICT[key][rawVal]) {
       const nativeVal = ENGLISH_TO_NATIVE_DICT[key][rawVal][targetFormLang];
       if (nativeVal) return nativeVal;
@@ -418,11 +407,9 @@ function transliterateToTargetFormLanguage(key, rawVal, targetFormLang) {
 function fillPageFormFields(fields) {
   let count = 0;
 
-  // Detect language of the active web form on screen (English, Hindi, Odia, etc.)
   const targetFormLang = detectFormTargetLanguage();
   console.log(`🌐 Formitra Target Form Language: ${targetFormLang}`);
 
-  // Convert all extracted values to match the target form's language 100%!
   const formattedFields = {
     name: transliterateToTargetFormLanguage("name", fields.name, targetFormLang),
     city: transliterateToTargetFormLanguage("city", fields.city, targetFormLang),
@@ -449,7 +436,6 @@ function fillPageFormFields(fields) {
 
       const qTitle = titleElem.innerText.toLowerCase();
 
-      // A. Text / Textarea / Rich Text Inputs in Google Forms
       const textInput = qContainer.querySelector('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], textarea, [role="textbox"]');
       
       let valToSet = null;
@@ -471,7 +457,6 @@ function fillPageFormFields(fields) {
         return;
       }
 
-      // B. Radio Buttons / Checkboxes / Options in Google Forms
       const options = qContainer.querySelectorAll('[role="radio"], [role="checkbox"], [role="option"]');
       if (options.length > 0) {
         let targetVal = null;
