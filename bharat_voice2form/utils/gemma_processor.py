@@ -19,10 +19,9 @@ from utils.constants import INDIAN_STATES
 logger = logging.getLogger(__name__)
 
 # ─── Config ────────────────────────────────────────────────────────
-ENGINE: str = "gemma4"          # Primary: Gemma 4 / Gemini via google-genai (falls back to smart_nlp if key missing)
+ENGINE: str = "gemma4"          # Primary: Gemma 4 via google-genai (falls back to smart_nlp if key missing)
 MODEL_NAME: str = "gemma-4-31b-it"   # Gemma 4 31B Instruct via Gemini API
-MODEL_FALLBACK: str = "gemini-2.5-flash"  # High speed Gemini fallback
-MODEL_FALLBACK_2: str = "gemini-1.5-flash"
+MODEL_FALLBACK: str = "gemma-4-26b-a4b-it"  # Gemma 4 26B MoE fallback
 
 SYSTEM_PROMPT = """You are an expert multilingual AI form-filling assistant for Indian government applications.
 Given a speech transcript in any Indian language (Hindi, Tamil, Telugu, Bengali, Marathi, Kannada, Malayalam, Odia, English),
@@ -353,8 +352,8 @@ def _extract_gemma4(transcript: str, language: str) -> ExtractionResult:
         f"Transcript:\n{transcript}"
     )
 
-    # Try primary model first, fall back to lighter variants
-    for model_id in (MODEL_NAME, MODEL_FALLBACK, MODEL_FALLBACK_2):
+    # Try primary Gemma 4 model first, fall back to lighter variant
+    for model_id in (MODEL_NAME, MODEL_FALLBACK):
         try:
             response = client.models.generate_content(
                 model=model_id,
@@ -364,7 +363,19 @@ def _extract_gemma4(transcript: str, language: str) -> ExtractionResult:
                     max_output_tokens=512,
                 ),
             )
-            raw_text = response.text.strip()
+            raw_text = ""
+            if hasattr(response, "text") and response.text:
+                raw_text = response.text
+            elif hasattr(response, "candidates") and response.candidates:
+                cand = response.candidates[0]
+                if cand.content and cand.content.parts:
+                    raw_text = cand.content.parts[0].text or ""
+
+            raw_text = raw_text.strip()
+            if not raw_text:
+                logger.warning("Empty output from Gemma 4 model %s", model_id)
+                continue
+
             data = _parse_json_from_llm(raw_text)
             result = ExtractionResult(data, f"Gemma 4 ({model_id})", 0.0)
             result.raw = raw_text
