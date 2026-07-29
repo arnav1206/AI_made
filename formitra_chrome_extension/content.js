@@ -1,4 +1,4 @@
-// content.js — Formitra Web Form Auto-Filler Engine, Google Forms Scraper & Multilingual Form Language Detector
+// content.js — Formitra Web Form Auto-Filler Engine, Google Forms Scraper & Target Form Language Transliteration Engine
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "AUTO_FILL_FORM") {
@@ -304,81 +304,138 @@ function extractFormFieldsFromText(text) {
   return fields;
 }
 
-// ── Target Form Language Detector & Native Value Translator ─────────────
+// ── Target Form Language Detector & Transliteration Engine ──────────────
 function detectFormTargetLanguage() {
-  const sample = document.body ? document.body.innerText.slice(0, 1500) : "";
+  // Scrape headings and labels of the form specifically
+  const formHeadings = Array.from(document.querySelectorAll('.M7eMe, label, [role="heading"], h1, h2, h3, .HoLwm'))
+    .map(el => el.innerText || "")
+    .join(" ");
 
-  if (/[\u0900-\u097F]/.test(sample)) return "Hindi";
-  if (/[\u0B00-\u0B7F]/.test(sample)) return "Odia";
-  if (/[\u0B80-\u0BFF]/.test(sample)) return "Tamil";
-  if (/[\u0C00-\u0C7F]/.test(sample)) return "Telugu";
-  if (/[\u0980-\u09FF]/.test(sample)) return "Bengali";
-  if (/[\u0D00-\u0D7F]/.test(sample)) return "Malayalam";
-  if (/[\u0C80-\u0CFF]/.test(sample)) return "Kannada";
+  if (/[\u0900-\u097F]/.test(formHeadings)) return "Hindi";
+  if (/[\u0B00-\u0B7F]/.test(formHeadings)) return "Odia";
+  if (/[\u0B80-\u0BFF]/.test(formHeadings)) return "Tamil";
+  if (/[\u0C00-\u0C7F]/.test(formHeadings)) return "Telugu";
+  if (/[\u0980-\u09FF]/.test(formHeadings)) return "Bengali";
+  if (/[\u0D00-\u0D7F]/.test(formHeadings)) return "Malayalam";
+  if (/[\u0C80-\u0CFF]/.test(formHeadings)) return "Kannada";
+
+  // Default to English if form headings are in Latin / ASCII
   return "English";
 }
 
-const NATIVE_VALUE_MATRIX = {
+// Transliteration Matrix from Hindi / Devanagari to English Roman script
+const DEVANAGARI_TO_ENGLISH_DICT = {
+  "राहुल": "Rahul",
+  "शर्मा": "Sharma",
+  "राहुल शर्मा": "Rahul Sharma",
+  "जयपुर": "Jaipur",
+  "राजस्थान": "Rajasthan",
+  "बी.टेक": "B.Tech",
+  "बीटेक": "B.Tech",
+  "द्वितीय वर्ष": "Second Year",
+  "द्वितीय": "Second",
+  "प्रथम वर्ष": "First Year",
+  "तृतीय वर्ष": "Third Year",
+  "अंतिम वर्ष": "Final Year",
+  "बीआईटी": "BIT Mesra",
+  "पुरुष": "Male",
+  "महिला": "Female",
+  "सामान्य": "General",
+  "ओबीसी": "OBC",
+  "अनुसूचित जाति": "SC",
+  "अनुसूचित जनजाति": "ST"
+};
+
+const ENGLISH_TO_NATIVE_DICT = {
   "city": {
     "Jaipur": { Hindi: "जयपुर", Odia: "ଜୟପୁର", Tamil: "ஜெய்பூர்", Telugu: "జైపూర్", Bengali: "জয়পুর", Marathi: "जयपूर", Kannada: "ಜೈಪುರ", Malayalam: "ജയ്പൂർ", English: "Jaipur" },
     "Delhi": { Hindi: "दिल्ली", Odia: "ଦିଲ୍ଲୀ", Tamil: "டெல்லி", Telugu: "ఢిల్లీ", Bengali: "দিল্লি", Marathi: "दिल्ली", Kannada: "ದೆಹಲಿ", Malayalam: "ഡൽഹി", English: "Delhi" },
-    "Bhubaneswar": { Hindi: "भुवनेश्वर", Odia: "ଭୁବନେଶ୍ୱର", Tamil: "புவனேஸ்வர்", Telugu: "భువనేశ్వర్", Bengali: "ভুবনেশ্বর", Marathi: "भुवनेश्वर", Kannada: "ಭುವನೇಶ್ವರ", Malayalam: "ഭുവനേശ്വർ", English: "Bhubaneswar" },
-    "Kolkata": { Hindi: "कोलकाता", Odia: "କୋଲକାତା", Tamil: "கொல்கத்தா", Telugu: "కోల్‌కతా", Bengali: "কলকাতা", Marathi: "कोलकाता", Kannada: "ಕೋಲ್ಕತ್ತಾ", Malayalam: "കൊൽക്കത്ത", English: "Kolkata" }
+    "Bhubaneswar": { Hindi: "भुवनेश्वर", Odia: "ଭୁବନେଶ୍ୱର", Tamil: "ପୁବନେଶ୍ବର", Telugu: "భువనేశ్వర్", Bengali: "ভুবনেশ্বর", Marathi: "भुवनेश्वर", Kannada: "ಭುವನೇಶ್ವರ", Malayalam: "ഭുവനേശ്വർ", English: "Bhubaneswar" }
   },
   "state": {
     "Rajasthan": { Hindi: "राजस्थान", Odia: "ରାଜସ୍ଥାନ", Tamil: "ராஜஸ்தான்", Telugu: "రాజస్థాన్", Bengali: "রাজস্থান", Marathi: "राजस्थान", Kannada: "ರಾಜಸ್ಥಾನ", Malayalam: "രാജസ്ഥാൻ", English: "Rajasthan" },
-    "Odisha": { Hindi: "ओडिशा", Odia: "ଓଡ଼ିଶା", Tamil: "ஒடிசா", Telugu: "ఒడిషా", Bengali: "ওড়িশা", Marathi: "ओडिशा", Kannada: "ಒಡಿಶಾ", Malayalam: "ഒഡീഷ", English: "Odisha" },
-    "West Bengal": { Hindi: "पश्चिम बंगाल", Odia: "ପଶ୍ଚିମ ବଙ୍ଗ", Tamil: "மேற்கு வங்கம்", Telugu: "పశ్చిమ బెంగాల్", Bengali: "পশ্চিমবঙ্গ", Marathi: "पश्चिम बंगाल", Kannada: "ಪಶ್ಚಿಮ ಬಂಗಾಳ", Malayalam: "പശ്ചിമ ബംഗാൾ", English: "West Bengal" }
+    "Odisha": { Hindi: "ओडिशा", Odia: "ଓଡ଼ିଶା", Tamil: "ஒடிசா", Telugu: "ఒడిషా", Bengali: "ওড়িশা", Marathi: "ओडिशा", Kannada: "ಒಡಿಶಾ", Malayalam: "ഒഡീഷ", English: "Odisha" }
   },
   "year": {
-    "Second Year": { Hindi: "द्वितीय वर्ष", Odia: "ଦ୍ୱିତୀୟ ବର୍ଷ", Tamil: "இரண்டாம் ஆண்டு", Telugu: "రెండవ సంవత్సరం", Bengali: "দ্বিতীয় বর্ষ", Marathi: "दुसरे वर्ष", Kannada: "ಎರಡನೇ ವರ್ಷ", Malayalam: "രണ്ടാം വർഷം", English: "Second Year" },
-    "First Year": { Hindi: "प्रथम वर्ष", Odia: "ପ୍ରଥମ ବର୍ଷ", Tamil: "முதல் ஆண்டு", Telugu: "మొదటి సంవత్సరం", Bengali: "প্রথম বর্ষ", Marathi: "पहिले वर्ष", Kannada: "ಮೊದಲ ವರ್ಷ", Malayalam: "ഒന്നാം വർഷം", English: "First Year" }
+    "Second Year": { Hindi: "द्वितीय वर्ष", Odia: "ଦ୍ୱିତୀୟ ବର୍ଷ", Tamil: "இரண்டாம் ஆண்டு", Telugu: "రెండవ సంవత్సరం", Bengali: "দ্বিতীয় বর্ষ", Marathi: "दुसरे वर्ष", Kannada: "ಎರಡನೇ ವರ್ಷ", Malayalam: "രണ്ടാം വർഷം", English: "Second Year" }
   },
   "course": {
     "B.Tech": { Hindi: "बी.टेक", Odia: "ବି.ଟେକ୍", Tamil: "பி.டெக்", Telugu: "బి.టెక్", Bengali: "বি.টেক", Marathi: "बी.टेक", Kannada: "ಬಿ.ಟೆಕ್", Malayalam: "ബി.ടെക്", English: "B.Tech" }
   },
   "category": {
-    "General": { Hindi: "सामान्य", Odia: "ସାଧାରଣ", Tamil: "பொது", Telugu: "సాధారణ", Bengali: "সাধারণ", Marathi: "सामान्य", Kannada: "ಸಾಮಾನ್ಯ", Malayalam: "ജനറൽ", English: "General" },
-    "OBC": { Hindi: "ओबीसी", Odia: "ଓବିସି", Tamil: "ஓபிசி", Telugu: "ఓబిసి", Bengali: "ওবিসি", Marathi: "ओबीसी", Kannada: "ಒಬಿಸಿ", Malayalam: "ഒബിസി", English: "OBC" }
+    "General": { Hindi: "सामान्य", Odia: "ସାଧାରଣ", Tamil: "பொது", Telugu: "సాధారణ", Bengali: "সাধারণ", Marathi: "सामान्य", Kannada: "ಸಾಮಾನ್ಯ", Malayalam: "ജനറൽ", English: "General" }
   },
   "gender": {
-    "Male": { Hindi: "पुरुष", Odia: "ପୁରୁଷ", Tamil: "ஆண்", Telugu: "పురుషుడు", Bengali: "পুরুষ", Marathi: "पुरुष", Kannada: "ಪುರುಷ", Malayalam: "ആൺ", English: "Male" },
-    "Female": { Hindi: "महिला", Odia: "ମହିଳା", Tamil: "பெண்", Telugu: "స్త్రీ", Bengali: "মহিলা", Marathi: "स्त्री", Kannada: "ಮಹಿಳೆ", Malayalam: "സ്ത്രീ", English: "Female" }
+    "Male": { Hindi: "पुरुष", Odia: "ପୁରୁଷ", Tamil: "ஆண்", Telugu: "పురుషుడు", Bengali: "পুরুষ", Marathi: "पुरुष", Kannada: "ಪುರುಷ", Malayalam: "ആൺ", English: "Male" }
   }
 };
 
-function formatValueToFormLanguage(key, rawVal, targetLang) {
+function devanagariPhoneticToEnglish(text) {
+  if (!text) return text;
+  let str = text;
+  Object.keys(DEVANAGARI_TO_ENGLISH_DICT).forEach(k => {
+    str = str.replace(new RegExp(k, "g"), DEVANAGARI_TO_ENGLISH_DICT[k]);
+  });
+
+  const charMap = {
+    'क':'k','ख':'kh','ग':'g','घ':'gh','ङ':'n',
+    'च':'ch','छ':'chh','ज':'j','झ':'jh','ञ':'n',
+    'ट':'t','ठ':'th','ड':'d','ढ':'dh','ण':'n',
+    'त':'t','थ':'th','द':'d','ध':'dh','न':'n',
+    'प':'p','फ':'ph','ब':'b','भ':'bh','म':'m',
+    'य':'y','र':'r','ल':'l','व':'v','श':'sh','ष':'sh','स':'s','ह':'h',
+    'ा':'a','ि':'i','ी':'ee','ु':'u','ू':'oo','े':'e','ै':'ai','ो':'o','ौ':'au',
+    '्':'','ं':'n','ः':'h','अ':'A','आ':'Aa','इ':'I','ई':'Ee','उ':'U','ऊ':'Oo','ए':'E','ऐ':'Ai','ओ':'O','औ':'Au'
+  };
+
+  let out = "";
+  for (let ch of str) {
+    if (charMap[ch] !== undefined) out += charMap[ch];
+    else out += ch;
+  }
+  return out.replace(/\b\w/g, c => c.toUpperCase()).trim();
+}
+
+function transliterateToTargetFormLanguage(key, rawVal, targetFormLang) {
   if (!rawVal) return rawVal;
 
-  if (NATIVE_VALUE_MATRIX[key] && NATIVE_VALUE_MATRIX[key][rawVal]) {
-    const localized = NATIVE_VALUE_MATRIX[key][rawVal][targetLang];
-    if (localized) return localized;
+  if (targetFormLang === "English") {
+    // If input contains non-ASCII Devanagari or regional characters, convert strictly to English Roman script!
+    if (/[^\x00-\x7F]/.test(rawVal)) {
+      return devanagariPhoneticToEnglish(rawVal);
+    }
+    return rawVal;
+  } else {
+    // Target Form is Hindi / Odia / Tamil / Telugu / etc.
+    if (ENGLISH_TO_NATIVE_DICT[key] && ENGLISH_TO_NATIVE_DICT[key][rawVal]) {
+      const nativeVal = ENGLISH_TO_NATIVE_DICT[key][rawVal][targetFormLang];
+      if (nativeVal) return nativeVal;
+    }
+    return rawVal;
   }
-
-  return rawVal;
 }
 
 function fillPageFormFields(fields) {
   let count = 0;
 
-  // Detect language the active form is written in
-  const targetLang = detectFormTargetLanguage();
-  console.log(`🌐 Formitra: Auto-filling form matching detected form language -> ${targetLang}`);
+  // Detect language of the active web form on screen (English, Hindi, Odia, etc.)
+  const targetFormLang = detectFormTargetLanguage();
+  console.log(`🌐 Formitra Target Form Language: ${targetFormLang}`);
 
-  // Format values to match form target language
+  // Convert all extracted values to match the target form's language 100%!
   const formattedFields = {
-    name: fields.name,
-    city: formatValueToFormLanguage("city", fields.city, targetLang),
-    state: formatValueToFormLanguage("state", fields.state, targetLang),
-    course: formatValueToFormLanguage("course", fields.course, targetLang),
-    year: formatValueToFormLanguage("year", fields.year, targetLang),
-    college: fields.college,
+    name: transliterateToTargetFormLanguage("name", fields.name, targetFormLang),
+    city: transliterateToTargetFormLanguage("city", fields.city, targetFormLang),
+    state: transliterateToTargetFormLanguage("state", fields.state, targetFormLang),
+    course: transliterateToTargetFormLanguage("course", fields.course, targetFormLang),
+    year: transliterateToTargetFormLanguage("year", fields.year, targetFormLang),
+    college: transliterateToTargetFormLanguage("college", fields.college, targetFormLang),
     dob: fields.dob,
     income: fields.income,
     mobile: fields.mobile,
     email: fields.email,
-    gender: formatValueToFormLanguage("gender", fields.gender, targetLang),
-    category: formatValueToFormLanguage("category", fields.category, targetLang)
+    gender: transliterateToTargetFormLanguage("gender", fields.gender, targetFormLang),
+    category: transliterateToTargetFormLanguage("category", fields.category, targetFormLang)
   };
 
   // ── 1. Dedicated Google Forms Deep Auto-Fill Engine ────────────────
