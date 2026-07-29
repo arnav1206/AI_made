@@ -136,6 +136,25 @@ document.addEventListener("DOMContentLoaded", () => {
     micBtn.classList.remove("recording");
     micIcon.innerText = "🎙️";
     statusText.innerText = "Click microphone & speak your details";
+
+    if (transcriptText.value.trim()) {
+      triggerAutoFillFromVoice();
+    }
+  }
+
+  async function triggerAutoFillFromVoice() {
+    const text = transcriptText.value.trim();
+    if (!text) return;
+
+    const fields = extractFormFields(text);
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.id) {
+      chrome.tabs.sendMessage(tab.id, { action: "AUTO_FILL_FORM", fields: fields }, (response) => {
+        if (response && response.status === "SUCCESS") {
+          showToast(`🎉 Auto-filled ${response.count} form fields from voice input!`);
+        }
+      });
+    }
   }
 
   // ── 1. Import Questions & Automatically Take to Voice Input ──────────────
@@ -453,19 +472,66 @@ document.addEventListener("DOMContentLoaded", () => {
     return "English";
   }
 
-  // Pattern Intent Extractor (Strictly no default fallbacks!)
+  // Pattern Intent Extractor (Expanded NLP Entity Extractor)
   function extractFormFields(text) {
     const fields = {};
+    let m;
 
-    if (m = text.match(/(?:नाम|name is|name|naam)\s+([A-Za-z\u0900-\u097F\s]{2,25})/i)) fields["name"] = m[1].replace(/(?:है|hai|is|hoon).*/i, "").trim();
-    if (m = text.match(/(?:जयपुर|jaipur)/i)) fields["city"] = "Jaipur";
-    if (m = text.match(/(?:राजस्थान|rajasthan)/i)) fields["state"] = "Rajasthan";
-    if (m = text.match(/(?:b\.?tech|बी\.?टेक)/i)) fields["course"] = "B.Tech";
-    if (m = text.match(/(?:द्वितीय|second|2nd)/i)) fields["year"] = "Second Year";
-    if (m = text.match(/(?:बीआईटी|bit|mesra)/i)) fields["college"] = "BIT Mesra";
+    // Name
+    if (m = text.match(/(?:नाम|name is|name|naam|applicant|candidate)\s+([A-Za-z\u0900-\u097F\s]{2,30})/i)) {
+      fields["name"] = m[1].replace(/(?:है|hai|is|hoon|and|category|gender|male|female).*/i, "").trim();
+    }
+    // Gender
+    if (m = text.match(/(?:gender|sex|लिंग)\s*[:\-]?\s*(male|female|transgender|पुरुष|महिला)/i) || text.match(/\b(male|female|transgender|पुरुष|महिला)\b/i)) {
+      const rawG = m[1].toLowerCase();
+      if (rawG === "female" || rawG === "महिला") fields["gender"] = "Female";
+      else if (rawG === "male" || rawG === "पुरुष") fields["gender"] = "Male";
+      else fields["gender"] = "Transgender";
+    }
+    // Category
+    if (m = text.match(/(?:category|caste|वर्ग|श्रेणी)\s*[:\-]?\s*(general|obc|sc|st|ews|सामान्य|ओबीसी)/i) || text.match(/\b(general|obc|sc|st|ews|सामान्य|ओबीसी)\b/i)) {
+      const rawC = m[1].toUpperCase();
+      if (rawC.includes("OBC") || rawC.includes("ओबीसी")) fields["category"] = "OBC";
+      else if (rawC.includes("SC")) fields["category"] = "SC";
+      else if (rawC.includes("ST")) fields["category"] = "ST";
+      else if (rawC.includes("EWS")) fields["category"] = "EWS / EBC";
+      else fields["category"] = "General";
+    }
+    // City
+    if (m = text.match(/(?:city|district|शहर|जिला)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,20})/i) || text.match(/(?:जयपुर|jaipur|दिल्ली|delhi|भुवनेश्वर|bhubaneswar|ranchi|patna|mumbai)/i)) {
+      fields["city"] = m[1] || m[0];
+    }
+    // State
+    if (m = text.match(/(?:state|domicile|राज्य)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,20})/i) || text.match(/(?:राजस्थान|rajasthan|ओडिशा|odisha|jharkhand|bihar|maharashtra|uttar pradesh)/i)) {
+      fields["state"] = m[1] || m[0];
+    }
+    // Course
+    if (m = text.match(/(?:b\.?tech|बी\.?टेक|b\.?sc|m\.?tech|mba|diploma|b.a|m.a)/i)) {
+      fields["course"] = m[0].toUpperCase();
+    }
+    // Year
+    if (m = text.match(/(?:first|second|third|fourth|1st|2nd|3rd|4th|प्रथम|द्वितीय|तृतीय)\s*(?:year|वर्ष)?/i)) {
+      const rawY = m[0].toLowerCase();
+      if (rawY.includes("1st") || rawY.includes("first") || rawY.includes("प्रथम")) fields["year"] = "First Year";
+      else if (rawY.includes("3rd") || rawY.includes("third") || rawY.includes("तृतीय")) fields["year"] = "Third Year";
+      else if (rawY.includes("4th") || rawY.includes("fourth")) fields["year"] = "Fourth Year";
+      else fields["year"] = "Second Year";
+    }
+    // College
+    if (m = text.match(/(?:college|institute|university|school|संस्थान|कॉलेज)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,30})/i) || text.match(/(?:bit\s*mesra|jaipur\s*national|iit|nit)/i)) {
+      fields["college"] = m[1] || m[0];
+    }
+    // DOB
     if (m = text.match(/(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/)) fields["dob"] = m[1];
+    // Income
     if (m = text.match(/(?:आय|income|aay|वार्षिक)\s*₹?\s*([\d\,]+)/i)) fields["income"] = m[1].replace(/\,/g, "");
+    else if (m = text.match(/([\d\.]+)\s*(?:lakh|lakhs|लाख)/i)) {
+      const num = parseFloat(m[1]) * 100000;
+      fields["income"] = String(Math.round(num));
+    }
+    // Mobile
     if (m = text.match(/(\d{10})/)) fields["mobile"] = m[1];
+    // Email
     if (m = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)) fields["email"] = m[1];
 
     return fields;
