@@ -278,7 +278,7 @@ MOCK_TRANSCRIPTS: dict[str, str] = {
         "ഞാൻ ബി.ടെക് രണ്ടാം വർഷ വിദ്യാർത്ഥിയാണ്. എന്റെ വാർഷിക വരുമാനം ₹1,50,000. "
         "എന്റെ ഫോൺ നമ്പർ 9876543210 ഉം ഇമെയിൽ rahul.sharma@example.com ഉം ആണ്."
     ),
-    },
+}
 
 AI_PROCESSING_STEPS: list[tuple[str, str, float]] = [
     ("🎙️", "Converting speech audio & running language detection...", 0.4),
