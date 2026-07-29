@@ -3,7 +3,7 @@ views/success.py
 =================
 Submission success page for Formitra.
 100% Multilingual translation support via t().
-Features celebratory green badge animation, ref code display, live document preview & download option.
+Features celebratory green badge animation, ref code display, large-format document preview & download option.
 """
 
 import base64
@@ -32,7 +32,7 @@ def render() -> None:
         ref_code = session.get("reference_code")
 
     form_title = session.get("selected_form") or "Scholarship Application"
-    language   = session.get("selected_language", "Hindi")
+    language   = session.get("selected_language", "English")
     form_data  = session.get("form_data", {})
 
     # Generate PDF document for preview & download
@@ -120,9 +120,9 @@ animation: fall 3s infinite ease-in-out;
 
     spacer()
 
-    # Live Interactive Document Preview Box
+    # Large-Format Interactive Document Preview Box
     if pdf_res:
-        with st.expander(t("preview_doc_title"), expanded=True):
+        with st.expander("📄 Official PDF Application Receipt Preview (Full Document View)", expanded=True):
             b64_pdf = base64.b64encode(pdf_res.pdf_bytes).decode("utf-8")
             
             grid_items = "".join(
@@ -134,18 +134,20 @@ animation: fall 3s infinite ease-in-out;
             ) if form_data else ""
 
             doc_fallback = f"""
-            <object data="data:application/pdf;base64,{b64_pdf}" type="application/pdf" width="100%" height="450" style="border:1.5px solid #10B981;border-radius:12px;">
-                <div style="background:#FFFFFF;color:#0F172A;padding:1.5rem;border-radius:12px;border:2px solid #059669;">
-                    <div style="background:#0F172A;color:#FFFFFF;padding:1rem;border-radius:8px;margin-bottom:0.75rem;">
-                        <div style="font-weight:800;font-size:1.1rem;color:#FF7A00;">NATIONAL SCHOLARSHIP PORTAL — GOVT OF INDIA</div>
-                        <div style="font-size:0.85rem;color:#E2E8F0;">Formitra AI Voice Application Receipt | Ref: {ref_code}</div>
+            <iframe src="data:application/pdf;base64,{b64_pdf}#toolbar=1&navpanes=0&scrollbar=1" width="100%" height="750px" style="border:3px solid #10B981;border-radius:16px;box-shadow:0 12px 40px rgba(16, 185, 129, 0.35);">
+                <object data="data:application/pdf;base64,{b64_pdf}" type="application/pdf" width="100%" height="750px">
+                    <div style="background:#FFFFFF;color:#0F172A;padding:1.5rem;border-radius:12px;border:2px solid #059669;">
+                        <div style="background:#0F172A;color:#FFFFFF;padding:1rem;border-radius:8px;margin-bottom:0.75rem;">
+                            <div style="font-weight:800;font-size:1.1rem;color:#FF7A00;">NATIONAL SCHOLARSHIP PORTAL — GOVT OF INDIA</div>
+                            <div style="font-size:0.85rem;color:#E2E8F0;">Formitra AI Voice Application Receipt | Ref: {ref_code}</div>
+                        </div>
+                        <div style="margin-bottom:1rem;">{grid_items}</div>
+                        <div style="background:#ECFDF5;border:1px solid #10B981;padding:0.75rem;border-radius:6px;font-size:0.8rem;color:#065F46;">
+                            <b>{t("receipt_sealed")}</b>
+                        </div>
                     </div>
-                    <div style="margin-bottom:1rem;">{grid_items}</div>
-                    <div style="background:#ECFDF5;border:1px solid #10B981;padding:0.75rem;border-radius:6px;font-size:0.8rem;color:#065F46;">
-                        <b>{t("receipt_sealed")}</b>
-                    </div>
-                </div>
-            </object>
+                </object>
+            </iframe>
             """
             st.markdown(doc_fallback, unsafe_allow_html=True)
 

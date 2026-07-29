@@ -3,7 +3,7 @@ views/preview.py
 ================
 Application preview page — translated via t().
 100% Multilingual translation support.
-Includes live PDF document preview & download option.
+Includes live, large-format PDF document preview & download option.
 """
 
 import base64
@@ -32,7 +32,7 @@ def render() -> None:
     now       = datetime.now().strftime("%d %b %Y, %I:%M %p")
     form_name = session.get("selected_form") or "Merit-cum-Means Scholarship 2025-26"
 
-    is_dark = st.session_state.get("dark_mode", False)
+    is_dark = st.session_state.get("dark_mode", True)
 
     if is_dark:
         dec_bg     = "rgba(217, 119, 6, 0.2)"
@@ -85,7 +85,7 @@ def render() -> None:
 
     # ── Declaration ────────────────────────────────────────────────
     st.markdown(
-        f'<div class="form-card" style="background:{dec_bg};border:{dec_border};">'
+        f'<div class="form-card" style="background:{dec_bg};border:{dec_border};margin-bottom:1.5rem;">'
         f'<div style="font-weight:800;font-size:0.98rem;color:{dec_title};margin-bottom:0.5rem;">{t("declaration_title")}</div>'
         f'<div style="font-size:0.88rem;color:{dec_txt};line-height:1.7;">'
         f'{t("declaration_text")}'
@@ -95,16 +95,17 @@ def render() -> None:
 
     agreed = st.checkbox(t("declaration_check"), key="declaration_agreed")
 
-    # ── Pre-Generate PDF Document for Live Preview ──────────────────
+    # ── Pre-Generate PDF Document for Live Big Preview ──────────────
     pdf_res = generate_pdf(
         form_data=form_data,
         application_no=app_no,
         form_title=form_name,
     )
 
-    # ── Live PDF Document Preview Box ──────────────────────────────
+    # ── Large-Format Live PDF Document Preview ─────────────────────
     if pdf_res:
-        with st.expander(t("preview_doc_title"), expanded=False):
+        st.markdown("<br>", unsafe_allow_html=True)
+        with st.expander("📄 Official PDF Application Receipt Preview (Full Document View)", expanded=True):
             b64_pdf = base64.b64encode(pdf_res.pdf_bytes).decode("utf-8")
             
             grid_items = "".join(
@@ -116,18 +117,20 @@ def render() -> None:
             ) if form_data else ""
 
             doc_fallback = f"""
-            <object data="data:application/pdf;base64,{b64_pdf}" type="application/pdf" width="100%" height="450" style="border:1.5px solid #FF7A00;border-radius:12px;">
-                <div style="background:#FFFFFF;color:#0F172A;padding:1.5rem;border-radius:12px;border:2px solid #FF7A00;">
-                    <div style="background:#0F172A;color:#FFFFFF;padding:1rem;border-radius:8px;margin-bottom:0.75rem;">
-                        <div style="font-weight:800;font-size:1.1rem;color:#FF7A00;">{t("nsp_portal_hdr")}</div>
-                        <div style="font-size:0.85rem;color:#E2E8F0;">Formitra AI Voice Application Receipt | Ref: {app_no}</div>
+            <iframe src="data:application/pdf;base64,{b64_pdf}#toolbar=1&navpanes=0&scrollbar=1" width="100%" height="750px" style="border:3px solid #FF7A00;border-radius:16px;box-shadow:0 12px 40px rgba(255, 122, 0, 0.35);">
+                <object data="data:application/pdf;base64,{b64_pdf}" type="application/pdf" width="100%" height="750px">
+                    <div style="background:#FFFFFF;color:#0F172A;padding:1.5rem;border-radius:12px;border:2px solid #FF7A00;">
+                        <div style="background:#0F172A;color:#FFFFFF;padding:1rem;border-radius:8px;margin-bottom:0.75rem;">
+                            <div style="font-weight:800;font-size:1.1rem;color:#FF7A00;">{t("nsp_portal_hdr")}</div>
+                            <div style="font-size:0.85rem;color:#E2E8F0;">Formitra AI Voice Application Receipt | Ref: {app_no}</div>
+                        </div>
+                        <div style="margin-bottom:1rem;">{grid_items}</div>
+                        <div style="background:#FEF3C7;border:1px solid #F59E0B;padding:0.75rem;border-radius:6px;font-size:0.8rem;color:#92400E;">
+                            <b>📜 {t("receipt_sealed")}</b>
+                        </div>
                     </div>
-                    <div style="margin-bottom:1rem;">{grid_items}</div>
-                    <div style="background:#FEF3C7;border:1px solid #F59E0B;padding:0.75rem;border-radius:6px;font-size:0.8rem;color:#92400E;">
-                        <b>📜 {t("receipt_sealed")}</b>
-                    </div>
-                </div>
-            </object>
+                </object>
+            </iframe>
             """
             st.markdown(doc_fallback, unsafe_allow_html=True)
 
