@@ -1,4 +1,4 @@
-// content.js — Formitra Web Form Auto-Filler Engine, Google Forms Scraper & Overlay Voice Prompter
+// content.js — Formitra Web Form Auto-Filler Engine, Google Forms Scraper & Multilingual Form Language Detector
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "AUTO_FILL_FORM") {
@@ -205,7 +205,6 @@ function scrapePageQuestions() {
   const isGoogleForms = window.location.href.includes("docs.google.com/forms");
 
   if (isGoogleForms) {
-    // Strategy 1: Google Forms Question Heading Elements (.M7eMe, role="heading", etc.)
     const gfHeaders = document.querySelectorAll(
       '.M7eMe, div[role="listitem"] [role="heading"], div[role="heading"] span, [role="heading"], .ge2dfc [role="heading"], .freebirdFormviewerComponentsQuestionBaseHeaderTitle, .HoLwm, .F9iA2e, [data-params], [aria-level="2"], [aria-level="3"]'
     );
@@ -215,7 +214,6 @@ function scrapePageQuestions() {
       if (rawText.includes("\n")) rawText = rawText.split("\n")[0];
       let cleanText = rawText.replace(/\*/g, "").trim();
 
-      // Exclude main form title or submit text noise
       const lower = cleanText.toLowerCase();
       if (
         cleanText && cleanText.length >= 2 &&
@@ -233,7 +231,6 @@ function scrapePageQuestions() {
       }
     });
 
-    // Strategy 2: Google Forms Input aria-label / title attributes
     const gfInputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], textarea, [role="textbox"], [role="radio"], [role="checkbox"]');
     gfInputs.forEach((inp, idx) => {
       const ariaLbl = (inp.getAttribute("aria-label") || inp.getAttribute("title") || "").replace(/\*/g, "").trim();
@@ -247,7 +244,6 @@ function scrapePageQuestions() {
     });
   }
 
-  // Strategy 3: Standard Web Form Inputs
   if (questions.length === 0) {
     const inputs = document.querySelectorAll("input, select, textarea");
     inputs.forEach((inp, idx) => {
@@ -267,7 +263,6 @@ function scrapePageQuestions() {
     });
   }
 
-  // Strategy 4: Fallback scan all h1-h4 & label tags on page
   if (questions.length === 0) {
     const allLabels = document.querySelectorAll("label, h1, h2, h3, h4, legend");
     allLabels.forEach((lbl, idx) => {
@@ -309,8 +304,82 @@ function extractFormFieldsFromText(text) {
   return fields;
 }
 
+// ── Target Form Language Detector & Native Value Translator ─────────────
+function detectFormTargetLanguage() {
+  const sample = document.body ? document.body.innerText.slice(0, 1500) : "";
+
+  if (/[\u0900-\u097F]/.test(sample)) return "Hindi";
+  if (/[\u0B00-\u0B7F]/.test(sample)) return "Odia";
+  if (/[\u0B80-\u0BFF]/.test(sample)) return "Tamil";
+  if (/[\u0C00-\u0C7F]/.test(sample)) return "Telugu";
+  if (/[\u0980-\u09FF]/.test(sample)) return "Bengali";
+  if (/[\u0D00-\u0D7F]/.test(sample)) return "Malayalam";
+  if (/[\u0C80-\u0CFF]/.test(sample)) return "Kannada";
+  return "English";
+}
+
+const NATIVE_VALUE_MATRIX = {
+  "city": {
+    "Jaipur": { Hindi: "जयपुर", Odia: "ଜୟପୁର", Tamil: "ஜெய்பூர்", Telugu: "జైపూర్", Bengali: "জয়পুর", Marathi: "जयपूर", Kannada: "ಜೈಪುರ", Malayalam: "ജയ്പൂർ", English: "Jaipur" },
+    "Delhi": { Hindi: "दिल्ली", Odia: "ଦିଲ୍ଲୀ", Tamil: "டெல்லி", Telugu: "ఢిల్లీ", Bengali: "দিল্লি", Marathi: "दिल्ली", Kannada: "ದೆಹಲಿ", Malayalam: "ഡൽഹി", English: "Delhi" },
+    "Bhubaneswar": { Hindi: "भुवनेश्वर", Odia: "ଭୁବନେଶ୍ୱର", Tamil: "புவனேஸ்வர்", Telugu: "భువనేశ్వర్", Bengali: "ভুবনেশ্বর", Marathi: "भुवनेश्वर", Kannada: "ಭುವನೇಶ್ವರ", Malayalam: "ഭുവനേശ്വർ", English: "Bhubaneswar" },
+    "Kolkata": { Hindi: "कोलकाता", Odia: "କୋଲକାତା", Tamil: "கொல்கத்தா", Telugu: "కోల్‌కతా", Bengali: "কলকাতা", Marathi: "कोलकाता", Kannada: "ಕೋಲ್ಕತ್ತಾ", Malayalam: "കൊൽക്കത്ത", English: "Kolkata" }
+  },
+  "state": {
+    "Rajasthan": { Hindi: "राजस्थान", Odia: "ରାଜସ୍ଥାନ", Tamil: "ராஜஸ்தான்", Telugu: "రాజస్థాన్", Bengali: "রাজস্থান", Marathi: "राजस्थान", Kannada: "ರಾಜಸ್ಥಾನ", Malayalam: "രാജസ്ഥാൻ", English: "Rajasthan" },
+    "Odisha": { Hindi: "ओडिशा", Odia: "ଓଡ଼ିଶା", Tamil: "ஒடிசா", Telugu: "ఒడిషా", Bengali: "ওড়িশা", Marathi: "ओडिशा", Kannada: "ಒಡಿಶಾ", Malayalam: "ഒഡീഷ", English: "Odisha" },
+    "West Bengal": { Hindi: "पश्चिम बंगाल", Odia: "ପଶ୍ଚିମ ବଙ୍ଗ", Tamil: "மேற்கு வங்கம்", Telugu: "పశ్చిమ బెంగాల్", Bengali: "পশ্চিমবঙ্গ", Marathi: "पश्चिम बंगाल", Kannada: "ಪಶ್ಚಿಮ ಬಂಗಾಳ", Malayalam: "പശ്ചിമ ബംഗാൾ", English: "West Bengal" }
+  },
+  "year": {
+    "Second Year": { Hindi: "द्वितीय वर्ष", Odia: "ଦ୍ୱିତୀୟ ବର୍ଷ", Tamil: "இரண்டாம் ஆண்டு", Telugu: "రెండవ సంవత్సరం", Bengali: "দ্বিতীয় বর্ষ", Marathi: "दुसरे वर्ष", Kannada: "ಎರಡನೇ ವರ್ಷ", Malayalam: "രണ്ടാം വർഷം", English: "Second Year" },
+    "First Year": { Hindi: "प्रथम वर्ष", Odia: "ପ୍ରଥମ ବର୍ଷ", Tamil: "முதல் ஆண்டு", Telugu: "మొదటి సంవత్సరం", Bengali: "প্রথম বর্ষ", Marathi: "पहिले वर्ष", Kannada: "ಮೊದಲ ವರ್ಷ", Malayalam: "ഒന്നാം വർഷം", English: "First Year" }
+  },
+  "course": {
+    "B.Tech": { Hindi: "बी.टेक", Odia: "ବି.ଟେକ୍", Tamil: "பி.டெக்", Telugu: "బి.టెక్", Bengali: "বি.টেক", Marathi: "बी.टेक", Kannada: "ಬಿ.ಟೆಕ್", Malayalam: "ബി.ടെക്", English: "B.Tech" }
+  },
+  "category": {
+    "General": { Hindi: "सामान्य", Odia: "ସାଧାରଣ", Tamil: "பொது", Telugu: "సాధారణ", Bengali: "সাধারণ", Marathi: "सामान्य", Kannada: "ಸಾಮಾನ್ಯ", Malayalam: "ജനറൽ", English: "General" },
+    "OBC": { Hindi: "ओबीसी", Odia: "ଓବିସି", Tamil: "ஓபிசி", Telugu: "ఓబిసి", Bengali: "ওবিসি", Marathi: "ओबीसी", Kannada: "ಒಬಿಸಿ", Malayalam: "ഒബിസി", English: "OBC" }
+  },
+  "gender": {
+    "Male": { Hindi: "पुरुष", Odia: "ପୁରୁଷ", Tamil: "ஆண்", Telugu: "పురుషుడు", Bengali: "পুরুষ", Marathi: "पुरुष", Kannada: "ಪುರುಷ", Malayalam: "ആൺ", English: "Male" },
+    "Female": { Hindi: "महिला", Odia: "ମହିଳା", Tamil: "பெண்", Telugu: "స్త్రీ", Bengali: "মহিলা", Marathi: "स्त्री", Kannada: "ಮಹಿಳೆ", Malayalam: "സ്ത്രീ", English: "Female" }
+  }
+};
+
+function formatValueToFormLanguage(key, rawVal, targetLang) {
+  if (!rawVal) return rawVal;
+
+  if (NATIVE_VALUE_MATRIX[key] && NATIVE_VALUE_MATRIX[key][rawVal]) {
+    const localized = NATIVE_VALUE_MATRIX[key][rawVal][targetLang];
+    if (localized) return localized;
+  }
+
+  return rawVal;
+}
+
 function fillPageFormFields(fields) {
   let count = 0;
+
+  // Detect language the active form is written in
+  const targetLang = detectFormTargetLanguage();
+  console.log(`🌐 Formitra: Auto-filling form matching detected form language -> ${targetLang}`);
+
+  // Format values to match form target language
+  const formattedFields = {
+    name: fields.name,
+    city: formatValueToFormLanguage("city", fields.city, targetLang),
+    state: formatValueToFormLanguage("state", fields.state, targetLang),
+    course: formatValueToFormLanguage("course", fields.course, targetLang),
+    year: formatValueToFormLanguage("year", fields.year, targetLang),
+    college: fields.college,
+    dob: fields.dob,
+    income: fields.income,
+    mobile: fields.mobile,
+    email: fields.email,
+    gender: formatValueToFormLanguage("gender", fields.gender, targetLang),
+    category: formatValueToFormLanguage("category", fields.category, targetLang)
+  };
 
   // ── 1. Dedicated Google Forms Deep Auto-Fill Engine ────────────────
   const isGoogleForms = window.location.href.includes("docs.google.com/forms");
@@ -327,16 +396,16 @@ function fillPageFormFields(fields) {
       const textInput = qContainer.querySelector('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], textarea, [role="textbox"]');
       
       let valToSet = null;
-      if (matchRule(qTitle, ["name", "full name", "applicant name", "candidate name", "first name", "last name", "नाम", "पूरा नाम"])) valToSet = fields.name;
-      else if (matchRule(qTitle, ["city", "town", "district", "शहर", "जिला"])) valToSet = fields.city;
-      else if (matchRule(qTitle, ["state", "domicile", "राज्य"])) valToSet = fields.state;
-      else if (matchRule(qTitle, ["income", "annual income", "family income", "आय", "वार्षिक आय"])) valToSet = fields.income;
-      else if (matchRule(qTitle, ["course", "degree", "program", "branch", "पाठ्यक्रम"])) valToSet = fields.course;
-      else if (matchRule(qTitle, ["year", "academic year", "year of study", "वर्ष"])) valToSet = fields.year;
-      else if (matchRule(qTitle, ["college", "institute", "school", "university", "संस्थान", "कॉलेज"])) valToSet = fields.college;
-      else if (matchRule(qTitle, ["dob", "date of birth", "birth date", "birthdate", "जन्मतिथि"])) valToSet = fields.dob;
-      else if (matchRule(qTitle, ["mobile", "phone", "contact", "फोन", "मोबाइल"])) valToSet = fields.mobile;
-      else if (matchRule(qTitle, ["email", "e-mail", "ईमेल"])) valToSet = fields.email;
+      if (matchRule(qTitle, ["name", "full name", "applicant name", "candidate name", "first name", "last name", "नाम", "पूरा नाम"])) valToSet = formattedFields.name;
+      else if (matchRule(qTitle, ["city", "town", "district", "शहर", "जिला"])) valToSet = formattedFields.city;
+      else if (matchRule(qTitle, ["state", "domicile", "राज्य"])) valToSet = formattedFields.state;
+      else if (matchRule(qTitle, ["income", "annual income", "family income", "आय", "वार्षिक आय"])) valToSet = formattedFields.income;
+      else if (matchRule(qTitle, ["course", "degree", "program", "branch", "पाठ्यक्रम"])) valToSet = formattedFields.course;
+      else if (matchRule(qTitle, ["year", "academic year", "year of study", "वर्ष"])) valToSet = formattedFields.year;
+      else if (matchRule(qTitle, ["college", "institute", "school", "university", "संस्थान", "कॉलेज"])) valToSet = formattedFields.college;
+      else if (matchRule(qTitle, ["dob", "date of birth", "birth date", "birthdate", "जन्मतिथि"])) valToSet = formattedFields.dob;
+      else if (matchRule(qTitle, ["mobile", "phone", "contact", "फोन", "मोबाइल"])) valToSet = formattedFields.mobile;
+      else if (matchRule(qTitle, ["email", "e-mail", "ईमेल"])) valToSet = formattedFields.email;
 
       if (textInput && valToSet !== null && valToSet !== undefined) {
         setGoogleFormsInputValue(textInput, valToSet);
@@ -349,14 +418,14 @@ function fillPageFormFields(fields) {
       const options = qContainer.querySelectorAll('[role="radio"], [role="checkbox"], [role="option"]');
       if (options.length > 0) {
         let targetVal = null;
-        if (matchRule(qTitle, ["gender", "sex", "लिंग"])) targetVal = fields.gender;
-        else if (matchRule(qTitle, ["category", "caste", "वर्ग", "श्रेणी"])) targetVal = fields.category;
-        else if (matchRule(qTitle, ["course", "degree"])) targetVal = fields.course;
+        if (matchRule(qTitle, ["gender", "sex", "लिंग"])) targetVal = formattedFields.gender;
+        else if (matchRule(qTitle, ["category", "caste", "वर्ग", "श्रेणी"])) targetVal = formattedFields.category;
+        else if (matchRule(qTitle, ["course", "degree"])) targetVal = formattedFields.course;
 
         if (targetVal) {
           options.forEach((opt) => {
             const optText = opt.innerText || opt.getAttribute("aria-label") || "";
-            if (optText.toLowerCase().includes(targetVal.toLowerCase())) {
+            if (optText.toLowerCase().includes(targetVal.toLowerCase()) || targetVal.toLowerCase().includes(optText.toLowerCase())) {
               opt.click();
               highlightFilledInput(opt, targetVal);
               count++;
@@ -380,16 +449,16 @@ function fillPageFormFields(fields) {
 
     let valToSet = null;
 
-    if (matchRule(fullSearch, ["name", "full name", "applicant name", "candidate name", "नाम"])) valToSet = fields.name;
-    else if (matchRule(fullSearch, ["city", "town", "district", "शहर"])) valToSet = fields.city;
-    else if (matchRule(fullSearch, ["state", "domicile", "राज्य"])) valToSet = fields.state;
-    else if (matchRule(fullSearch, ["income", "annual income", "family income", "आय"])) valToSet = fields.income;
-    else if (matchRule(fullSearch, ["course", "degree", "program", "पाठ्यक्रम"])) valToSet = fields.course;
-    else if (matchRule(fullSearch, ["year", "academic year", "वर्ष"])) valToSet = fields.year;
-    else if (matchRule(fullSearch, ["college", "institute", "school", "university", "संस्थान"])) valToSet = fields.college;
-    else if (matchRule(fullSearch, ["dob", "date of birth", "birth date", "जन्मतिथि"])) valToSet = fields.dob;
-    else if (matchRule(fullSearch, ["mobile", "phone", "contact", "फोन"])) valToSet = fields.mobile;
-    else if (matchRule(fullSearch, ["email", "e-mail", "ईमेल"])) valToSet = fields.email;
+    if (matchRule(fullSearch, ["name", "full name", "applicant name", "candidate name", "नाम"])) valToSet = formattedFields.name;
+    else if (matchRule(fullSearch, ["city", "town", "district", "शहर"])) valToSet = formattedFields.city;
+    else if (matchRule(fullSearch, ["state", "domicile", "राज्य"])) valToSet = formattedFields.state;
+    else if (matchRule(fullSearch, ["income", "annual income", "family income", "आय"])) valToSet = formattedFields.income;
+    else if (matchRule(fullSearch, ["course", "degree", "program", "पाठ्यक्रम"])) valToSet = formattedFields.course;
+    else if (matchRule(fullSearch, ["year", "academic year", "वर्ष"])) valToSet = formattedFields.year;
+    else if (matchRule(fullSearch, ["college", "institute", "school", "university", "संस्थान"])) valToSet = formattedFields.college;
+    else if (matchRule(fullSearch, ["dob", "date of birth", "birth date", "जन्मतिथि"])) valToSet = formattedFields.dob;
+    else if (matchRule(fullSearch, ["mobile", "phone", "contact", "फोन"])) valToSet = formattedFields.mobile;
+    else if (matchRule(fullSearch, ["email", "e-mail", "ईमेल"])) valToSet = formattedFields.email;
 
     if (valToSet !== null && valToSet !== undefined) {
       setGoogleFormsInputValue(input, valToSet);
