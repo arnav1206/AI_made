@@ -1,4 +1,4 @@
-// popup.js — Formitra Extension Speech, Question Scraper & Multilingual Voice Prompter
+// popup.js — Formitra Extension Speech, Microphone Authorization & Question Scraper
 
 document.addEventListener("DOMContentLoaded", () => {
   const langSelect         = document.getElementById("langSelect");
@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const micBtn             = document.getElementById("micBtn");
   const micIcon            = document.getElementById("micIcon");
   const statusText         = document.getElementById("statusText");
+  const grantMicBtn        = document.getElementById("grantMicBtn");
   const langDetected       = document.getElementById("langDetected");
   const transcriptText     = document.getElementById("transcriptText");
   const demoBtn            = document.getElementById("demoBtn");
@@ -22,6 +23,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let recognition = null;
   let isRecording = false;
   let importedQuestions = [];
+
+  // Grant Mic Button Handler
+  if (grantMicBtn) {
+    grantMicBtn.addEventListener("click", () => {
+      chrome.tabs.create({ url: chrome.runtime.getURL("permission.html") });
+    });
+  }
 
   // Initialize Speech Recognition
   if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
@@ -47,7 +55,13 @@ document.addEventListener("DOMContentLoaded", () => {
     recognition.onerror = (event) => {
       console.warn("Speech recognition error:", event.error);
       stopRecording();
-      showToast("⚠️ Mic access error: " + event.error);
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        statusText.innerText = "⚠️ Mic Access Blocked! Click button below to allow.";
+        showToast("⚠️ Microphone access required. Opening permission page...");
+        chrome.tabs.create({ url: chrome.runtime.getURL("permission.html") });
+      } else {
+        showToast("⚠️ Speech error: " + event.error);
+      }
     };
 
     recognition.onend = () => {
@@ -61,11 +75,20 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Mic Button Click
-  micBtn.addEventListener("click", () => {
+  micBtn.addEventListener("click", async () => {
     if (isRecording) {
       stopRecording();
     } else {
-      startRecording();
+      // Pre-check permission
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(t => t.stop());
+        startRecording();
+      } catch (err) {
+        console.warn("Microphone permission pre-check failed:", err);
+        statusText.innerText = "⚠️ Mic Access Required!";
+        chrome.tabs.create({ url: chrome.runtime.getURL("permission.html") });
+      }
     }
   });
 
@@ -82,6 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
       statusText.innerText = `🎙️ Listening in ${langSelect.options[langSelect.selectedIndex].text}... Speak clearly.`;
     } catch (e) {
       console.error(e);
+      chrome.tabs.create({ url: chrome.runtime.getURL("permission.html") });
     }
   }
 
@@ -111,7 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderImportedQuestions(importedQuestions);
         showToast(`🎉 Imported ${importedQuestions.length} form questions!`);
       } else {
-        // Fallback default questions if no input tags detected
         importedQuestions = [
           { id: "q1", title: "Full Name", required: true },
           { id: "q2", title: "Date of Birth", required: true },
@@ -147,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    window.speechSynthesis.cancel(); // Stop any active speech
+    window.speechSynthesis.cancel();
 
     const selectedLang = langSelect.value;
     const translatedTitles = questions.map((q, idx) => `${idx + 1}. ${translateTitle(q.title, selectedLang)}`);
@@ -227,7 +250,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (t.includes("mobile") || t.includes("phone") || t.includes("contact") || t.includes("फोन")) return getQTrans("mobile", langCode);
     if (t.includes("email") || t.includes("mail") || t.includes("ईमेल")) return getQTrans("email", langCode);
 
-    // Dynamic Fallback
     const prefixes = {
       "hi-IN": "कृपया इस फ़ील्ड की जानकारी बताएं: ",
       "en-IN": "Please provide details for: ",
@@ -281,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       mobile: {
         "hi-IN": "आपका मोबाइल नंबर क्या है?", "en-IN": "What is your mobile number?", "or-IN": "ଆପଣଙ୍କ ମୋବାଇଲ୍ ନମ୍ବର କ’ଣ?",
-        "ta-IN": "உங்கள் அலைபேசி எண் என்ன?", "te-IN": "మీ మొబైల్ నంబర్ ఏమిటి?", "bn-IN": "আপনার মোবাইল নম্বর কী?",
+        "ta-IN": "உங்கள் அலைபேசி எண் என்ன?", "te-IN": "మీ మొబൈల్ నంబర్ ఏమిటి?", "bn-IN": "আপনার মোবাইল নম্বর কী?",
         "mr-IN": "तुमचा मोबाईल नंबर काय आहे?", "kn-IN": "ನಿಮ್ಮ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ಏನು?", "ml-IN": "നിങ്ങളുടെ മൊബൈൽ നമ്പർ എന്താണ്?",
       },
       email: {
