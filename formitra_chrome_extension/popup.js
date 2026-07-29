@@ -1,4 +1,4 @@
-// popup.js — Formitra Extension Speech, Microphone Authorization & Question Scraper
+// popup.js — Formitra Extension Speech, Google Forms Scraper & Multilingual Voice Prompter
 
 document.addEventListener("DOMContentLoaded", () => {
   const langSelect         = document.getElementById("langSelect");
@@ -79,7 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isRecording) {
       stopRecording();
     } else {
-      // Pre-check permission
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         stream.getTracks().forEach(t => t.stop());
@@ -127,41 +126,46 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    chrome.tabs.sendMessage(tab.id, { action: "SCRAPE_FORM_QUESTIONS" }, (response) => {
-      if (chrome.runtime.lastError) {
-        showToast("⚠️ Please refresh the web page or open a form tab.");
-      } else if (response && response.questions && response.questions.length > 0) {
-        importedQuestions = response.questions;
-        renderImportedQuestions(importedQuestions);
-        showToast(`🎉 Imported ${importedQuestions.length} form questions!`);
-      } else {
-        importedQuestions = [
-          { id: "q1", title: "Full Name", required: true },
-          { id: "q2", title: "Date of Birth", required: true },
-          { id: "q3", title: "City / District", required: true },
-          { id: "q4", title: "State of Domicile", required: true },
-          { id: "q5", title: "College / Institute Name", required: true },
-          { id: "q6", title: "Course / Degree", required: true },
-          { id: "q7", title: "Annual Family Income", required: true },
-          { id: "q8", title: "Mobile Number", required: true },
-        ];
-        renderImportedQuestions(importedQuestions);
-        showToast(`📋 Imported ${importedQuestions.length} standard form fields`);
-      }
-    });
+    const tryScrapeMessage = (tabId) => {
+      chrome.tabs.sendMessage(tabId, { action: "SCRAPE_FORM_QUESTIONS" }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.warn("Injecting content.js fallback:", chrome.runtime.lastError.message);
+          chrome.scripting.executeScript({
+            target: { tabId: tabId },
+            files: ["content.js"]
+          }, () => {
+            setTimeout(() => {
+              chrome.tabs.sendMessage(tabId, { action: "SCRAPE_FORM_QUESTIONS" }, (res2) => {
+                if (res2 && res2.questions && res2.questions.length > 0) {
+                  importedQuestions = res2.questions;
+                  renderImportedQuestions(importedQuestions);
+                  showToast(`🎉 Imported ${importedQuestions.length} Google Form questions!`);
+                } else {
+                  showToast("⚠️ Open a Google Form or Web Form tab to import questions.");
+                }
+              });
+            }, 300);
+          });
+        } else if (response && response.questions && response.questions.length > 0) {
+          importedQuestions = response.questions;
+          renderImportedQuestions(importedQuestions);
+          showToast(`🎉 Imported ${importedQuestions.length} Google Form questions!`);
+        } else {
+          showToast("⚠️ Could not locate question fields on this active tab.");
+        }
+      });
+    };
+
+    tryScrapeMessage(tab.id);
   });
 
   // ── 2. Read Out Questions Aloud in Selected Native Language ────────
   speakQuestionsBtn.addEventListener("click", () => {
-    const list = importedQuestions.length > 0 ? importedQuestions : [
-      { title: "Full Name" },
-      { title: "Date of Birth" },
-      { title: "City / District" },
-      { title: "State of Domicile" },
-      { title: "Course" },
-      { title: "Annual Family Income" },
-    ];
-    speakQuestionsList(list);
+    if (importedQuestions.length === 0) {
+      showToast("⚠️ Click '📥 Import Questions' first to load form questions!");
+      return;
+    }
+    speakQuestionsList(importedQuestions);
   });
 
   function speakQuestionsList(questions) {
@@ -236,32 +240,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Multilingual Question Translator Matrix
+  // Multilingual Question Translator Matrix for Google Form Questions
   function translateTitle(title, langCode) {
     const t = title.toLowerCase();
 
     if (t.includes("name") || t.includes("नाम")) return getQTrans("name", langCode);
     if (t.includes("dob") || t.includes("birth") || t.includes("जन्म")) return getQTrans("dob", langCode);
-    if (t.includes("city") || t.includes("district") || t.includes("शहर") || t.includes("जिला")) return getQTrans("city", langCode);
+    if (t.includes("city") || t.includes("district") || t.includes("town") || t.includes("शहर") || t.includes("जिला")) return getQTrans("city", langCode);
     if (t.includes("state") || t.includes("domicile") || t.includes("राज्य")) return getQTrans("state", langCode);
-    if (t.includes("income") || t.includes("आय")) return getQTrans("income", langCode);
-    if (t.includes("college") || t.includes("institute") || t.includes("school") || t.includes("संस्थान")) return getQTrans("college", langCode);
-    if (t.includes("course") || t.includes("degree") || t.includes("पाठ्यक्रम")) return getQTrans("course", langCode);
+    if (t.includes("income") || t.includes("salary") || t.includes("आय")) return getQTrans("income", langCode);
+    if (t.includes("college") || t.includes("institute") || t.includes("school") || t.includes("university") || t.includes("संस्थान") || t.includes("कॉलेज")) return getQTrans("college", langCode);
+    if (t.includes("course") || t.includes("degree") || t.includes("branch") || t.includes("पाठ्यक्रम")) return getQTrans("course", langCode);
+    if (t.includes("year") || t.includes("academic year") || t.includes("वर्ष")) return getQTrans("year", langCode);
     if (t.includes("mobile") || t.includes("phone") || t.includes("contact") || t.includes("फोन")) return getQTrans("mobile", langCode);
     if (t.includes("email") || t.includes("mail") || t.includes("ईमेल")) return getQTrans("email", langCode);
 
     const prefixes = {
-      "hi-IN": "कृपया इस फ़ील्ड की जानकारी बताएं: ",
-      "en-IN": "Please provide details for: ",
-      "or-IN": "ଦୟାକରି ଏହି ବିବରଣୀ ପ୍ରଦାନ କରନ୍ତୁ: ",
-      "ta-IN": "தயவுசெய்து இந்த விவரத்தை வழங்கவும்: ",
-      "te-IN": "దయచేసి ఈ వివరాలను అందించండి: ",
-      "bn-IN": "অনুগ্রহ করে এই বিবরণ দিন: ",
-      "mr-IN": "कृपया ही माहिती द्या: ",
-      "kn-IN": "ದಯವಿಟ್ಟು ಈ ವಿವರಗಳನ್ನು ನೀಡಿ: ",
-      "ml-IN": "ദയവായി ഈ വിവരങ്ങൾ നൽകുക: ",
+      "hi-IN": "प्रश्न: " + title + " — कृपया इसका उत्तर दें",
+      "en-IN": "Question: " + title + " — Please provide your answer",
+      "or-IN": "ପ୍ରଶ୍ନ: " + title + " — ଦୟାକରି ଏହାର ଉତ୍ତର ଦିଅନ୍ତୁ",
+      "ta-IN": "கேள்வி: " + title + " — தயவுசெய்து பதிலளிக்கவும்",
+      "te-IN": "ప్రశ్న: " + title + " — దయచేసి సమాధానం ఇవ్వండి",
+      "bn-IN": "প্রশ্ন: " + title + " — অনুগ্রহ করে উত্তর দিন",
+      "mr-IN": "प्रश्न: " + title + " — कृपया याचे उत्तर द्या",
+      "kn-IN": "ಪ್ರಶ್ನೆ: " + title + " — ದಯವಿಟ್ಟು ಉತ್ತರಿಸಿ",
+      "ml-IN": "ചോദ്യം: " + title + " — ദയവായി ഉത്തരം നൽകുക",
     };
-    return (prefixes[langCode] || prefixes["en-IN"]) + title;
+    return (prefixes[langCode] || prefixes["en-IN"]);
   }
 
   function getQTrans(key, langCode) {
@@ -284,7 +289,7 @@ document.addEventListener("DOMContentLoaded", () => {
       state: {
         "hi-IN": "आपका राज्य कौन सा है?", "en-IN": "What is your state of domicile?", "or-IN": "ଆପଣଙ୍କ ରାଜ୍ୟ କ’ଣ?",
         "ta-IN": "உங்கள் மாநிலம் எது?", "te-IN": "మీ రాష్ట్రం ఏది?", "bn-IN": "আপনার রাজ্য কোনটি?",
-        "mr-IN": "तुमचे राज्य कोणते आहे?", "kn-IN": "ನಿಮ್ಮ ರಾಜ್ಯ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ സംസ്ഥാനം ഏതാണ്?",
+        "mr-IN": "तुमचे राज्य कोणते आहे?", "kn-IN": "ನಿಮ್ಮ રાજ્ય ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ സംസ്ഥാനം ഏതാണ്?",
       },
       income: {
         "hi-IN": "आपकी वार्षिक पारिवारिक आय कितनी है?", "en-IN": "What is your annual family income?", "or-IN": "ଆପଣଙ୍କ ବାର୍ଷିକ ପାରିବାରିକ ଆୟ କେତେ?",
@@ -299,16 +304,21 @@ document.addEventListener("DOMContentLoaded", () => {
       course: {
         "hi-IN": "आपका पाठ्यक्रम या कोर्स कौन सा है?", "en-IN": "What course are you enrolled in?", "or-IN": "ଆପଣଙ୍କ ପାଠ୍ୟକ୍ରମ କ’ଣ?",
         "ta-IN": "உங்கள் படிப்பு என்ன?", "te-IN": "మీ కోర్సు ఏమిటి?", "bn-IN": "আপনার কোর্স কোনটি?",
-        "mr-IN": "तुमचा कोर्स कोणता आहे?", "kn-IN": "ನಿಮ್ಮ ಕೋರ್ಸ್ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ കോഴ്‌സ് ഏതാണ്?",
+        "mr-IN": "तुमचा कोर्स कोणता आहे?", "kn-IN": "ನಿಮ್ಮ ಕೋರ್ಸ್ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ ಕೋರ್ಸ್ ಏതാണ്?",
+      },
+      year: {
+        "hi-IN": "आपका अध्ययन का वर्ष कौन सा है?", "en-IN": "What is your year of study?", "or-IN": "ଆପଣଙ୍କ ପାଠପଢ଼ା ବର୍ଷ କ’ଣ?",
+        "ta-IN": "உங்கள் படிப்பு ஆண்டு என்ன?", "te-IN": "మీ చదువు సంవత్సరం ఏమిటి?", "bn-IN": "আপনার অধ্যয়নের বছর কোনটি?",
+        "mr-IN": "तुमचे अभ्यासाचे वर्ष कोणते आहे?", "kn-IN": "ನಿಮ್ಮ ಅಧ್ಯಯನದ ವರ್ಷ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ പഠന വർഷം ഏതാണ്?",
       },
       mobile: {
         "hi-IN": "आपका मोबाइल नंबर क्या है?", "en-IN": "What is your mobile number?", "or-IN": "ଆପଣଙ୍କ ମୋବାଇଲ୍ ନମ୍ବର କ’ଣ?",
-        "ta-IN": "உங்கள் அலைபேசி எண் என்ன?", "te-IN": "మీ మొబൈల్ నంబర్ ఏమిటి?", "bn-IN": "আপনার মোবাইল নম্বর কী?",
+        "ta-IN": "உங்கள் அலைபேசி எண் என்ன?", "te-IN": "మీ మొబైల్ నంబర్ ఏమిటి?", "bn-IN": "আপনার মোবাইল নম্বর কী?",
         "mr-IN": "तुमचा मोबाईल नंबर काय आहे?", "kn-IN": "ನಿಮ್ಮ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ಏನು?", "ml-IN": "നിങ്ങളുടെ മൊബൈൽ നമ്പർ എന്താണ്?",
       },
       email: {
         "hi-IN": "आपका ईमेल पता क्या है?", "en-IN": "What is your email address?", "or-IN": "ଆପଣଙ୍କ ଇମେଲ୍ ଠିକଣା କ’ଣ?",
-        "ta-IN": "உங்கள் மின்னஞ்சல் முகவரி என்ன?", "te-IN": "మీ ఇమెయిల్ చిరునామా ఏమిటి?", "bn-IN": "আপনার ইমেল ঠিকানা কী?",
+        "ta-IN": "உங்கள் மின்னஞ்சல் முகவரி என்ன?", "te-IN": "మీ ఇమెయిల్ చిరునాமா ఏమిటి?", "bn-IN": "আপনার ইমেল ঠিকানা কী?",
         "mr-IN": "तुमचा ईमेल पत्ता काय आहे?", "kn-IN": "ನಿಮ್ಮ ಇಮೇಲ್ ವಿಳಾಸ ಏನು?", "ml-IN": "നിങ്ങളുടെ ഇമെയിൽ വിലാസം എന്താണ്?",
       }
     };

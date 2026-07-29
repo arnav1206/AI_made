@@ -1,4 +1,4 @@
-// content.js — Formitra Web Form Auto-Filler Engine, Google Forms Assistant & Question Scraper
+// content.js — Formitra Web Form Auto-Filler Engine, Google Forms Scraper & Overlay Voice Prompter
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "AUTO_FILL_FORM") {
@@ -124,7 +124,7 @@ function openFloatingFormitraWidget() {
     pageQuestions = scrapePageQuestions();
     const statusDiv = document.getElementById("fmt-q-status");
     statusDiv.style.display = "block";
-    statusDiv.innerText = `📋 Imported ${pageQuestions.length} questions from this form!`;
+    statusDiv.innerText = `📋 Imported ${pageQuestions.length} questions from Google Form!`;
   });
 
   document.getElementById("fmt-speak-btn").addEventListener("click", () => {
@@ -132,7 +132,7 @@ function openFloatingFormitraWidget() {
       pageQuestions = scrapePageQuestions();
     }
     const qList = pageQuestions.map((q, idx) => `${idx + 1}. ${q.title}`);
-    const textToSpeak = `Formitra Assistant: ${qList.join("। ")}`;
+    const textToSpeak = `Formitra Google Forms Assistant: ${qList.join("। ")}`;
 
     if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
@@ -195,38 +195,46 @@ function openFloatingFormitraWidget() {
   });
 }
 
+// ── Google Forms & Web Page Deep Question Extractor ────────────────
 function scrapePageQuestions() {
   const questions = [];
   const isGoogleForms = window.location.href.includes("docs.google.com/forms");
 
   if (isGoogleForms) {
-    const qContainers = document.querySelectorAll('div[role="listitem"], div[jsmodel], .ge2dfc, .freebirdFormviewerComponentsQuestionBaseRoot, .o3b8eb');
-    qContainers.forEach((q, idx) => {
-      const titleElem = q.querySelector('.M7eMe, [role="heading"], .HoLwm, .freebirdFormviewerComponentsQuestionBaseHeaderTitle, span');
-      if (titleElem) {
-        const text = titleElem.innerText.trim();
-        if (text && text.length > 2 && !questions.some(item => item.title === text)) {
-          const req = q.innerText.includes("*") || q.querySelector('.codefx, [aria-label*="required"]') !== null;
-          questions.push({
-            id: `gf_q_${idx}`,
-            title: text,
-            required: req,
-          });
-        }
+    // Primary Google Forms Question Containers & Heading Selectors
+    const gfHeaders = document.querySelectorAll(
+      '.M7eMe, div[role="listitem"] div[role="heading"] span, div[role="listitem"] [role="heading"], .ge2dfc [role="heading"], .freebirdFormviewerComponentsQuestionBaseHeaderTitle, .HoLwm, .F9iA2e'
+    );
+
+    gfHeaders.forEach((hElem, idx) => {
+      let rawText = hElem.innerText || hElem.textContent || "";
+      let cleanText = rawText.replace(/\*/g, "").trim();
+
+      // Filter out form main header title or short empty noise
+      if (cleanText && cleanText.length >= 3 && !questions.some(q => q.title.toLowerCase() === cleanText.toLowerCase())) {
+        const parentCard = hElem.closest('div[role="listitem"], div[jsmodel], .ge2dfc, .o3b8eb, div[data-params]') || hElem.parentElement;
+        const isReq = parentCard ? (parentCard.innerText.includes("*") || parentCard.querySelector('.codefx, [aria-label*="required"]') !== null) : false;
+
+        questions.push({
+          id: `gf_q_${idx}`,
+          title: cleanText,
+          required: isReq,
+        });
       }
     });
   }
 
+  // Standard HTML Web Form Input Scanner
   if (questions.length === 0) {
     const inputs = document.querySelectorAll("input, select, textarea");
     inputs.forEach((inp, idx) => {
       if (inp.type === "hidden" || inp.type === "submit" || inp.type === "button") return;
 
-      const labelText = getFieldLabelText(inp).trim();
+      const labelText  = getFieldLabelText(inp).replace(/\*/g, "").trim();
       const placeholder = inp.placeholder || inp.name || inp.id || "";
       const displayTitle = labelText || placeholder;
 
-      if (displayTitle && !questions.some(q => q.title === displayTitle)) {
+      if (displayTitle && displayTitle.length >= 2 && !questions.some(q => q.title.toLowerCase() === displayTitle.toLowerCase())) {
         questions.push({
           id: `inp_q_${idx}`,
           title: displayTitle,
