@@ -394,10 +394,27 @@ def _extract_gemini_api(transcript: str, language: str) -> ExtractionResult:
 
 
 def _parse_json_from_llm(raw_text: str) -> dict:
-    fence_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw_text, re.DOTALL)
-    if fence_match:
-        return json.loads(fence_match.group(1))
-    obj_match = re.search(r"\{[^{}]+\}", raw_text, re.DOTALL)
-    if obj_match:
-        return json.loads(obj_match.group())
-    return json.loads(raw_text.strip())
+    if not raw_text:
+        raise ValueError("Empty text received from LLM")
+
+    # 1. Strip top/bottom markdown code fences
+    cleaned = re.sub(r"^```(?:json)?\s*", "", raw_text.strip(), flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s*```$", "", cleaned).strip()
+
+    # 2. Try direct json.loads
+    try:
+        return json.loads(cleaned)
+    except Exception:
+        pass
+
+    # 3. Extract JSON object bounded by outermost '{' and '}'
+    first_brace = raw_text.find('{')
+    last_brace = raw_text.rfind('}')
+    if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+        candidate = raw_text[first_brace:last_brace + 1]
+        try:
+            return json.loads(candidate)
+        except Exception as err:
+            logger.warning("Outer brace JSON parse failed: %s", err)
+
+    raise ValueError(f"Could not parse valid JSON from LLM output: {raw_text[:120]}")
