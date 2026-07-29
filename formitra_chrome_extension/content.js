@@ -9,6 +9,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     openFloatingFormitraWidget();
     sendResponse({ status: "STARTED" });
   } else if (request.action === "SCRAPE_FORM_QUESTIONS") {
+    if (window.self !== window.top) {
+      sendResponse({ status: "SUCCESS", questions: [], hasNextPage: false });
+      return true;
+    }
     const questions = scrapePageQuestions();
     const hasNext = detectNextPageButton();
     sendResponse({ status: "SUCCESS", questions: questions, hasNextPage: hasNext });

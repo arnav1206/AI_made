@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (chrome.runtime.lastError) {
         console.warn("Injecting content.js fallback:", chrome.runtime.lastError.message);
         chrome.scripting.executeScript({
-          target: { tabId: tab.id, allFrames: true },
+          target: { tabId: tab.id, allFrames: false },
           files: ["content.js"]
         }, () => {
           setTimeout(() => {
