@@ -1,8 +1,9 @@
 """
 components/navbar.py
 ====================
-Sidebar navigation component with language selector, user auth status, Admin Portal link & Dark Mode toggle.
+Sidebar navigation component with language selector, user auth status, & Dark Mode toggle.
 Features official Formitra darkmode multilingual brand logo with flexbox centered image alignment.
+Clean workflow navigation without duplicate authentication buttons.
 """
 
 from __future__ import annotations
@@ -18,9 +19,6 @@ import utils.auth as auth
 
 
 _NAV_KEYS: dict[str, str] = {
-    "login":          "nav_login",
-    "register":       "nav_register",
-    "admin":          "nav_admin",
     "home":           "nav_home",
     "form_selection": "nav_form_selection",
     "voice_input":    "nav_voice_input",
@@ -100,18 +98,13 @@ def _user_auth_badge() -> None:
             unsafe_allow_html=True,
         )
     else:
-        c1, c2 = st.columns(2)
-        with c1:
-            if st.button("🔑 Login", key="sb_login_btn", use_container_width=True):
-                session.navigate("login")
-        with c2:
-            if st.button("📝 Register", key="sb_reg_btn", use_container_width=True):
-                session.navigate("register")
+        if st.button("🔑 Account Login / Register", key="sb_login_btn", use_container_width=True):
+            session.navigate("login")
 
 
 def _theme_toggle_button() -> None:
     """Dark / Light mode switcher."""
-    is_dark = session.get("dark_mode", False)
+    is_dark = session.get("dark_mode", True)
     btn_label = "☀️ Light Mode" if is_dark else "🌙 Dark Mode"
     if st.button(btn_label, key="theme_toggle_btn", use_container_width=True):
         session.set("dark_mode", not is_dark)
@@ -154,7 +147,9 @@ def _nav_section() -> None:
         unsafe_allow_html=True,
     )
 
-    for page_key in PAGE_ORDER:
+    nav_pages = [p for p in PAGE_ORDER if p not in ("login", "register", "admin")]
+
+    for page_key in nav_pages:
         label = t(_NAV_KEYS.get(page_key, f"nav_{page_key}"))
         is_active = (page_key == current_page)
 

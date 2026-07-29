@@ -3,7 +3,7 @@ views/login.py
 ==============
 Initial Login & Authentication Page for Formitra.
 100% Multilingual translation support via t().
-Supports Password/OTP authentication, Reference Number tracking, Guest mode & New Registration.
+Supports Applicant Login, Admin Portal Login, Demo Access & Reference Number tracking.
 """
 
 from __future__ import annotations
@@ -20,6 +20,30 @@ def render() -> None:
     tricolour_bar()
 
     section_heading(t("login_heading"), t("login_sub"))
+
+    if auth.is_admin_logged_in():
+        admin_name = st.session_state.get("admin_user", "Administrator")
+        st.markdown(
+            f'<div class="card" style="border-left:5px solid #2563EB;background:linear-gradient(135deg, #EFF6FF, #DBEAFE);text-align:center;padding:2rem;">'
+            f'<div style="font-size:3rem;margin-bottom:0.5rem;">🛡️</div>'
+            f'<div style="font-size:1.4rem;font-weight:900;color:#1E40AF;">Authenticated as Administrator ({admin_name})</div>'
+            f'<div style="font-size:0.92rem;color:#1E3A8A;margin-top:0.35rem;">'
+            f'Full administrative access to student applications and approval workflows.</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("🛡️ Open Admin Portal →", use_container_width=True, type="primary"):
+                session.navigate("admin")
+        with col2:
+            if st.button("🚪 Logout Admin", use_container_width=True):
+                auth.admin_logout()
+                st.toast("Admin logged out successfully.")
+                st.rerun()
+
+        return
 
     if auth.is_logged_in():
         user = auth.get_logged_in_user()
@@ -60,7 +84,12 @@ def render() -> None:
             unsafe_allow_html=True,
         )
 
-        tab1, tab2, tab3 = st.tabs([t("login_tab_pwd"), t("login_tab_demo"), t("login_tab_ref")])
+        tab1, tab2, tab3, tab4 = st.tabs([
+            t("login_tab_pwd"),
+            "🛡️ Admin Login",
+            t("login_tab_demo"),
+            t("login_tab_ref")
+        ])
 
         with tab1:
             identifier = st.text_input(
@@ -90,6 +119,37 @@ def render() -> None:
 
         with tab2:
             st.markdown(
+                '<div style="font-size:0.88rem;opacity:0.85;margin:0.5rem 0 0.8rem;line-height:1.5;text-align:center;">'
+                'Enter government officer / portal administrator credentials to access the submission database and verification dashboard.'
+                '</div>',
+                unsafe_allow_html=True,
+            )
+            admin_user = st.text_input(
+                "Admin Username",
+                value="admin",
+                placeholder="Enter admin username (e.g. admin)",
+                key="admin_login_user",
+            )
+            admin_pass = st.text_input(
+                "Admin Password",
+                value="admin123",
+                type="password",
+                placeholder="Enter admin password",
+                key="admin_login_pass",
+            )
+            if st.button("🛡️ Login to Admin Portal", use_container_width=True, type="primary"):
+                if admin_user.strip() and admin_pass.strip():
+                    success, msg = auth.admin_login(admin_user, admin_pass)
+                    if success:
+                        st.toast(msg)
+                        session.navigate("admin")
+                    else:
+                        st.error(msg)
+                else:
+                    st.warning("Please enter admin username and password.")
+
+        with tab3:
+            st.markdown(
                 '<div style="font-size:0.88rem;opacity:0.85;margin:0.5rem 0 1rem;line-height:1.5;text-align:center;">'
                 'Testing the platform? Login immediately using the default <b>Rahul Sharma (Demo Profile)</b> account.'
                 '</div>',
@@ -100,7 +160,7 @@ def render() -> None:
                 st.toast("Logged in as Rahul Sharma (Demo Account)")
                 session.navigate("home")
 
-        with tab3:
+        with tab4:
             ref_code = st.text_input(
                 t("app_number"),
                 placeholder="e.g. FMT-2026-89412",
