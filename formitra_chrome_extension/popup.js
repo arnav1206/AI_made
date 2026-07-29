@@ -1,21 +1,27 @@
-// popup.js — Formitra Extension Speech, Extraction & AI Voice Prompter
+// popup.js — Formitra Extension Speech, Question Scraper & Multilingual Voice Prompter
 
 document.addEventListener("DOMContentLoaded", () => {
-  const langSelect     = document.getElementById("langSelect");
-  const micBtn         = document.getElementById("micBtn");
-  const micIcon        = document.getElementById("micIcon");
-  const statusText     = document.getElementById("statusText");
-  const langDetected   = document.getElementById("langDetected");
-  const transcriptText = document.getElementById("transcriptText");
-  const demoBtn        = document.getElementById("demoBtn");
-  const extractionCard = document.getElementById("extractionCard");
-  const extractionGrid = document.getElementById("extractionGrid");
-  const extractedCount = document.getElementById("extractedCount");
-  const autoFillBtn    = document.getElementById("autoFillBtn");
-  const toast          = document.getElementById("toast");
+  const langSelect         = document.getElementById("langSelect");
+  const importQuestionsBtn = document.getElementById("importQuestionsBtn");
+  const speakQuestionsBtn  = document.getElementById("speakQuestionsBtn");
+  const questionsCard      = document.getElementById("questionsCard");
+  const questionsList      = document.getElementById("questionsList");
+  const questionsCount     = document.getElementById("questionsCount");
+  const micBtn             = document.getElementById("micBtn");
+  const micIcon            = document.getElementById("micIcon");
+  const statusText         = document.getElementById("statusText");
+  const langDetected       = document.getElementById("langDetected");
+  const transcriptText     = document.getElementById("transcriptText");
+  const demoBtn            = document.getElementById("demoBtn");
+  const extractionCard     = document.getElementById("extractionCard");
+  const extractionGrid     = document.getElementById("extractionGrid");
+  const extractedCount     = document.getElementById("extractedCount");
+  const autoFillBtn        = document.getElementById("autoFillBtn");
+  const toast              = document.getElementById("toast");
 
   let recognition = null;
   let isRecording = false;
+  let importedQuestions = [];
 
   // Initialize Speech Recognition
   if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
@@ -89,14 +95,211 @@ document.addEventListener("DOMContentLoaded", () => {
     statusText.innerText = "Click microphone & speak your details";
   }
 
+  // ── 1. Import Questions from Active Web Page / Google Form ────────
+  importQuestionsBtn.addEventListener("click", async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab || !tab.id) {
+      showToast("⚠️ Open a Google Form or Web Form tab first.");
+      return;
+    }
+
+    chrome.tabs.sendMessage(tab.id, { action: "SCRAPE_FORM_QUESTIONS" }, (response) => {
+      if (chrome.runtime.lastError) {
+        showToast("⚠️ Please refresh the web page or open a form tab.");
+      } else if (response && response.questions && response.questions.length > 0) {
+        importedQuestions = response.questions;
+        renderImportedQuestions(importedQuestions);
+        showToast(`🎉 Imported ${importedQuestions.length} form questions!`);
+      } else {
+        // Fallback default questions if no input tags detected
+        importedQuestions = [
+          { id: "q1", title: "Full Name", required: true },
+          { id: "q2", title: "Date of Birth", required: true },
+          { id: "q3", title: "City / District", required: true },
+          { id: "q4", title: "State of Domicile", required: true },
+          { id: "q5", title: "College / Institute Name", required: true },
+          { id: "q6", title: "Course / Degree", required: true },
+          { id: "q7", title: "Annual Family Income", required: true },
+          { id: "q8", title: "Mobile Number", required: true },
+        ];
+        renderImportedQuestions(importedQuestions);
+        showToast(`📋 Imported ${importedQuestions.length} standard form fields`);
+      }
+    });
+  });
+
+  // ── 2. Read Out Questions Aloud in Selected Native Language ────────
+  speakQuestionsBtn.addEventListener("click", () => {
+    const list = importedQuestions.length > 0 ? importedQuestions : [
+      { title: "Full Name" },
+      { title: "Date of Birth" },
+      { title: "City / District" },
+      { title: "State of Domicile" },
+      { title: "Course" },
+      { title: "Annual Family Income" },
+    ];
+    speakQuestionsList(list);
+  });
+
+  function speakQuestionsList(questions) {
+    if (!("speechSynthesis" in window)) {
+      showToast("⚠️ Speech Synthesis TTS not supported.");
+      return;
+    }
+
+    window.speechSynthesis.cancel(); // Stop any active speech
+
+    const selectedLang = langSelect.value;
+    const translatedTitles = questions.map((q, idx) => `${idx + 1}. ${translateTitle(q.title, selectedLang)}`);
+
+    const promptText = `Formitra Assistant: ${translatedTitles.join("। ")}`;
+
+    const utterance = new SpeechSynthesisUtterance(promptText);
+    utterance.lang = selectedLang;
+    utterance.rate = 0.92;
+
+    window.speechSynthesis.speak(utterance);
+    showToast(`🔊 Speaking ${questions.length} questions in ${langSelect.options[langSelect.selectedIndex].text}...`);
+  }
+
+  function speakSingleQuestion(title) {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+
+    const selectedLang = langSelect.value;
+    const translated = translateTitle(title, selectedLang);
+    const utterance  = new SpeechSynthesisUtterance(translated);
+    utterance.lang = selectedLang;
+    utterance.rate = 0.92;
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function renderImportedQuestions(questions) {
+    questionsCount.innerText = questions.length;
+    questionsList.innerHTML = "";
+
+    const selectedLang = langSelect.value;
+
+    questions.forEach((q, idx) => {
+      const item = document.createElement("div");
+      item.className = "q-item";
+
+      const trans = translateTitle(q.title, selectedLang);
+
+      item.innerHTML = `
+        <div>
+          <div class="q-title">${idx + 1}. ${q.title} ${q.required ? '<span style="color:#EF4444;">*</span>' : ''}</div>
+          <div class="q-trans">🌐 ${trans}</div>
+        </div>
+        <button class="q-speak-btn" title="Speak this question in native language">🔊</button>
+      `;
+
+      item.querySelector(".q-speak-btn").addEventListener("click", (e) => {
+        e.stopPropagation();
+        speakSingleQuestion(q.title);
+      });
+
+      questionsList.appendChild(item);
+    });
+
+    questionsCard.classList.remove("hidden");
+  }
+
+  // Language Change Listener
+  langSelect.addEventListener("change", () => {
+    if (importedQuestions.length > 0) {
+      renderImportedQuestions(importedQuestions);
+    }
+  });
+
+  // Multilingual Question Translator Matrix
+  function translateTitle(title, langCode) {
+    const t = title.toLowerCase();
+
+    if (t.includes("name") || t.includes("नाम")) return getQTrans("name", langCode);
+    if (t.includes("dob") || t.includes("birth") || t.includes("जन्म")) return getQTrans("dob", langCode);
+    if (t.includes("city") || t.includes("district") || t.includes("शहर") || t.includes("जिला")) return getQTrans("city", langCode);
+    if (t.includes("state") || t.includes("domicile") || t.includes("राज्य")) return getQTrans("state", langCode);
+    if (t.includes("income") || t.includes("आय")) return getQTrans("income", langCode);
+    if (t.includes("college") || t.includes("institute") || t.includes("school") || t.includes("संस्थान")) return getQTrans("college", langCode);
+    if (t.includes("course") || t.includes("degree") || t.includes("पाठ्यक्रम")) return getQTrans("course", langCode);
+    if (t.includes("mobile") || t.includes("phone") || t.includes("contact") || t.includes("फोन")) return getQTrans("mobile", langCode);
+    if (t.includes("email") || t.includes("mail") || t.includes("ईमेल")) return getQTrans("email", langCode);
+
+    // Dynamic Fallback
+    const prefixes = {
+      "hi-IN": "कृपया इस फ़ील्ड की जानकारी बताएं: ",
+      "en-IN": "Please provide details for: ",
+      "or-IN": "ଦୟାକରି ଏହି ବିବରଣୀ ପ୍ରଦାନ କରନ୍ତୁ: ",
+      "ta-IN": "தயவுசெய்து இந்த விவரத்தை வழங்கவும்: ",
+      "te-IN": "దయచేసి ఈ వివరాలను అందించండి: ",
+      "bn-IN": "অনুগ্রহ করে এই বিবরণ দিন: ",
+      "mr-IN": "कृपया ही माहिती द्या: ",
+      "kn-IN": "ದಯವಿಟ್ಟು ಈ ವಿವರಗಳನ್ನು ನೀಡಿ: ",
+      "ml-IN": "ദയവായി ഈ വിവരങ്ങൾ നൽകുക: ",
+    };
+    return (prefixes[langCode] || prefixes["en-IN"]) + title;
+  }
+
+  function getQTrans(key, langCode) {
+    const dict = {
+      name: {
+        "hi-IN": "आपका पूरा नाम क्या है?", "en-IN": "What is your full name?", "or-IN": "ଆପଣଙ୍କ ସମ୍ପୂର୍ଣ୍ଣ ନାମ କ’ଣ?",
+        "ta-IN": "உங்கள் முழு பெயர் என்ன?", "te-IN": "మీ పూర్తి పేరు ఏమిటి?", "bn-IN": "আপনার পুরো নাম কী?",
+        "mr-IN": "तुमचे पूर्ण नाव काय आहे?", "kn-IN": "ನಿಮ್ಮ ಪೂರ್ಣ ಹೆಸರು ಏನು?", "ml-IN": "നിങ്ങളുടെ പൂർണ്ണ പേര് എന്താണ്?",
+      },
+      dob: {
+        "hi-IN": "आपकी जन्मतिथि क्या है?", "en-IN": "What is your date of birth?", "or-IN": "ଆପଣଙ୍କ ଜନ୍ମ ତାରିଖ କ’ଣ?",
+        "ta-IN": "உங்கள் பிறந்த தேதி என்ன?", "te-IN": "మీ పుట్టిన తేదీ ఏమిటి?", "bn-IN": "আপনার জন্ম তারিখ কী?",
+        "mr-IN": "तुमची जन्म तारीख काय आहे?", "kn-IN": "ನಿಮ್ಮ ಹುಟ್ಟಿದ ದಿನಾಂಕ ಏನು?", "ml-IN": "നിങ്ങളുടെ ജനന തീയതി എന്താണ്?",
+      },
+      city: {
+        "hi-IN": "आपका शहर या जिला कौन सा है?", "en-IN": "Which city or district do you live in?", "or-IN": "ଆପଣଙ୍କ ସହର କିମ୍ବା ଜିଲ୍ଲା କ’ଣ?",
+        "ta-IN": "உங்கள் நகரம் அல்லது மாவட்டம் எது?", "te-IN": "మీ నగరం లేదా జిల్లా ఏది?", "bn-IN": "আপনার শহর বা জেলা কোনটি?",
+        "mr-IN": "तुमचे शहर किंवा जिल्हा कोणता आहे?", "kn-IN": "ನಿಮ್ಮ ನಗರ ಅಥವಾ ಜಿಲ್ಲೆ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ നഗരം അല്ലെങ്കിൽ ജില്ല ഏതാണ്?",
+      },
+      state: {
+        "hi-IN": "आपका राज्य कौन सा है?", "en-IN": "What is your state of domicile?", "or-IN": "ଆପଣଙ୍କ ରାଜ୍ୟ କ’ଣ?",
+        "ta-IN": "உங்கள் மாநிலம் எது?", "te-IN": "మీ రాష్ట్రం ఏది?", "bn-IN": "আপনার রাজ্য কোনটি?",
+        "mr-IN": "तुमचे राज्य कोणते आहे?", "kn-IN": "ನಿಮ್ಮ ರಾಜ್ಯ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ സംസ്ഥാനം ഏതാണ്?",
+      },
+      income: {
+        "hi-IN": "आपकी वार्षिक पारिवारिक आय कितनी है?", "en-IN": "What is your annual family income?", "or-IN": "ଆପଣଙ୍କ ବାର୍ଷିକ ପାରିବାରିକ ଆୟ କେତେ?",
+        "ta-IN": "உங்கள் குடும்ப வருமானம் எவ்வளவு?", "te-IN": "మీ వార్షిక కుటుంబ ఆదాయం ఎంత?", "bn-IN": "আপনার বার্ষিক পারিবারিক আয় কত?",
+        "mr-IN": "तुमचे वार्षिक कौटुंबिक उत्पन्न किती आहे?", "kn-IN": "ನಿಮ್ಮ ವಾರ್ಷಿಕ ಕುಟುಂಬ ಆದಾಯ ಎಷ್ಟು?", "ml-IN": "നിങ്ങളുടെ വാർഷിക കുടുംബ വരുമാനം എത്രയാണ്?",
+      },
+      college: {
+        "hi-IN": "आपके कॉलेज या संस्थान का नाम क्या है?", "en-IN": "What is your college or institute name?", "or-IN": "ଆପଣଙ୍କ କଲେଜର ନାମ କ’ଣ?",
+        "ta-IN": "உங்கள் கல்லூரி பெயர் என்ன?", "te-IN": "మీ కళాశాల పేరు ఏమిటి?", "bn-IN": "আপনার কলেজের নাম কী?",
+        "mr-IN": "तुमच्या कॉलेजचे नाव काय आहे?", "kn-IN": "ನಿಮ್ಮ ಕಾಲೇಜಿನ ಹೆಸರು ಏನು?", "ml-IN": "നിങ്ങളുടെ കോളേജിന്റെ പേര് എന്താണ്?",
+      },
+      course: {
+        "hi-IN": "आपका पाठ्यक्रम या कोर्स कौन सा है?", "en-IN": "What course are you enrolled in?", "or-IN": "ଆପଣଙ୍କ ପାଠ୍ୟକ୍ରମ କ’ଣ?",
+        "ta-IN": "உங்கள் படிப்பு என்ன?", "te-IN": "మీ కోర్సు ఏమిటి?", "bn-IN": "আপনার কোর্স কোনটি?",
+        "mr-IN": "तुमचा कोर्स कोणता आहे?", "kn-IN": "ನಿಮ್ಮ ಕೋರ್ಸ್ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ കോഴ്‌സ് ഏതാണ്?",
+      },
+      mobile: {
+        "hi-IN": "आपका मोबाइल नंबर क्या है?", "en-IN": "What is your mobile number?", "or-IN": "ଆପଣଙ୍କ ମୋବାଇଲ୍ ନମ୍ବର କ’ଣ?",
+        "ta-IN": "உங்கள் அலைபேசி எண் என்ன?", "te-IN": "మీ మొబైల్ నంబర్ ఏమిటి?", "bn-IN": "আপনার মোবাইল নম্বর কী?",
+        "mr-IN": "तुमचा मोबाईल नंबर काय आहे?", "kn-IN": "ನಿಮ್ಮ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ಏನು?", "ml-IN": "നിങ്ങളുടെ മൊബൈൽ നമ്പർ എന്താണ്?",
+      },
+      email: {
+        "hi-IN": "आपका ईमेल पता क्या है?", "en-IN": "What is your email address?", "or-IN": "ଆପଣଙ୍କ ଇମେଲ୍ ଠିକଣା କ’ଣ?",
+        "ta-IN": "உங்கள் மின்னஞ்சல் முகவரி என்ன?", "te-IN": "మీ ఇమెయిల్ చిరునామా ఏమిటి?", "bn-IN": "আপনার ইমেল ঠিকানা কী?",
+        "mr-IN": "तुमचा ईमेल पत्ता काय आहे?", "kn-IN": "ನಿಮ್ಮ ಇಮೇಲ್ ವಿಳಾಸ ಏನು?", "ml-IN": "നിങ്ങളുടെ ഇമെയിൽ വിലാസം എന്താണ്?",
+      }
+    };
+    return (dict[key] && dict[key][langCode]) ? dict[key][langCode] : dict[key]["en-IN"];
+  }
+
   // Demo Transcript Button
   demoBtn.addEventListener("click", () => {
     transcriptText.value = (
       "मेरा नाम राहुल शर्मा है। मैं जयपुर राजस्थान का रहने वाला हूँ। " +
       "मैं B.Tech द्वितीय वर्ष का छात्र हूँ और बीआईटी संस्थान में पढ़ता हूँ। " +
       "मेरी जन्मतिथि 15/08/2003 है और मेरी परिवार की वार्षिक आय ₹1,50,000 है। " +
-      "मेरा फोन नंबर 9876543210 और ईमेल rahul.sharma@example.com है। " +
-      "मेरा आधार नंबर 9876 5432 1098 है।"
+      "मेरा फोन नंबर 9876543210 और ईमेल rahul.sharma@example.com है।"
     );
     onTranscriptUpdated();
     showToast("📋 Loaded sample transcript");

@@ -20,7 +20,7 @@
 }
 
 body {
-  width: 380px;
+  width: 390px;
   background-color: var(--bg-dark);
   color: var(--text-light);
   font-size: 14px;
@@ -29,7 +29,7 @@ body {
 .extension-container {
   display: flex;
   flex-direction: column;
-  min-height: 520px;
+  min-height: 540px;
 }
 
 /* Header */
@@ -143,6 +143,93 @@ body {
 .custom-textarea {
   resize: vertical;
   line-height: 1.5;
+}
+
+.secondary-btn {
+  flex: 1;
+  background: rgba(255, 122, 0, 0.15);
+  color: #FF7A00;
+  border: 1px solid rgba(255, 122, 0, 0.4);
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondary-btn:hover {
+  background: rgba(255, 122, 0, 0.28);
+  border-color: #FF7A00;
+}
+
+.glow-btn {
+  background: rgba(37, 99, 235, 0.2);
+  color: #60A5FA;
+  border: 1px solid rgba(96, 165, 250, 0.4);
+}
+
+.glow-btn:hover {
+  background: rgba(37, 99, 235, 0.35);
+  border-color: #60A5FA;
+}
+
+/* Questions Card */
+.questions-card {
+  background: #1E293B;
+  border: 1px solid rgba(255, 122, 0, 0.4);
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+.questions-header {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #FF7A00;
+  margin-bottom: 0.5rem;
+}
+
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.q-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0.6rem;
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 6px;
+  font-size: 0.78rem;
+}
+
+.q-title {
+  font-weight: 600;
+  color: #F8FAFC;
+}
+
+.q-trans {
+  font-size: 0.72rem;
+  color: #CBD5E1;
+  margin-top: 0.15rem;
+}
+
+.q-speak-btn {
+  background: rgba(255, 122, 0, 0.2);
+  border: 1px solid #FF7A00;
+  color: #FFF;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Mic Section */

@@ -1,4 +1,4 @@
-// content.js — Formitra Web Form Auto-Filler Engine & Google Forms Assistant
+// content.js — Formitra Web Form Auto-Filler Engine, Google Forms Assistant & Question Scraper
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "AUTO_FILL_FORM") {
@@ -8,6 +8,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.action === "TRIGGER_FIELD_DICTATION") {
     openFloatingFormitraWidget();
     sendResponse({ status: "STARTED" });
+  } else if (request.action === "SCRAPE_FORM_QUESTIONS") {
+    const questions = scrapePageQuestions();
+    sendResponse({ status: "SUCCESS", questions: questions });
   }
   return true;
 });
@@ -77,7 +80,7 @@ function openFloatingFormitraWidget() {
     position: fixed;
     bottom: 80px;
     right: 24px;
-    width: 350px;
+    width: 360px;
     z-index: 999999;
     background: #0F172A;
     color: #F8FAFC;
@@ -96,7 +99,12 @@ function openFloatingFormitraWidget() {
       <div style="font-weight:800;font-size:14px;color:#FF7A00;">${titleText}</div>
       <button id="fmt-close-btn" style="background:none;border:none;color:#94A3B8;font-size:16px;cursor:pointer;font-weight:bold;">✕</button>
     </div>
-    <div style="font-size:12px;color:#CBD5E1;margin-bottom:10px;">Speak in your native language to auto-fill the form shown on your screen:</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <button id="fmt-scrape-btn" style="flex:1;background:rgba(255,122,0,0.2);color:#FF7A00;border:1px solid #FF7A00;padding:6px;border-radius:6px;font-size:11px;font-weight:bold;cursor:pointer;">📥 Import Questions</button>
+      <button id="fmt-speak-btn" style="flex:1;background:rgba(37,99,235,0.2);color:#60A5FA;border:1px solid #60A5FA;padding:6px;border-radius:6px;font-size:11px;font-weight:bold;cursor:pointer;">🔊 Read Questions</button>
+    </div>
+    <div id="fmt-q-status" style="font-size:11px;color:#34D399;margin-bottom:8px;display:none;font-weight:bold;"></div>
+    <div style="font-size:12px;color:#CBD5E1;margin-bottom:6px;">Speak in your native language to auto-fill the form:</div>
     <textarea id="fmt-modal-text" style="width:100%;height:85px;background:#1E293B;color:#FFF;border:1px solid rgba(255,122,0,0.4);border-radius:8px;padding:8px;font-size:12px;box-sizing:border-box;margin-bottom:10px;" placeholder="Press mic to speak or paste transcript..."></textarea>
     <div style="display:flex;gap:8px;">
       <button id="fmt-mic-toggle" style="flex:1;background:#FF7A00;color:#FFF;border:none;padding:9px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;">🎙️ Start Mic</button>
@@ -108,6 +116,30 @@ function openFloatingFormitraWidget() {
 
   document.getElementById("fmt-close-btn").addEventListener("click", () => {
     modal.style.display = "none";
+  });
+
+  let pageQuestions = [];
+
+  document.getElementById("fmt-scrape-btn").addEventListener("click", () => {
+    pageQuestions = scrapePageQuestions();
+    const statusDiv = document.getElementById("fmt-q-status");
+    statusDiv.style.display = "block";
+    statusDiv.innerText = `📋 Imported ${pageQuestions.length} questions from this form!`;
+  });
+
+  document.getElementById("fmt-speak-btn").addEventListener("click", () => {
+    if (pageQuestions.length === 0) {
+      pageQuestions = scrapePageQuestions();
+    }
+    const qList = pageQuestions.map((q, idx) => `${idx + 1}. ${q.title}`);
+    const textToSpeak = `Formitra Assistant: ${qList.join("। ")}`;
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const utt = new SpeechSynthesisUtterance(textToSpeak);
+      utt.rate = 0.92;
+      window.speechSynthesis.speak(utt);
+    }
   });
 
   let rec = null;
@@ -161,6 +193,50 @@ function openFloatingFormitraWidget() {
     alert(`🎉 Formitra auto-filled ${count} form fields on this Google Form!`);
     modal.style.display = "none";
   });
+}
+
+function scrapePageQuestions() {
+  const questions = [];
+  const isGoogleForms = window.location.href.includes("docs.google.com/forms");
+
+  if (isGoogleForms) {
+    const qContainers = document.querySelectorAll('div[role="listitem"], div[jsmodel], .ge2dfc, .freebirdFormviewerComponentsQuestionBaseRoot, .o3b8eb');
+    qContainers.forEach((q, idx) => {
+      const titleElem = q.querySelector('.M7eMe, [role="heading"], .HoLwm, .freebirdFormviewerComponentsQuestionBaseHeaderTitle, span');
+      if (titleElem) {
+        const text = titleElem.innerText.trim();
+        if (text && text.length > 2 && !questions.some(item => item.title === text)) {
+          const req = q.innerText.includes("*") || q.querySelector('.codefx, [aria-label*="required"]') !== null;
+          questions.push({
+            id: `gf_q_${idx}`,
+            title: text,
+            required: req,
+          });
+        }
+      }
+    });
+  }
+
+  if (questions.length === 0) {
+    const inputs = document.querySelectorAll("input, select, textarea");
+    inputs.forEach((inp, idx) => {
+      if (inp.type === "hidden" || inp.type === "submit" || inp.type === "button") return;
+
+      const labelText = getFieldLabelText(inp).trim();
+      const placeholder = inp.placeholder || inp.name || inp.id || "";
+      const displayTitle = labelText || placeholder;
+
+      if (displayTitle && !questions.some(q => q.title === displayTitle)) {
+        questions.push({
+          id: `inp_q_${idx}`,
+          title: displayTitle,
+          required: inp.required || labelText.includes("*"),
+        });
+      }
+    });
+  }
+
+  return questions;
 }
 
 function extractFormFieldsFromText(text) {
@@ -284,13 +360,11 @@ function matchRule(text, keywords) {
 function getFieldLabelText(element) {
   let labelText = "";
 
-  // 1. Standard <label for="...">
   if (element.id) {
     const label = document.querySelector(`label[for="${element.id}"]`);
     if (label) labelText = label.innerText;
   }
 
-  // 2. Streamlit data-testid="stWidgetLabel" or parent container
   if (!labelText) {
     const stContainer = element.closest('div[data-testid="stForm"], div[data-testid="stVerticalBlock"], div[data-baseweb="input"], div[data-baseweb="select"], .stTextInput, .stSelectbox, .stNumberInput');
     if (stContainer) {
@@ -299,13 +373,11 @@ function getFieldLabelText(element) {
     }
   }
 
-  // 3. Parent label fallback
   if (!labelText) {
     const parentLabel = element.closest("label");
     if (parentLabel) labelText = parentLabel.innerText;
   }
 
-  // 4. Preceding sibling
   if (!labelText && element.previousElementSibling) {
     labelText = element.previousElementSibling.innerText || "";
   }
@@ -329,7 +401,6 @@ function setGoogleFormsInputValue(element, value) {
   } else {
     element.focus();
 
-    // Native Property Value Setter for Google Forms & React
     const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set ||
                          Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
 
@@ -340,7 +411,6 @@ function setGoogleFormsInputValue(element, value) {
     }
   }
 
-  // Dispatch full event sequence to update Google Forms JS model (jsaction & jsname)
   element.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
   element.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
   element.dispatchEvent(new KeyboardEvent("keydown", { key: "a", bubbles: true, composed: true }));

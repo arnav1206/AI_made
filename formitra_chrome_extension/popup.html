@@ -24,7 +24,7 @@
     <div class="content">
       <!-- Language Picker -->
       <div class="field-group">
-        <label for="langSelect" class="field-label">🌐 Select Dictation Language:</label>
+        <label for="langSelect" class="field-label">🌐 Select Dictation & Voice Language:</label>
         <select id="langSelect" class="custom-select">
           <option value="hi-IN" selected>🇮🇳 Hindi (हिन्दी)</option>
           <option value="en-IN">🇬🇧 English (India)</option>
@@ -33,9 +33,29 @@
           <option value="te-IN">🇮🇳 Telugu (తెలుగు)</option>
           <option value="bn-IN">🇮🇳 Bengali (বাংলা)</option>
           <option value="mr-IN">🇮🇳 Marathi (मराठी)</option>
-          <option value="kn-IN">🇮🇳 Kannada (கன்னட)</option>
+          <option value="kn-IN">🇮🇳 Kannada (ಕನ್ನಡ)</option>
           <option value="ml-IN">🇮🇳 Malayalam (മലയാളം)</option>
         </select>
+      </div>
+
+      <!-- Question Import & Voice Assistant Tools -->
+      <div class="field-group">
+        <div style="display:flex;gap:6px;">
+          <button id="importQuestionsBtn" class="secondary-btn" title="Scrape and import form questions from current web page / Google Form">
+            📥 Import Questions
+          </button>
+          <button id="speakQuestionsBtn" class="secondary-btn glow-btn" title="Read questions aloud in selected language">
+            🔊 Speak Questions
+          </button>
+        </div>
+      </div>
+
+      <!-- Imported Questions Card -->
+      <div id="questionsCard" class="questions-card hidden">
+        <div class="questions-header">
+          <span>📋 Imported Form Questions (<span id="questionsCount">0</span>)</span>
+        </div>
+        <div id="questionsList" class="questions-list"></div>
       </div>
 
       <!-- Live Mic Dictation Button -->
@@ -54,7 +74,7 @@
           <label for="transcriptText" class="field-label">📝 Live Voice Transcript:</label>
           <button id="demoBtn" class="text-link-btn">📋 Load Demo</button>
         </div>
-        <textarea id="transcriptText" class="custom-textarea" rows="4" placeholder="Your spoken voice details will stream live here. You can also edit or paste directly..."></textarea>
+        <textarea id="transcriptText" class="custom-textarea" rows="3" placeholder="Your spoken voice details will stream live here. You can also edit or paste directly..."></textarea>
       </div>
 
       <!-- AI Extracted Fields Preview -->
@@ -78,7 +98,7 @@
 
     <!-- Footer -->
     <div class="footer">
-      <span>🏛️ Compatible with NSP, State Portals & All Web Forms</span>
+      <span>🏛️ Compatible with NSP, Google Forms & All Web Forms</span>
       <span class="ver-tag">v1.0</span>
     </div>
   </div>
