@@ -59,13 +59,14 @@ def render() -> None:
             state = st.selectbox(
                 t("reg_state"),
                 INDIAN_STATES,
-                index=19 if len(INDIAN_STATES) > 19 else 0, # Rajasthan
+                index=0, # Default to "-- Select --"
                 key="reg_state",
             )
         with col_c:
             category = st.selectbox(
                 t("reg_category"),
-                ["General", "OBC", "SC", "ST", "EWS / EBC"],
+                ["— Select —", "General", "OBC", "SC", "ST", "EWS / EBC"],
+                index=0, # Default to "-- Select --"
                 key="reg_category",
             )
 
@@ -97,8 +98,8 @@ def render() -> None:
                     phone=phone,
                     email=email,
                     password=pass1,
-                    state=state,
-                    category=category,
+                    state="" if state == "— Select —" else state,
+                    category="" if category == "— Select —" else category,
                 )
                 if success:
                     st.toast(msg)

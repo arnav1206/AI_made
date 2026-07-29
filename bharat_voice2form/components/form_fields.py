@@ -85,7 +85,7 @@ def personal_info_fields(extracted: dict) -> dict:
     c3, c4 = st.columns(2)
 
     with c3:
-        gender_opts = ["Male", "Female", "Transgender", "Prefer not to say"]
+        gender_opts = ["— Select —", "Male", "Female", "Transgender", "Prefer not to say"]
         gender_val  = extracted.get("Gender", gender_opts[0])
         if "field_gender" not in st.session_state:
             st.session_state["field_gender"] = gender_val if gender_val in gender_opts else gender_opts[0]
@@ -97,9 +97,10 @@ def personal_info_fields(extracted: dict) -> dict:
         )
 
     with c4:
-        cat_opts = ["General", "OBC", "SC", "ST", "EWS / EBC"]
+        cat_opts = ["— Select —", "General", "OBC", "SC", "ST", "EWS / EBC"]
+        cat_val  = extracted.get("Category", cat_opts[0])
         if "field_category" not in st.session_state:
-            st.session_state["field_category"] = cat_opts[0]
+            st.session_state["field_category"] = cat_val if cat_val in cat_opts else cat_opts[0]
 
         category = st.selectbox(
             t("reg_category", "Category"),
@@ -197,7 +198,7 @@ def academic_fields(extracted: dict) -> dict:
 
     c9, c10 = st.columns(2)
 
-    year_opts = ["First Year", "Second Year", "Third Year", "Fourth Year", "Fifth Year"]
+    year_opts = ["— Select —", "First Year", "Second Year", "Third Year", "Fourth Year", "Fifth Year"]
     year_val  = extracted.get("Year", year_opts[0])
     if "field_year" not in st.session_state:
         st.session_state["field_year"] = year_val if year_val in year_opts else year_opts[0]
@@ -238,13 +239,9 @@ def financial_contact_fields(extracted: dict) -> dict:
     income = st.text_input(
         t("lbl_income", "Annual Family Income (₹)"),
         key="field_income",
+        placeholder="e.g. 150000",
     )
-    _field_mic_helper("field_income", t("lbl_income", "Annual Income"))
-
-    if income and income.replace(",", "").isdigit():
-        amt = int(income.replace(",", ""))
-        if amt <= 250000:
-            success_inline(f"✅ Eligible for 100% Post-Matric Fee Waiver (Income ₹{amt:,} <= ₹2,50,000)")
+    _field_mic_helper("field_income", t("lbl_income", "Income"))
 
     c11, c12 = st.columns(2)
 
@@ -254,18 +251,14 @@ def financial_contact_fields(extracted: dict) -> dict:
             key="field_phone",
             placeholder="10-digit mobile number",
         )
-        if not phone:
-            warning_inline("Required for SMS tracking & OTP")
-        _field_mic_helper("field_phone", t("reg_phone", "Phone Number"))
+        _field_mic_helper("field_phone", t("reg_phone", "Mobile Number"))
 
     with c12:
         email = st.text_input(
             t("reg_email", "Email Address"),
             key="field_email",
-            placeholder="e.g. student@example.com",
+            placeholder="e.g. applicant@example.com",
         )
-        if not email:
-            warning_inline("Required for digital receipt & acknowledgment")
         _field_mic_helper("field_email", t("reg_email", "Email Address"))
 
     return {
