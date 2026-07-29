@@ -55,13 +55,12 @@ def mic_widget(is_recording: bool, language: str) -> None:
 
 
 def speech_tips_card() -> None:
-    """Render the 'Required Form Fields & Questions' guidance card on the voice input page."""
+    """Render the 'Required Form Fields' guidance card on the voice input page."""
     is_dark    = st.session_state.get("dark_mode", True)
     text_col   = "#F8FAFC" if is_dark else "#475569"
     card_bg    = "#151C2C" if is_dark else "#FFFFFF"
     border_c   = "rgba(255, 122, 0, 0.4)" if is_dark else "#FED7AA"
     custom_url = session.get("custom_form_url")
-    form_name  = session.get("selected_form") or "Post-Matric Scholarship Scheme"
 
     badge_html = ""
     if custom_url:
@@ -76,17 +75,17 @@ def speech_tips_card() -> None:
         f'<div class="card" style="margin-top:0.5rem;background:{card_bg};border:1px solid {border_c};">'
         f'{badge_html}'
         f'<div style="font-weight:800;font-size:1.02rem;color:#FF7A00;margin-bottom:0.3rem;">'
-        f'📋 Required Form Fields / Questions to Speak</div>'
+        f'📋 Required Form Fields to Dictate</div>'
         f'<div style="font-size:0.8rem;opacity:0.85;margin-bottom:0.75rem;line-height:1.4;">'
-        f'Please speak clearly into the mic to provide answers for the required form fields below:</div>'
+        f'Speak into the mic to provide answers for the required form fields:</div>'
         f'<ul style="margin:0;padding-left:1.2rem;font-size:0.88rem;color:{text_col};line-height:1.9;font-weight:600;">'
-        f'<li>👤 <strong>Full Name & Father\'s Name</strong></li>'
-        f'<li>📍 <strong>City / District, State & PIN Code</strong></li>'
-        f'<li>🎓 <strong>College / Institute & Course Name</strong></li>'
-        f'<li>📅 <strong>Current Academic Year & Percentage/CGPA</strong></li>'
-        f'<li>💼 <strong>Annual Family Income (in INR)</strong></li>'
+        f'<li>👤 <strong>Full Name & Date of Birth</strong></li>'
         f'<li>🏷️ <strong>Gender & Category (SC/ST/OBC/General)</strong></li>'
-        f'<li>📞 <strong>Mobile Phone Number & Email Address</strong></li>'
+        f'<li>📍 <strong>Full Residential Address & State</strong></li>'
+        f'<li>🎓 <strong>College Name & Course Name</strong></li>'
+        f'<li>📅 <strong>Current Academic Year & Marks (Percentage/CGPA)</strong></li>'
+        f'<li>💼 <strong>Annual Family Income (in INR)</strong></li>'
+        f'<li>📞 <strong>Mobile Phone Number</strong></li>'
         f'</ul></div>',
         unsafe_allow_html=True,
     )
