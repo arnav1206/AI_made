@@ -2,7 +2,7 @@
 components/navbar.py
 ====================
 Sidebar navigation component with language selector, user auth status, Admin Portal link & Dark Mode toggle.
-Features official Formitra darkmode multilingual brand logo perfectly centered.
+Features official Formitra darkmode multilingual brand logo with flexbox centered image alignment.
 """
 
 from __future__ import annotations
@@ -54,20 +54,22 @@ def _logo_block() -> None:
         with open(img_path, "rb") as f:
             b64_img = base64.b64encode(f.read()).decode("utf-8")
         logo_html = (
+            f'<div style="display:flex;justify-content:center;align-items:center;width:100%;margin-bottom:0.6rem;">'
             f'<img src="data:image/png;base64,{b64_img}" '
             f'style="width:96px;height:96px;border-radius:50%;object-fit:cover;'
             f'box-shadow:0 6px 22px rgba(255,122,0,0.5);border:3px solid #FF7A00;'
-            f'display:block;margin:0 auto 0.6rem auto;" />'
+            f'margin:0 auto;display:block;" />'
+            f'</div>'
         )
     except Exception:
         logo_html = '<div style="font-size:2.4rem;text-align:center;">🎙️</div>'
 
     st.markdown(
-        f'<div style="text-align:center;width:100%;margin:0 auto;padding:0.25rem 0 0.5rem 0;">'
+        f'<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;text-align:center;padding:0.25rem 0 0.5rem 0;">'
         f'{logo_html}'
-        f'<div style="font-size:1.35rem;font-weight:900;letter-spacing:-0.4px;color:#FF7A00;text-align:center;margin-top:0.2rem;">'
+        f'<div style="font-size:1.35rem;font-weight:900;letter-spacing:-0.4px;color:#FF7A00;text-align:center;margin-top:0.1rem;width:100%;">'
         f'Formitra</div>'
-        f'<div style="font-size:0.75rem;opacity:0.85;margin-top:0.1rem;color:#F8FAFC;text-align:center;">'
+        f'<div style="font-size:0.75rem;opacity:0.85;margin-top:0.1rem;color:#F8FAFC;text-align:center;width:100%;">'
         f'AI Voice-Powered Form Filling</div>'
         f'</div>',
         unsafe_allow_html=True,
