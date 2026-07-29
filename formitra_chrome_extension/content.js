@@ -215,23 +215,29 @@ function scrapePageQuestions() {
   const isGoogleForms = window.location.href.includes("docs.google.com/forms");
 
   if (isGoogleForms) {
-    const gfHeaders = document.querySelectorAll(
-      '.M7eMe, div[role="listitem"] [role="heading"], div[role="heading"] span, [role="heading"], .ge2dfc [role="heading"], .freebirdFormviewerComponentsQuestionBaseHeaderTitle, .HoLwm, .F9iA2e, [data-params], [aria-level="2"], [aria-level="3"]'
-    );
+    // Each question in Google Forms is wrapped inside a role="listitem" container card
+    const questionCards = document.querySelectorAll('div[role="listitem"], .ge2dfc, .o3b8eb, div[jsmodel]');
 
-    gfHeaders.forEach((hElem, idx) => {
-      let rawText = hElem.innerText || hElem.textContent || "";
+    questionCards.forEach((card, idx) => {
+      const headingElem = card.querySelector('.M7eMe, [role="heading"], .freebirdFormviewerComponentsQuestionBaseHeaderTitle, .HoLwm');
+      if (!headingElem) return;
+
+      let rawText = headingElem.innerText || headingElem.textContent || "";
       if (rawText.includes("\n")) rawText = rawText.split("\n")[0];
       let cleanText = rawText.replace(/\*/g, "").trim();
 
       const lower = cleanText.toLowerCase();
+
       if (
-        cleanText && cleanText.length >= 2 &&
-        !lower.includes("submit") && !lower.includes("clear form") && !lower.includes("never submit passwords") &&
+        cleanText &&
+        cleanText.length >= 2 &&
+        !lower.includes("submit") &&
+        !lower.includes("clear form") &&
+        !lower.includes("never submit passwords") &&
+        !lower.includes("report abuse") &&
         !questions.some(q => q.title.toLowerCase() === lower)
       ) {
-        const parentCard = hElem.closest('div[role="listitem"], div[jsmodel], .ge2dfc, .o3b8eb, div[data-params]') || hElem.parentElement;
-        const isReq = parentCard ? (parentCard.innerText.includes("*") || parentCard.querySelector('.codefx, [aria-label*="required"]') !== null) : false;
+        const isReq = card.innerText.includes("*") || card.querySelector('.codefx, [aria-label*="required"]') !== null;
 
         questions.push({
           id: `gf_q_${idx}`,
@@ -241,53 +247,44 @@ function scrapePageQuestions() {
       }
     });
 
-    const gfInputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], textarea, [role="textbox"]');
-    gfInputs.forEach((inp, idx) => {
-      const ariaLbl = (inp.getAttribute("aria-label") || inp.getAttribute("title") || "").replace(/\*/g, "").trim();
-      if (ariaLbl && ariaLbl.length >= 2 && !questions.some(q => q.title.toLowerCase() === ariaLbl.toLowerCase())) {
-        questions.push({
-          id: `gf_inp_${idx}`,
-          title: ariaLbl,
-          required: inp.required || inp.getAttribute("aria-required") === "true",
-        });
-      }
-    });
+    if (questions.length === 0) {
+      const gfHeaders = document.querySelectorAll('.M7eMe');
+      gfHeaders.forEach((hElem, idx) => {
+        let rawText = hElem.innerText || hElem.textContent || "";
+        if (rawText.includes("\n")) rawText = rawText.split("\n")[0];
+        let cleanText = rawText.replace(/\*/g, "").trim();
+        const lower = cleanText.toLowerCase();
+
+        if (cleanText && cleanText.length >= 2 && !questions.some(q => q.title.toLowerCase() === lower)) {
+          questions.push({
+            id: `gf_header_${idx}`,
+            title: cleanText,
+            required: false,
+          });
+        }
+      });
+    }
+
+    return questions;
   }
 
-  if (questions.length === 0) {
-    const inputs = document.querySelectorAll("input, select, textarea");
-    inputs.forEach((inp, idx) => {
-      if (inp.type === "hidden" || inp.type === "submit" || inp.type === "button" || inp.type === "checkbox" || inp.type === "radio") return;
+  // ── Standard Web Form Scraper (Non-Google Forms) ───────────────────
+  const inputs = document.querySelectorAll("input, select, textarea");
+  inputs.forEach((inp, idx) => {
+    if (inp.type === "hidden" || inp.type === "submit" || inp.type === "button" || inp.type === "checkbox" || inp.type === "radio") return;
 
-      const labelText  = getFieldLabelText(inp).replace(/\*/g, "").trim();
-      const placeholder = inp.placeholder || inp.name || inp.id || inp.getAttribute("aria-label") || "";
-      const displayTitle = labelText || placeholder;
+    const labelText  = getFieldLabelText(inp).replace(/\*/g, "").trim();
+    const placeholder = inp.placeholder || inp.name || inp.id || inp.getAttribute("aria-label") || "";
+    const displayTitle = labelText || placeholder;
 
-      if (displayTitle && displayTitle.length >= 2 && !questions.some(q => q.title.toLowerCase() === displayTitle.toLowerCase())) {
-        questions.push({
-          id: `inp_q_${idx}`,
-          title: displayTitle,
-          required: inp.required || labelText.includes("*"),
-        });
-      }
-    });
-  }
-
-  if (questions.length === 0) {
-    const allLabels = document.querySelectorAll("label, h1, h2, h3, h4, legend");
-    allLabels.forEach((lbl, idx) => {
-      let txt = (lbl.innerText || lbl.textContent || "").replace(/\*/g, "").trim();
-      if (txt.includes("\n")) txt = txt.split("\n")[0].trim();
-
-      if (txt && txt.length >= 3 && !questions.some(q => q.title.toLowerCase() === txt.toLowerCase())) {
-        questions.push({
-          id: `lbl_q_${idx}`,
-          title: txt,
-          required: false,
-        });
-      }
-    });
-  }
+    if (displayTitle && displayTitle.length >= 2 && !questions.some(q => q.title.toLowerCase() === displayTitle.toLowerCase())) {
+      questions.push({
+        id: `inp_q_${idx}`,
+        title: displayTitle,
+        required: inp.required || labelText.includes("*"),
+      });
+    }
+  });
 
   return questions;
 }
