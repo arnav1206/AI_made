@@ -1,11 +1,10 @@
 """
 utils/pdf_generator.py
 =======================
-Attractive, high-quality PDF document generator for Formitra.
-Features Government header banner with official darkmode multilingual brand logo,
-tricolour accents, structured grid tables, self-declaration verification block,
-and official digital receipt watermark seal.
-Supports ReportLab engine with high-precision pure-Python PDF fallback.
+Attractive, modern, and official PDF document generator for Formitra (भारत Formitra).
+Features Government header banner with official brand logo, tricolour accent line,
+structured 2-column data tables grouped by section, applicant self-declaration block,
+and an official digital verification seal.
 """
 
 from __future__ import annotations
@@ -47,23 +46,22 @@ def generate(
     engine: str | None = None,
 ) -> PDFResult:
     """
-    Generate an attractive, professional PDF of the filled application form.
+    Generate an attractive, official, modern PDF of the filled application form.
     """
     filename = _make_filename(application_no)
 
-    # Try ReportLab first if available
     try:
         import reportlab
         return _generate_reportlab(form_data, application_no, form_title, filename)
     except ImportError:
-        logger.info("ReportLab module not found, using built-in styled PDF engine.")
+        logger.info("ReportLab module not found, using built-in styled vector PDF engine.")
         return _generate_styled_pdf(form_data, application_no, form_title, filename)
     except Exception as exc:
-        logger.warning("ReportLab PDF generation failed, falling back to styled engine: %s", exc)
+        logger.warning("ReportLab PDF generation failed, falling back to styled vector engine: %s", exc)
         return _generate_styled_pdf(form_data, application_no, form_title, filename)
 
 
-# ─── ReportLab Engine Implementation ───────────────────────────────
+# ─── Modern ReportLab Engine Implementation ─────────────────────────
 
 def _generate_reportlab(
     form_data: dict, application_no: str, form_title: str, filename: str
@@ -88,8 +86,9 @@ def _generate_reportlab(
     styles = getSampleStyleSheet()
     story  = []
 
-    # Color Palette
-    PRIMARY   = colors.HexColor("#0F172A") # Deep Navy
+    # Modern Color Palette
+    PRIMARY   = colors.HexColor("#0B132B") # Deep Navy
+    SECONDARY = colors.HexColor("#1C2541") # Dark Slate
     ACCENT    = colors.HexColor("#FF7A00") # Saffron Orange
     GREEN_ACC = colors.HexColor("#059669") # Emerald Green
     BG_GRAY   = colors.HexColor("#F8FAFC") # Table Alt Row
@@ -101,18 +100,18 @@ def _generate_reportlab(
         "GovTitle",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=12.5,
+        fontSize=12,
         textColor=colors.white,
-        alignment=0,
-        spaceAfter=4,
+        leading=15,
     )
     sub_title_style = ParagraphStyle(
         "GovSubTitle",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=9.5,
+        fontSize=9,
         textColor=colors.HexColor("#FDE047"),
         alignment=2,
+        leading=13,
     )
     section_style = ParagraphStyle(
         "SectionHdr",
@@ -120,7 +119,7 @@ def _generate_reportlab(
         fontName="Helvetica-Bold",
         fontSize=11,
         textColor=PRIMARY,
-        spaceBefore=8,
+        spaceBefore=10,
         spaceAfter=4,
     )
     cell_label = ParagraphStyle(
@@ -146,50 +145,55 @@ def _generate_reportlab(
         leading=12,
     )
 
-    # 1. Header Banner Table with Official Darkmode Logo Image
+    # 1. Header Banner Table with Official Logo
     now_str  = datetime.now().strftime("%d %b %Y, %I:%M %p")
-    img_path = Path(__file__).parent.parent / "assets" / "images" / "multilingual_dark.jpg"
+    img_dir  = Path(__file__).parent.parent / "assets" / "images"
+    
+    logo_path = None
+    for candidate in ["logo.png", "logo_orbit.png", "logo.jpg", "multilingual_dark.jpg"]:
+        p = img_dir / candidate
+        if p.exists():
+            logo_path = p
+            break
 
-    if img_path.exists():
+    if logo_path:
         try:
-            logo_img = RLImage(str(img_path), width=46, height=46)
+            logo_img = RLImage(str(logo_path), width=52, height=52)
             header_data = [
                 [
                     logo_img,
-                    Paragraph("NATIONAL SCHOLARSHIP PORTAL — GOVERNMENT OF INDIA<br/><font size=8.5 color='#E2E8F0'>Formitra AI Voice-Assisted Application Receipt</font>", title_style),
-                    Paragraph(f"<b>REFERENCE NO:</b><br/><font size=11 color='#FDE047'><b>{application_no}</b></font><br/><font size=7.5 color='#E2E8F0'>Date: {now_str}</font>", sub_title_style),
+                    Paragraph("<b>NATIONAL SCHOLARSHIP PORTAL — GOVT OF INDIA</b><br/><font size=8 color='#E2E8F0'>Formitra AI Voice-Assisted Official Application Receipt</font>", title_style),
+                    Paragraph(f"<b>APPLICATION REF NO:</b><br/><font size=11 color='#FDE047'><b>{application_no}</b></font><br/><font size=7.5 color='#E2E8F0'>Issued: {now_str}</font>", sub_title_style),
                 ]
             ]
-            hdr_table = Table(header_data, colWidths=[52, 308, 180])
+            hdr_table = Table(header_data, colWidths=[58, 302, 180])
         except Exception as img_err:
-            logger.warning("Could not add image to ReportLab header table: %s", img_err)
+            logger.warning("Could not render logo in PDF header: %s", img_err)
             header_data = [
                 [
-                    Paragraph("NATIONAL SCHOLARSHIP PORTAL — GOVERNMENT OF INDIA<br/><font size=8.5 color='#E2E8F0'>Formitra AI Voice-Assisted Application Receipt</font>", title_style),
-                    Paragraph(f"<b>REFERENCE NO:</b><br/><font size=11 color='#FDE047'><b>{application_no}</b></font><br/><font size=7.5 color='#E2E8F0'>Date: {now_str}</font>", sub_title_style),
+                    Paragraph("<b>NATIONAL SCHOLARSHIP PORTAL — GOVT OF INDIA</b><br/><font size=8 color='#E2E8F0'>Formitra AI Voice-Assisted Official Application Receipt</font>", title_style),
+                    Paragraph(f"<b>APPLICATION REF NO:</b><br/><font size=11 color='#FDE047'><b>{application_no}</b></font><br/><font size=7.5 color='#E2E8F0'>Issued: {now_str}</font>", sub_title_style),
                 ]
             ]
-            hdr_table = Table(header_data, colWidths=[350, 190])
+            hdr_table = Table(header_data, colWidths=[360, 180])
     else:
         header_data = [
             [
-                Paragraph("NATIONAL SCHOLARSHIP PORTAL — GOVERNMENT OF INDIA<br/><font size=8.5 color='#E2E8F0'>Formitra AI Voice-Assisted Application Receipt</font>", title_style),
-                Paragraph(f"<b>REFERENCE NO:</b><br/><font size=11 color='#FDE047'><b>{application_no}</b></font><br/><font size=7.5 color='#E2E8F0'>Date: {now_str}</font>", sub_title_style),
+                Paragraph("<b>NATIONAL SCHOLARSHIP PORTAL — GOVT OF INDIA</b><br/><font size=8 color='#E2E8F0'>Formitra AI Voice-Assisted Official Application Receipt</font>", title_style),
+                Paragraph(f"<b>APPLICATION REF NO:</b><br/><font size=11 color='#FDE047'><b>{application_no}</b></font><br/><font size=7.5 color='#E2E8F0'>Issued: {now_str}</font>", sub_title_style),
             ]
         ]
-        hdr_table = Table(header_data, colWidths=[350, 190])
+        hdr_table = Table(header_data, colWidths=[360, 180])
 
     hdr_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,-1), PRIMARY),
         ('PADDING', (0,0), (-1,-1), 10),
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 10),
     ]))
     story.append(hdr_table)
 
-    # Tricolour Accent Line
-    tri_data = [["", "", ""]]
-    tri_table = Table(tri_data, colWidths=[180, 180, 180], rowHeights=[4])
+    # Tricolour Accent Bar
+    tri_table = Table([["", "", ""]], colWidths=[180, 180, 180], rowHeights=[4])
     tri_table.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (0,0), ACCENT),
         ('BACKGROUND', (1,0), (1,0), colors.white),
@@ -200,30 +204,28 @@ def _generate_reportlab(
     story.append(Spacer(1, 10))
 
     # Form Scheme Header
-    story.append(Paragraph(f"<b>Application Details: {form_title}</b>", section_style))
+    story.append(Paragraph(f"📋 Application Form: <b>{form_title}</b>", section_style))
     story.append(HRFlowable(width="100%", thickness=1.5, color=ACCENT, spaceBefore=2, spaceAfter=8))
 
     # 2. Form Data Grid Table
-    rows = []
-    items = list(form_data.items())
-    if not items:
-        items = [
-            ("Full Name", "Rahul Sharma"),
-            ("Date of Birth", "15/08/2003"),
-            ("Gender", "Male"),
-            ("Category", "General"),
-            ("Address", "Jaipur, Rajasthan"),
-            ("City", "Jaipur"),
-            ("State", "Rajasthan"),
-            ("PIN Code", "302001"),
-            ("College", "BIT Mesra"),
-            ("Course", "B.Tech"),
-            ("Year", "Second Year"),
-            ("Annual Family Income", "₹1,50,000"),
-            ("Mobile Number", "9876543210"),
-            ("Email Address", "rahul.sharma@example.com"),
-        ]
+    items = list(form_data.items()) if form_data else [
+        ("Full Name", "Rahul Sharma"),
+        ("Date of Birth", "15/08/2003"),
+        ("Gender", "Male"),
+        ("Category", "General"),
+        ("Address", "Jaipur, Rajasthan"),
+        ("City", "Jaipur"),
+        ("State", "Rajasthan"),
+        ("PIN Code", "302001"),
+        ("College", "BIT Mesra"),
+        ("Course", "B.Tech"),
+        ("Year", "Second Year"),
+        ("Annual Family Income", "₹1,50,000"),
+        ("Mobile Number", "9876543210"),
+        ("Email Address", "rahul.sharma@example.com"),
+    ]
 
+    rows = []
     for field, val in items:
         display_val = str(val) if val else "—"
         rows.append([Paragraph(field, cell_label), Paragraph(display_val, cell_val)])
@@ -242,7 +244,7 @@ def _generate_reportlab(
     story.append(Spacer(1, 12))
 
     # 3. Applicant Self-Declaration Callout Box
-    dec_header = Paragraph("<b>📜 Applicant Verification & Self-Declaration</b>", ParagraphStyle("DecHdr", parent=cell_label, textColor=colors.HexColor("#92400E"), fontSize=10))
+    dec_header = Paragraph("📜 <b>Applicant Self-Declaration & Authenticity Verification</b>", ParagraphStyle("DecHdr", parent=cell_label, textColor=colors.HexColor("#92400E"), fontSize=9.5))
     dec_body   = Paragraph("I hereby declare that all information provided above is true and correct to the best of my knowledge. I understand that any false statement will disqualify my scholarship application under the National Scholarship Portal rules.", dec_style)
 
     dec_table = Table([[dec_header], [dec_body]], colWidths=[540])
@@ -252,26 +254,25 @@ def _generate_reportlab(
         ('PADDING', (0,0), (-1,-1), 10),
     ]))
     story.append(dec_table)
-    story.append(Spacer(1, 12))
+    story.append(Spacer(1, 14))
 
-    # 4. Footer Seal & Verification Line
-    footer_text = Paragraph(f"<b>Official Formitra Digital Receipt</b> | Reference ID: <b>{application_no}</b> | Verified & Sealed electronically.", ParagraphStyle("Foot", parent=styles["Normal"], fontName="Helvetica", fontSize=8, textColor=colors.HexColor("#64748B"), alignment=1))
+    # 4. Official Seal & Verification Line
+    footer_text = Paragraph(
+        f"✅ <b>Official Formitra Digital Application Receipt</b> | Ref: <b>{application_no}</b> | Verified & Sealed Electronically.",
+        ParagraphStyle("Foot", parent=styles["Normal"], fontName="Helvetica", fontSize=8.5, textColor=colors.HexColor("#475569"), alignment=1)
+    )
     story.append(footer_text)
 
     doc.build(story)
     pdf_bytes = buf.getvalue()
-    return PDFResult(pdf_bytes, filename, "ReportLab Beautiful PDF with Darkmode Logo")
+    return PDFResult(pdf_bytes, filename, "ReportLab Modern Official PDF")
 
 
-# ─── Fallback Styled Engine Implementation ──────────────────────────
+# ─── Vector Engine Implementation ───────────────────────────────────
 
 def _generate_styled_pdf(
     form_data: dict, application_no: str, form_title: str, filename: str
 ) -> PDFResult:
-    """
-    High-precision pure-Python vector PDF builder.
-    Draws custom styled header bands, text, tables, and borders.
-    """
     now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
 
     items = list(form_data.items()) if form_data else [
@@ -293,27 +294,28 @@ def _generate_styled_pdf(
 
     ops = []
     
-    # Page background & Header Box (#0F172A)
-    ops.append("0.06 0.09 0.16 rg") # Dark navy fill
-    ops.append("36 710 540 60 re f") # Header rect
+    # Header Box (#0B132B)
+    ops.append("0.04 0.07 0.17 rg")
+    ops.append("36 710 540 60 re f")
 
-    # Header text
-    ops.append("BT /F1 14 Tf 1 1 1 rg 46 750 Td (NATIONAL SCHOLARSHIP PORTAL - GOVT OF INDIA) Tj ET")
-    ops.append("BT /F1 9 Tf 0.9 0.9 0.9 rg 46 725 Td (Formitra AI Voice-Assisted Application Receipt) Tj ET")
+    # Header Emblem Logo Text
+    ops.append("BT /F1 16 Tf 1 0.48 0 rg 46 732 Td (FMT) Tj ET")
+    ops.append("BT /F1 12 Tf 1 1 1 rg 90 746 Td (NATIONAL SCHOLARSHIP PORTAL - GOVT OF INDIA) Tj ET")
+    ops.append("BT /F1 8.5 Tf 0.9 0.9 0.9 rg 90 724 Td (Formitra AI Voice-Assisted Official Application Receipt) Tj ET")
 
     # Reference Code
     safe_ref = application_no.replace("(", "").replace(")", "")
     ops.append(f"BT /F1 10 Tf 1 0.88 0.28 rg 400 745 Td (REF: {safe_ref}) Tj ET")
     ops.append(f"BT /F1 8 Tf 0.9 0.9 0.9 rg 400 725 Td (Date: {now_str}) Tj ET")
 
-    # Tricolour Accent Bar
+    # Tricolour Accent Line
     ops.append("1 0.48 0 rg 36 704 180 4 re f")
     ops.append("1 1 1 rg 216 704 180 4 re f")
     ops.append("0.02 0.58 0.03 rg 396 704 180 4 re f")
 
     # Form Title
     safe_title = form_title.replace("(", "").replace(")", "")
-    ops.append("BT /F1 11 Tf 0.06 0.09 0.16 rg 36 680 Td (Application Details: " + safe_title + ") Tj ET")
+    ops.append("BT /F1 11 Tf 0.04 0.07 0.17 rg 36 680 Td (Application Details: " + safe_title + ") Tj ET")
     ops.append("1 0.48 0 rg 36 672 540 1.5 re f")
 
     # Grid Table
@@ -322,15 +324,12 @@ def _generate_styled_pdf(
         safe_f = str(f_name).replace("(", "").replace(")", "")
         safe_v = str(f_val or "—").replace("(", "").replace(")", "")
 
-        # Row shading
         if i % 2 == 0:
             ops.append("0.97 0.98 0.99 rg 36 " + str(y - 4) + " 540 18 re f")
 
-        # Row border line
         ops.append("0.8 0.85 0.9 RG 0.5 w 36 " + str(y - 4) + " 540 18 re s")
 
-        # Cell Text
-        ops.append(f"BT /F1 9 Tf 0.06 0.09 0.16 rg 44 {y} Td ({safe_f}) Tj ET")
+        ops.append(f"BT /F1 9 Tf 0.04 0.07 0.17 rg 44 {y} Td ({safe_f}) Tj ET")
         ops.append(f"BT /F1 9 Tf 0.2 0.25 0.35 rg 200 {y} Td ({safe_v}) Tj ET")
 
         y -= 20
@@ -346,7 +345,7 @@ def _generate_styled_pdf(
     ops.append(f"BT /F1 8 Tf 0.35 0.25 0.05 rg 46 {y - 30} Td (Verified via Formitra AI Multilingual Form Assistant Engine.) Tj ET")
 
     # Footer
-    ops.append("BT /F1 8 Tf 0.4 0.45 0.55 rg 180 40 Td (Official Formitra Digital Application Receipt — Verified & Sealed) Tj ET")
+    ops.append("BT /F1 8.5 Tf 0.28 0.33 0.41 rg 140 40 Td (Official Formitra Digital Application Receipt - Verified & Sealed) Tj ET")
 
     stream_content = "\n".join(ops)
     length = len(stream_content)
