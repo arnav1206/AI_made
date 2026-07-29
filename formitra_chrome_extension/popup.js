@@ -1,4 +1,4 @@
-// popup.js — Formitra Extension Speech, Google Forms Scraper & Multilingual Voice Prompter
+// popup.js — Formitra Single-Session Form Question Scraper & Transient Multilingual Voice Prompter
 
 document.addEventListener("DOMContentLoaded", () => {
   const langSelect         = document.getElementById("langSelect");
@@ -23,6 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let recognition = null;
   let isRecording = false;
+  
+  // Transient single-session questions (deleted after auto-fill / session end)
   let importedQuestions = [];
 
   // Grant Mic Button Handler
@@ -119,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
     statusText.innerText = "Click microphone & speak your details";
   }
 
-  // ── 1. Import Questions from Active Web Page / Google Form ────────
+  // ── 1. Import Questions STRICTLY from Active Web Page / Google Form ──────
   importQuestionsBtn.addEventListener("click", async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab || !tab.id) {
@@ -132,28 +134,21 @@ document.addEventListener("DOMContentLoaded", () => {
     questionsCard.classList.remove("hidden");
     if (importingSpinner) importingSpinner.classList.remove("hidden");
     questionsList.innerHTML = "";
+    importedQuestions = [];
 
     const processResponse = (res) => {
       if (importingSpinner) importingSpinner.classList.add("hidden");
 
       if (res && res.questions && res.questions.length > 0) {
+        // Save ONLY the questions given in this form for this session
         importedQuestions = res.questions;
         renderImportedQuestions(importedQuestions);
-        showToast(`🎉 Successfully imported ${importedQuestions.length} Google Form questions!`);
+        showToast(`🎉 Imported ${importedQuestions.length} questions from this form!`);
       } else {
-        // Fallback default scholarship form fields if active page is not a form
-        importedQuestions = [
-          { id: "q1", title: "Full Name", required: true },
-          { id: "q2", title: "Date of Birth", required: true },
-          { id: "q3", title: "City / District", required: true },
-          { id: "q4", title: "State of Domicile", required: true },
-          { id: "q5", title: "College / Institute Name", required: true },
-          { id: "q6", title: "Course / Degree", required: true },
-          { id: "q7", title: "Annual Family Income", required: true },
-          { id: "q8", title: "Mobile Number", required: true },
-        ];
-        renderImportedQuestions(importedQuestions);
-        showToast(`📋 Imported ${importedQuestions.length} standard form questions`);
+        // Strictly NO hardcoded default fallback questions!
+        importedQuestions = [];
+        questionsCard.classList.add("hidden");
+        showToast("⚠️ No question fields detected on active page.");
       }
     };
 
@@ -176,10 +171,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // ── 2. Read Out Questions Aloud in Selected Native Language ────────
+  // ── 2. Speak ONLY the Questions Given in the Imported Form ─────────────
   speakQuestionsBtn.addEventListener("click", () => {
     if (importedQuestions.length === 0) {
-      showToast("⚠️ Click '📥 Import Questions' first to load form questions!");
+      showToast("⚠️ Please click '📥 Import Questions' first to scan form questions!");
       return;
     }
     speakQuestionsList(importedQuestions);
@@ -203,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
     utterance.rate = 0.92;
 
     window.speechSynthesis.speak(utterance);
-    showToast(`🔊 Speaking ${questions.length} questions in ${langSelect.options[langSelect.selectedIndex].text}...`);
+    showToast(`🔊 Speaking ${questions.length} form questions in ${langSelect.options[langSelect.selectedIndex].text}...`);
   }
 
   function speakSingleQuestion(title) {
@@ -306,7 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
       state: {
         "hi-IN": "आपका राज्य कौन सा है?", "en-IN": "What is your state of domicile?", "or-IN": "ଆପଣଙ୍କ ରାଜ୍ୟ କ’ଣ?",
         "ta-IN": "உங்கள் மாநிலம் எது?", "te-IN": "మీ రాష్ట్రం ఏది?", "bn-IN": "আপনার রাজ্য কোনটি?",
-        "mr-IN": "तुमचे राज्य कोणते आहे?", "kn-IN": "ನಿಮ್ಮ રાજ્ય ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ സംസ്ഥാനം ഏതാണ്?",
+        "mr-IN": "तुमचे राज्य कोणते आहे?", "kn-IN": "ನಿಮ್ಮ ರಾಜ್ಯ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ സംസ്ഥാനം ഏതാണ്?",
       },
       income: {
         "hi-IN": "आपकी वार्षिक पारिवारिक आय कितनी है?", "en-IN": "What is your annual family income?", "or-IN": "ଆପଣଙ୍କ ବାର୍ଷିକ ପାରିବାରିକ ଆୟ କେତେ?",
@@ -321,22 +316,22 @@ document.addEventListener("DOMContentLoaded", () => {
       course: {
         "hi-IN": "आपका पाठ्यक्रम या कोर्स कौन सा है?", "en-IN": "What course are you enrolled in?", "or-IN": "ଆପଣଙ୍କ ପାଠ୍ୟକ୍ରମ କ’ଣ?",
         "ta-IN": "உங்கள் படிப்பு என்ன?", "te-IN": "మీ కోర్సు ఏమిటి?", "bn-IN": "আপনার কোর্স কোনটি?",
-        "mr-IN": "तुमचा कोर्स कोणता आहे?", "kn-IN": "ನಿಮ್ಮ ಕೋರ್ಸ್ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ ಕೋರ್ಸ್ ಏതാണ്?",
+        "mr-IN": "तुमचा कोर्स कोणता आहे?", "kn-IN": "ನಿಮ್ಮ ಕೋರ್ಸ್ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ ಕೋರ್ಸ್ ഏതാണ്?",
       },
       year: {
         "hi-IN": "आपका अध्ययन का वर्ष कौन सा है?", "en-IN": "What is your year of study?", "or-IN": "ଆପଣଙ୍କ ପାଠପଢ଼ା ବର୍ଷ କ’ଣ?",
         "ta-IN": "உங்கள் படிப்பு ஆண்டு என்ன?", "te-IN": "మీ చదువు సంవత్సరం ఏమిటి?", "bn-IN": "আপনার অধ্যয়নের বছর কোনটি?",
-        "mr-IN": "तुमचे अभ्यासाचे वर्ष कोणते आहे?", "kn-IN": "ನಿಮ್ಮ ಅಧ್ಯಯನದ ವರ್ಷ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ പഠന വർഷം ഏതാണ്?",
+        "mr-IN": "तुमचे अभ्यासाचे वर्ष कोणते आहे?", "kn-IN": "ನಿಮ್ಮ ಅಧ್ಯಯನದ ವರ್ಷ ಯಾವುದು?", "ml-IN": "ನಿങ്ങളുടെ പഠന വർഷം ഏതാണ്?",
       },
       mobile: {
         "hi-IN": "आपका मोबाइल नंबर क्या है?", "en-IN": "What is your mobile number?", "or-IN": "ଆପଣଙ୍କ ମୋବାଇଲ୍ ନମ୍ବର କ’ଣ?",
-        "ta-IN": "உங்கள் அலைபேசி எண் என்ன?", "te-IN": "మీ మొబైల్ నంబర్ ఏమిటి?", "bn-IN": "আপনার মোবাইল নম্বর কী?",
-        "mr-IN": "तुमचा मोबाईल नंबर काय आहे?", "kn-IN": "ನಿಮ್ಮ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ಏನು?", "ml-IN": "നിങ്ങളുടെ മൊബൈൽ നമ്പർ എന്താണ്?",
+        "ta-IN": "உங்கள் அலைபேசி எண் என்ன?", "te-IN": "మీ మొబైಲ್ నంబర్ ఏమిటి?", "bn-IN": "আপনার মোবাইল নম্বর কী?",
+        "mr-IN": "तुमचा मोबाईल नंबर काय आहे?", "kn-IN": "ನಿಮ್ಮ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ ಏನು?", "ml-IN": "ನಿങ്ങളുടെ മൊബൈಲ್ നമ്പർ എന്താണ്?",
       },
       email: {
         "hi-IN": "आपका ईमेल पता क्या है?", "en-IN": "What is your email address?", "or-IN": "ଆପଣଙ୍କ ଇମେଲ୍ ଠିକଣା କ’ଣ?",
-        "ta-IN": "உங்கள் மின்னஞ்சல் முகவரி என்ன?", "te-IN": "మీ ఇమెయિલ చిరునామా ఏమిటి?", "bn-IN": "আপনার ইমেল ঠিকানা কী?",
-        "mr-IN": "तुमचा ईमेल पत्ता काय आहे?", "kn-IN": "ನಿಮ್ಮ ಇಮೇଲ ವಿಳಾಸ ಏನು?", "ml-IN": "നിങ്ങളുടെ ഇമെയിൽ വിലാസം എന്താണ്?",
+        "ta-IN": "உங்கள் மின்னஞ்சல் முகவரி என்ன?", "te-IN": "మీ ఇమెయਿਲ చిరునామా ఏమిటి?", "bn-IN": "আপনার ইমেল ঠিকানা কী?",
+        "mr-IN": "तुमचा ईमेल पत्ता काय आहे?", "kn-IN": "ನಿಮ್ಮ ಇಮೇಲ್ ವಿಳಾಸ ಏನು?", "ml-IN": "നിങ്ങളുടെ ഇമെയിൽ വിലാസം എന്താണ്?",
       }
     };
     return (dict[key] && dict[key][langCode]) ? dict[key][langCode] : dict[key]["en-IN"];
@@ -380,24 +375,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Run Gemma AI Intent Extractor
     const fields = extractFormFields(text);
     renderExtractedFields(fields);
-    checkMissingRequiredFields(fields);
-  }
-
-  function checkMissingRequiredFields(fields) {
-    const required = ["name", "dob", "income", "state", "city"];
-    const missing = required.filter(k => !fields[k]);
-    if (missing.length > 0) {
-      speakMissingFieldsPrompt(missing);
-    }
-  }
-
-  function speakMissingFieldsPrompt(missingKeys) {
-    if (!("speechSynthesis" in window) || window.speechSynthesis.speaking) return;
-    const formatted = missingKeys.map(k => formatFieldKey(k)).join(", ");
-    const msg = `Attention! ${missingKeys.length} required fields are missing: ${formatted}. Please speak these details into the mic.`;
-    const utterance = new SpeechSynthesisUtterance(msg);
-    utterance.rate = 0.95;
-    window.speechSynthesis.speak(utterance);
   }
 
   function detectScriptLanguage(text) {
@@ -472,7 +449,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return map[key] || key;
   }
 
-  // Auto-Fill Web Page Button
+  // ── 3. Auto-Fill Form & Transient Delete Session Questions ──────────────
   autoFillBtn.addEventListener("click", async () => {
     const text = transcriptText.value.trim();
     if (!text) return;
@@ -485,7 +462,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (chrome.runtime.lastError) {
           showToast("⚠️ Please refresh the web page or open a form tab.");
         } else if (response && response.status === "SUCCESS") {
-          showToast(`🎉 Auto-filled ${response.count} form fields on active page!`);
+          showToast(`🎉 Auto-filled ${response.count} fields & deleted session questions!`);
+          
+          // Clear and delete imported questions after completion for single-session privacy
+          importedQuestions = [];
+          questionsCard.classList.add("hidden");
+          transcriptText.value = "";
+          extractionCard.classList.add("hidden");
+          autoFillBtn.disabled = true;
         } else {
           showToast("⚠️ Could not locate form fields on this page.");
         }
