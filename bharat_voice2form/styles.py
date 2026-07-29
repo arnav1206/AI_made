@@ -32,7 +32,7 @@ def inject_global_css() -> None:
         bg_sidebar   = "#0F172A"
         text_primary = "#0F172A"
         text_sub     = "#475569"
-        border_col   = "#E2E8F0"
+        border_col   = "#CBD5E1"
         input_bg     = "#FFFFFF"
         input_text   = "#0F172A"
         select_bg    = "#FFFFFF"
@@ -201,7 +201,7 @@ def inject_global_css() -> None:
             background-color: {input_bg} !important;
             background: {input_bg} !important;
             color: {input_text} !important;
-            border: 1.5px solid rgba(255, 122, 0, 0.45) !important;
+            border: 1.5px solid {border_col} !important;
             border-radius: 10px !important;
         }}
         div[data-testid="stPopover"] > button p,
@@ -222,9 +222,9 @@ def inject_global_css() -> None:
         button[data-testid="stBaseButton-popover"]:hover,
         [data-testid="stPopover"] button:hover {{
             border-color: #FF7A00 !important;
-            background-color: #FF7A00 !important;
-            background: #FF7A00 !important;
-            color: #FFFFFF !important;
+            background-color: rgba(255, 122, 0, 0.1) !important;
+            background: rgba(255, 122, 0, 0.1) !important;
+            color: #FF7A00 !important;
         }}
 
         /* ── Voice Dictate Popover Body & Dialog Container ── */
@@ -234,7 +234,7 @@ def inject_global_css() -> None:
             background-color: {bg_card} !important;
             background: {bg_card} !important;
             color: {text_primary} !important;
-            border: 1.5px solid rgba(255, 122, 0, 0.5) !important;
+            border: 1.5px solid {border_col} !important;
             border-radius: 16px !important;
             box-shadow: {card_shadow} !important;
         }}
@@ -342,7 +342,7 @@ def inject_global_css() -> None:
             box-shadow: 0 0 0 2px rgba(255, 122, 0, 0.25) !important;
         }}
 
-        /* ── Selectboxes & Dropdowns Dynamic Light/Dark Theme ── */
+        /* ── Selectboxes & Dropdowns Clean Dynamic Theme (No Orange Highlight Borders) ── */
         .stSelectbox,
         .stSelectbox > div,
         .stSelectbox div[data-baseweb="select"],
@@ -354,10 +354,14 @@ def inject_global_css() -> None:
             background-color: {select_bg} !important;
             background: {select_bg} !important;
             color: {select_text} !important;
-            border: 2px solid #FF7A00 !important;
+            border: 1.5px solid {border_col} !important;
             border-radius: 12px !important;
             font-weight: 700 !important;
             font-size: 0.95rem !important;
+        }}
+        div[data-baseweb="select"]:hover,
+        div[data-baseweb="select"]:focus-within {{
+            border-color: #FF7A00 !important;
         }}
         div[data-baseweb="select"] span,
         div[data-baseweb="select"] div,
