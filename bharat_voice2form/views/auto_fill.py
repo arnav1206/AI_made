@@ -123,5 +123,26 @@ def render() -> None:
 
     with b3:
         if st.button(t("btn_preview"), use_container_width=True, type="primary"):
-            session.save_form_data()
-            session.navigate("preview")
+            gender   = st.session_state.get("field_gender", "— Select —")
+            category = st.session_state.get("field_category", "— Select —")
+            state    = st.session_state.get("field_state", "— Select —")
+            year     = st.session_state.get("field_year", "— Select —")
+            name     = st.session_state.get("field_name", "").strip()
+
+            unselected = []
+            if not name:
+                unselected.append("Full Name")
+            if gender == "— Select —":
+                unselected.append("Gender")
+            if category == "— Select —":
+                unselected.append("Category")
+            if state in ("— Select —", "— Select State —"):
+                unselected.append("State of Domicile")
+            if year == "— Select —":
+                unselected.append("Current Academic Year")
+
+            if unselected:
+                st.warning(f"⚠️ Pre-Submission Alert: Please select/provide valid options for: **{', '.join(unselected)}** before proceeding.")
+            else:
+                session.save_form_data()
+                session.navigate("preview")

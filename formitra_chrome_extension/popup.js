@@ -77,8 +77,12 @@ document.addEventListener("DOMContentLoaded", () => {
     micBtn.disabled = true;
   }
 
-  // Mic Button Click
+  let lastMicClickTime = 0;
   micBtn.addEventListener("click", async () => {
+    const now = Date.now();
+    if (now - lastMicClickTime < 400) return;
+    lastMicClickTime = now;
+
     if (isRecording) {
       stopRecording();
     } else {
@@ -136,6 +140,9 @@ document.addEventListener("DOMContentLoaded", () => {
     questionsList.innerHTML = "";
     importedQuestions = [];
 
+    const nextSectionContainer = document.getElementById("nextSectionContainer");
+    const importNextSectionBtn  = document.getElementById("importNextSectionBtn");
+
     const processResponse = (res) => {
       if (importingSpinner) importingSpinner.classList.add("hidden");
 
@@ -143,7 +150,12 @@ document.addEventListener("DOMContentLoaded", () => {
         importedQuestions = res.questions;
         renderImportedQuestions(importedQuestions);
         
-        // Step 2: Show success popup notice & take user to Voice Input section
+        if (res.hasNextPage && nextSectionContainer) {
+          nextSectionContainer.classList.remove("hidden");
+        } else if (nextSectionContainer) {
+          nextSectionContainer.classList.add("hidden");
+        }
+
         showToast(`🎉 Imported ${importedQuestions.length} questions! Ready for voice input...`);
         
         setTimeout(() => {
@@ -176,6 +188,37 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+
+  if (document.getElementById("importNextSectionBtn")) {
+    document.getElementById("importNextSectionBtn").addEventListener("click", async () => {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab) return;
+
+      const nextSecCont = document.getElementById("nextSectionContainer");
+      showToast("⏳ Navigating & importing next section...");
+      chrome.tabs.sendMessage(tab.id, { action: "CLICK_NEXT_SECTION" }, () => {
+        setTimeout(() => {
+          chrome.tabs.sendMessage(tab.id, { action: "SCRAPE_FORM_QUESTIONS" }, (res2) => {
+            if (res2 && res2.questions && res2.questions.length > 0) {
+              const existingTitles = new Set(importedQuestions.map(q => q.title.toLowerCase()));
+              res2.questions.forEach(q => {
+                if (!existingTitles.has(q.title.toLowerCase())) {
+                  importedQuestions.push(q);
+                }
+              });
+              renderImportedQuestions(importedQuestions);
+              showToast(`🎉 Imported next section! Total questions: ${importedQuestions.length}`);
+              if (!res2.hasNextPage && nextSecCont) {
+                nextSecCont.classList.add("hidden");
+              }
+            } else {
+              showToast("⚠️ No additional questions found in next section.");
+            }
+          });
+        }, 900);
+      });
+    });
+  }
 
   // ── 2. Speak ONLY the Questions Given in the Imported Form ─────────────
   speakQuestionsBtn.addEventListener("click", () => {

@@ -10,7 +10,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse({ status: "STARTED" });
   } else if (request.action === "SCRAPE_FORM_QUESTIONS") {
     const questions = scrapePageQuestions();
-    sendResponse({ status: "SUCCESS", questions: questions });
+    const hasNext = detectNextPageButton();
+    sendResponse({ status: "SUCCESS", questions: questions, hasNextPage: hasNext });
+  } else if (request.action === "CLICK_NEXT_SECTION") {
+    const clicked = clickNextPageButton();
+    sendResponse({ status: clicked ? "SUCCESS" : "FAILED" });
   }
   return true;
 });
@@ -610,4 +614,25 @@ function highlightFilledInput(element, value) {
     element.style.boxShadow = origShadow;
     if (tooltip.parentNode) tooltip.parentNode.removeChild(tooltip);
   }, 4000);
+}
+
+function detectNextPageButton() {
+  const btns = Array.from(document.querySelectorAll('[role="button"], button, span.NfeDxb'));
+  return btns.some(el => {
+    const txt = (el.innerText || el.textContent || "").trim().toLowerCase();
+    return (txt === "next" || txt === "अगला" || txt === "आगे" || txt === "next section");
+  });
+}
+
+function clickNextPageButton() {
+  const btns = Array.from(document.querySelectorAll('[role="button"], button, span.NfeDxb'));
+  const target = btns.find(el => {
+    const txt = (el.innerText || el.textContent || "").trim().toLowerCase();
+    return (txt === "next" || txt === "अगला" || txt === "आगे" || txt === "next section");
+  });
+  if (target) {
+    target.click();
+    return true;
+  }
+  return false;
 }

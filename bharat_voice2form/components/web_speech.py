@@ -204,7 +204,12 @@ def render_live_speech_dictation(language: str = "Hindi", is_dark: bool = True) 
                 document.getElementById('statusText').innerText = '⚠️ Web Speech API not supported in this browser. Please use Chrome or Edge.';
             }}
 
+            let lastToggleTime = 0;
             function toggleDictation() {{
+                const now = Date.now();
+                if (now - lastToggleTime < 400) return;
+                lastToggleTime = now;
+
                 if (!recognition) return;
                 if (isRecording) {{
                     recognition.stop();
