@@ -121,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
     statusText.innerText = "Click microphone & speak your details";
   }
 
-  // ── 1. Import Questions STRICTLY from Active Web Page / Google Form ──────
+  // ── 1. Import Questions & Automatically Take to Voice Input ──────────────
   importQuestionsBtn.addEventListener("click", async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab || !tab.id) {
@@ -129,8 +129,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Show loading status & spinner
-    showToast("⏳ Scanning & Importing Form Questions... Please wait.");
+    // Step 1: Display loading popup notification while importing
+    showToast("⏳ Importing & Analyzing Form Questions... Please wait.");
     questionsCard.classList.remove("hidden");
     if (importingSpinner) importingSpinner.classList.remove("hidden");
     questionsList.innerHTML = "";
@@ -140,12 +140,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (importingSpinner) importingSpinner.classList.add("hidden");
 
       if (res && res.questions && res.questions.length > 0) {
-        // Save ONLY the questions given in this form
         importedQuestions = res.questions;
         renderImportedQuestions(importedQuestions);
-        showToast(`🎉 Imported ${importedQuestions.length} questions from this form!`);
+        
+        // Step 2: Show success popup notice & take user to Voice Input section
+        showToast(`🎉 Imported ${importedQuestions.length} questions! Ready for voice input...`);
+        
+        setTimeout(() => {
+          document.querySelector(".mic-section")?.scrollIntoView({ behavior: "smooth" });
+          statusText.innerText = `🎙️ Ready! Speak details for ${importedQuestions.length} imported questions.`;
+          micBtn.focus();
+        }, 500);
       } else {
-        // NO hardcoded default fallback questions!
         importedQuestions = [];
         questionsCard.classList.add("hidden");
         showToast("⚠️ No question fields detected on active page.");
@@ -291,7 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
       dob: {
         "hi-IN": "आपकी जन्मतिथि क्या है?", "en-IN": "What is your date of birth?", "or-IN": "ଆପଣଙ୍କ ଜନ୍ମ ତାରିଖ କ’ଣ?",
         "ta-IN": "உங்கள் பிறந்த தேதி என்ன?", "te-IN": "మీ పుట్టిన తేదీ ఏమిటి?", "bn-IN": "আপনার জন্ম তারিখ কী?",
-        "mr-IN": "तुमची जन्म तारीख काय आहे?", "kn-IN": "ನಿಮ್ಮ ಹುಟ್ಟಿದ ದಿನಾಂಕ ಏನು?", "ml-IN": "നിങ്ങളുടെ ജനന തീയതി എന്താണ്?",
+        "mr-IN": "तुमची जन्म तारीख काय आहे?", "kn-IN": "ನಿಮ್ಮ ಹುಟ್ಟಿದ ದಿನಾಂକ ಏನು?", "ml-IN": "നിങ്ങളുടെ ജനന തീയതി എന്താണ്?",
       },
       city: {
         "hi-IN": "आपका शहर या जिला कौन सा है?", "en-IN": "Which city or district do you live in?", "or-IN": "ଆପଣଙ୍କ ସହର କିମ୍ବା ଜିଲ୍ଲା କ’ଣ?",
@@ -301,12 +307,12 @@ document.addEventListener("DOMContentLoaded", () => {
       state: {
         "hi-IN": "आपका राज्य कौन सा है?", "en-IN": "What is your state of domicile?", "or-IN": "ଆପଣଙ୍କ ରାଜ୍ୟ କ’ଣ?",
         "ta-IN": "உங்கள் மாநிலம் எது?", "te-IN": "మీ రాష్ట్రం ఏది?", "bn-IN": "আপনার রাজ্য কোনটি?",
-        "mr-IN": "तुमचे राज्य कोणते आहे?", "kn-IN": "ನಿಮ್ಮ ರಾಜ್ಯ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ സംസ്ഥാനം ഏതാണ്?",
+        "mr-IN": "तुमचे राज्य कोणते आहे?", "kn-IN": "ನಿಮ್ಮ રાજ્ય ಯಾವುದು?", "ml-IN": "ನಿങ്ങളുടെ സംസ്ഥാനം ഏതാണ്?",
       },
       income: {
         "hi-IN": "आपकी वार्षिक पारिवारिक आय कितनी है?", "en-IN": "What is your annual family income?", "or-IN": "ଆପଣଙ୍କ ବାର୍ଷିକ ପାରିବାରିକ ଆୟ କେତେ?",
         "ta-IN": "உங்கள் குடும்ப வருமானம் எவ்வளவு?", "te-IN": "మీ వార్షిక కుటుంబ ఆదాయం ఎంత?", "bn-IN": "আপনার বার্ষিক পারিবারিক আয় কত?",
-        "mr-IN": "तुमचे वार्षिक कौटुंबिक उत्पन्न किती आहे?", "kn-IN": "ನಿಮ್ಮ ವಾರ್ಷಿಕ ಕುಟುಂಬ ಆದಾಯ ಎಷ್ಟು?", "ml-IN": "നിങ്ങളുടെ വാർഷിക കുടുംബ വരുമാനം എത്രയാണ്?",
+        "mr-IN": "तुमचे वार्षिक कौटुंबिक उत्पन्न किती आहे?", "kn-IN": "<ctrl42>ನಿಮ್ಮ ವಾರ್ಷಿಕ ಕುಟುಂಬ ಆದಾಯ ಎಷ್ಟು?", "ml-IN": "നിങ്ങളുടെ വാർഷിക കുടുംബ വരുമാനം എത്രയാണ്?",
       },
       college: {
         "hi-IN": "आपके कॉलेज या संस्थान का नाम क्या है?", "en-IN": "What is your college or institute name?", "or-IN": "ଆପଣଙ୍କ କଲେଜର ନାମ କ’ଣ?",
@@ -316,12 +322,12 @@ document.addEventListener("DOMContentLoaded", () => {
       course: {
         "hi-IN": "आपका पाठ्यक्रम या कोर्स कौन सा है?", "en-IN": "What course are you enrolled in?", "or-IN": "ଆପଣଙ୍କ ପାଠ୍ୟକ୍ରମ କ’ଣ?",
         "ta-IN": "உங்கள் படிப்பு என்ன?", "te-IN": "మీ కోర్సు ఏమిటి?", "bn-IN": "আপনার কোর্স কোনটি?",
-        "mr-IN": "तुमचा कोर्स कोणता आहे?", "kn-IN": "ನಿಮ್ಮ ಕೋರ್ಸ್ ಯಾವುದು?", "ml-IN": "ನಿങ്ങളുടെ ಕೋರ್ಸ್ ಏതാണ്?",
+        "mr-IN": "तुमचा कोर्स कोणता आहे?", "kn-IN": "ನಿಮ್ಮ ಕೋರ್ಸ್ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ കോഴ്‌സ് ഏതാണ്?",
       },
       year: {
         "hi-IN": "आपका अध्ययन का वर्ष कौन सा है?", "en-IN": "What is your year of study?", "or-IN": "ଆପଣଙ୍କ ପାଠପଢ଼ା ବର୍ଷ କ’ଣ?",
         "ta-IN": "உங்கள் படிப்பு ஆண்டு என்ன?", "te-IN": "మీ చదువు సంవత్సరం ఏమిటి?", "bn-IN": "আপনার অধ্যয়নের বছর কোনটি?",
-        "mr-IN": "तुमचे अभ्यासाचे वर्ष कोणते आहे?", "kn-IN": "ನಿಮ್ಮ ಅಧ್ಯಯನದ ವರ್ಷ ಯಾವುದು?", "ml-IN": "ನಿങ്ങളുടെ പഠന വർഷം ഏതാണ്?",
+        "mr-IN": "तुमचे अभ्यासाचे वर्ष कोणते आहे?", "kn-IN": "ನಿಮ್ಮ ಅಧ್ಯಯನದ ವರ್ಷ ಯಾವುದು?", "ml-IN": "നിങ്ങളുടെ പഠന വർഷം ഏതാണ്?",
       },
       mobile: {
         "hi-IN": "आपका मोबाइल नंबर क्या है?", "en-IN": "What is your mobile number?", "or-IN": "ଆପଣଙ୍କ ମୋବାଇଲ୍ ନମ୍ବର କ’ଣ?",
@@ -330,8 +336,8 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       email: {
         "hi-IN": "आपका ईमेल पता क्या है?", "en-IN": "What is your email address?", "or-IN": "ଆପଣଙ୍କ ଇମେଲ୍ ଠିକଣା କ’ଣ?",
-        "ta-IN": "உங்கள் மின்னஞ்சல் முகவரி என்ன?", "te-IN": "మీ ఇమెయిల్ చిరునామా ఏమిటి?", "bn-IN": "আপনার ইমেল ঠিকানা কী?",
-        "mr-IN": "तुमचा ईमेल पत्ता काय आहे?", "kn-IN": "ನಿಮ್ಮ ಇಮೇಲ್ ವಿಳಾಸ ಏನು?", "ml-IN": "നിങ്ങളുടെ ഇമെയിൽ വിലാസം എന്താണ്?",
+        "ta-IN": "உங்கள் மின்னஞ்சல் முகவரி என்ன?", "te-IN": "మీ ఇమెయિલ చిరుနာమా ఏమిటి?", "bn-IN": "আপনার ইমেল ঠিকানা কী?",
+        "mr-IN": "तुमचा ईमेल पत्ता काय आहे?", "kn-IN": "ನಿಮ್ಮ ഇಮೇൽ വിളಾಸ ಏನು?", "ml-IN": "നിങ്ങളുടെ ഇമെയിൽ വിലാസം എന്താണ്?",
       }
     };
     return (dict[key] && dict[key][langCode]) ? dict[key][langCode] : dict[key]["en-IN"];

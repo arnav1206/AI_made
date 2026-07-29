@@ -2,10 +2,11 @@
 views/form_selection.py
 =======================
 Form type selection grid page — distinct boxed options for scholarship schemes
-with Google Forms & Custom Form Link Importer.
+with Google Forms & Custom Form Link Importer and automatic Voice Input navigation.
 100% Multilingual translation support via t().
 """
 
+import time
 import streamlit as st
 
 from components.layout   import tricolour_bar, section_heading, info_box, spacer
@@ -49,10 +50,20 @@ def render() -> None:
             if custom_url.strip():
                 url_str = custom_url.strip()
                 form_title = "Google Forms Application" if "google.com" in url_str else "External Web Form"
+                
+                # Popup 1: Importing status notification
+                st.toast("⏳ Importing & Analyzing Form Questions... Please wait.", icon="⏳")
+                time.sleep(0.5)
+
                 session.set("selected_form", f"{form_title} ({url_str[:35]}...)")
                 session.set("custom_form_url", url_str)
-                st.toast("✅ Form link imported successfully!")
+                
+                # Popup 2: Success notification & navigate to voice input page
+                st.toast("🎉 Form questions imported successfully! Taking you to Voice Input...", icon="🎉")
+                time.sleep(0.3)
+
                 session.navigate("voice_input")
+                st.rerun()
             else:
                 st.warning("Please paste a valid form URL or select a scheme below.")
 
@@ -97,6 +108,7 @@ def render() -> None:
                 ):
                     session.set("selected_form", scheme_title)
                     session.navigate("voice_input")
+                    st.rerun()
             else:
                 st.button(
                     t("coming_soon"),
