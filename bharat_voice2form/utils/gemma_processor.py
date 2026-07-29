@@ -347,9 +347,12 @@ def _extract_gemma4(transcript: str, language: str) -> ExtractionResult:
     client = genai.Client(api_key=api_key)
 
     prompt = (
-        f"{SYSTEM_PROMPT}\n\n"
-        f"Transcript language: {language}\n"
-        f"Transcript:\n{transcript}"
+        f"Extract all personal and application information from this transcript in any language.\n"
+        f"Output ONLY a raw JSON object with these exact keys (use null for missing values):\n"
+        f'"{{"Name": "...", "DOB": "...", "Gender": "...", "Category": "...", "City": "...", "State": "...", '
+        f'"PinCode": "...", "College": "...", "Course": "...", "Year": "...", "Income": "...", "Phone": "...", '
+        f'"Email": "...", "Percentage": "...", "Aadhaar": "..."}}"\n\n'
+        f"Transcript ({language}):\n{transcript}"
     )
 
     # Try primary Gemma 4 model first, fall back to lighter variant
@@ -357,10 +360,8 @@ def _extract_gemma4(transcript: str, language: str) -> ExtractionResult:
         try:
             response = client.models.generate_content(
                 model=model_id,
-                contents=f"Transcript language: {language}\nTranscript:\n{transcript}",
+                contents=prompt,
                 config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_PROMPT,
-                    response_mime_type="application/json",
                     temperature=0.1,
                     max_output_tokens=512,
                 ),
