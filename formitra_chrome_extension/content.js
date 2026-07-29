@@ -341,6 +341,25 @@ function extractFormFieldsFromText(text) {
   if (m = text.match(/(?:college|institute|university|school|संस्थान|कॉलेज)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,30})/i) || text.match(/(?:bit\s*mesra|jaipur\s*national|iit|nit)/i)) {
     fields["college"] = m[1] || m[0];
   }
+  // Attendees / Guest Count
+  if (m = text.match(/(?:हम|we|are)?\s*(एक|दो|तीन|चार|पांच|छह|सात|आठ|नौ|दस|\d+)\s*(?:लोग|person|people|guest|guests|attend|अटैंड)/i) || text.match(/(\d+)\s*(?:लोग|people|guests)/i)) {
+    const wordMap = { "एक": "1", "दो": "2", "तीन": "3", "चार": "4", "पांच": "5", "छह": "6", "सात": "7", "आठ": "8", "नौ": "9", "दस": "10" };
+    const rawNum = m[1].toLowerCase();
+    fields["attendees"] = wordMap[rawNum] || rawNum;
+  }
+  // Dietary Restrictions / Allergies
+  if (m = text.match(/(?:allergy|allergies|एलर्जी|diet|food)\s*[:\-]?\s*([^\n\.]+)/i) || text.match(/(?:कोई\s*एलर्जी\s*नहीं|no\s*allergy|no\s*allergies|none)/i)) {
+    const rawA = m[0].toLowerCase();
+    if (rawA.includes("कोई नहीं") || rawA.includes("कोई एलर्जी नहीं") || rawA.includes("no") || rawA.includes("none")) {
+      fields["allergies"] = "None (कोई एलर्जी नहीं)";
+    } else {
+      fields["allergies"] = m[1] || m[0];
+    }
+  }
+  // RSVP Attendance
+  if (m = text.match(/(?:अटैंड\s*करेंगे|will\s*attend|attending|coming|yes|हाँ)/i)) {
+    fields["rsvp"] = "Yes (अटैंड करेंगे)";
+  }
   // DOB
   if (m = text.match(/(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/)) fields["dob"] = m[1];
   // Income
@@ -404,7 +423,7 @@ const ENGLISH_TO_NATIVE_DICT = {
   },
   "state": {
     "Rajasthan": { Hindi: "राजस्थान", Odia: "ରାଜସ୍ଥାନ", Tamil: "ராஜஸ்தான்", Telugu: "రాజస్థాన్", Bengali: "রাজস্থান", Marathi: "राजस्थान", Kannada: "ರಾಜಸ್ಥಾನ", Malayalam: "രാജസ്ഥാൻ", English: "Rajasthan" },
-    "Odisha": { Hindi: "ओडिशा", Odia: "ଓଡ଼ିଶା", Tamil: "ஒடிசா", Telugu: "ఒడిషా", Bengali: "ওড়িশা", Marathi: "ओडिशा", Kannada: "ಒಡಿಶಾ", Malayalam: "ഒഡീഷ", English: "Odisha" }
+    "Odisha": { Hindi: "ओडिशा", Odia: "ଓଡ଼િଶା", Tamil: "ஒடிசா", Telugu: "ఒడిషా", Bengali: "ওড়িশা", Marathi: "ओडिशा", Kannada: "ಒಡಿಶಾ", Malayalam: "ഒഡീഷ", English: "Odisha" }
   },
   "year": {
     "Second Year": { Hindi: "द्वितीय वर्ष", Odia: "ଦ୍ୱିତୀୟ ବର୍ଷ", Tamil: "இரண்டாம் ஆண்டு", Telugu: "రెండవ సంవత్సరం", Bengali: "দ্বিতীয় বর্ষ", Marathi: "दुसरे वर्ष", Kannada: "ಎರಡನೇ ವರ್ಷ", Malayalam: "രണ്ടാം വർഷം", English: "Second Year" }
@@ -505,7 +524,11 @@ function fillPageFormFields(fields) {
     mobile: fields.mobile,
     email: fields.email,
     gender: transliterateToTargetFormLanguage("gender", fields.gender, targetFormLang),
-    category: transliterateToTargetFormLanguage("category", fields.category, targetFormLang)
+    category: transliterateToTargetFormLanguage("category", fields.category, targetFormLang),
+    attendees: fields.attendees,
+    allergies: fields.allergies,
+    rsvp: fields.rsvp,
+    comments: fields.comments,
   };
 
   // ── 1. Dedicated Google Forms Deep Auto-Fill Engine ────────────────
@@ -532,6 +555,10 @@ function fillPageFormFields(fields) {
       else if (matchRule(qTitle, ["dob", "date of birth", "birth date", "birthdate", "जन्मतिथि"])) valToSet = formattedFields.dob;
       else if (matchRule(qTitle, ["mobile", "phone", "contact", "फोन", "मोबाइल"])) valToSet = formattedFields.mobile;
       else if (matchRule(qTitle, ["email", "e-mail", "ईमेल"])) valToSet = formattedFields.email;
+      else if (matchRule(qTitle, ["attend", "attendees", "people", "guests", "number of", "how many", "कितने लोग", "लोग"])) valToSet = formattedFields.attendees;
+      else if (matchRule(qTitle, ["allergy", "allergies", "diet", "dietary", "food", "एलर्जी", "खान-पान"])) valToSet = formattedFields.allergies;
+      else if (matchRule(qTitle, ["rsvp", "attend", "coming", "भाग लेंगे", "उपस्थित"])) valToSet = formattedFields.rsvp;
+      else if (matchRule(qTitle, ["comment", "remark", "note", "message", "टिप्पणी", "संदेश"])) valToSet = formattedFields.comments;
 
       if (textInput && valToSet !== null && valToSet !== undefined) {
         setGoogleFormsInputValue(textInput, valToSet);

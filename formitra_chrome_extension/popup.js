@@ -529,6 +529,25 @@ document.addEventListener("DOMContentLoaded", () => {
       const num = parseFloat(m[1]) * 100000;
       fields["income"] = String(Math.round(num));
     }
+    // Attendees / Guest Count
+    if (m = text.match(/(?:हम|we|are)?\s*(एक|दो|तीन|चार|पांच|छह|सात|आठ|नौ|दस|\d+)\s*(?:लोग|person|people|guest|guests|attend|अटैंड)/i) || text.match(/(\d+)\s*(?:लोग|people|guests)/i)) {
+      const wordMap = { "एक": "1", "दो": "2", "तीन": "3", "चार": "4", "पांच": "5", "छह": "6", "सात": "7", "आठ": "8", "नौ": "9", "दस": "10" };
+      const rawNum = m[1].toLowerCase();
+      fields["attendees"] = wordMap[rawNum] || rawNum;
+    }
+    // Dietary Restrictions / Allergies
+    if (m = text.match(/(?:allergy|allergies|एलर्जी|diet|food)\s*[:\-]?\s*([^\n\.]+)/i) || text.match(/(?:कोई\s*एलर्जी\s*नहीं|no\s*allergy|no\s*allergies|none)/i)) {
+      const rawA = m[0].toLowerCase();
+      if (rawA.includes("कोई नहीं") || rawA.includes("कोई एलर्जी नहीं") || rawA.includes("no") || rawA.includes("none")) {
+        fields["allergies"] = "None (कोई एलर्जी नहीं)";
+      } else {
+        fields["allergies"] = m[1] || m[0];
+      }
+    }
+    // RSVP Attendance
+    if (m = text.match(/(?:अटैंड\s*करेंगे|will\s*attend|attending|coming|yes|हाँ)/i)) {
+      fields["rsvp"] = "Yes (अटैंड करेंगे)";
+    }
     // Mobile
     if (m = text.match(/(\d{10})/)) fields["mobile"] = m[1];
     // Email
@@ -572,6 +591,10 @@ document.addEventListener("DOMContentLoaded", () => {
       income: "Family Income",
       mobile: "Mobile Number",
       email: "Email Address",
+      attendees: "Number of Attendees",
+      allergies: "Dietary / Allergies",
+      rsvp: "RSVP Attendance",
+      comments: "Comments / Notes",
       aadhaar: "Aadhaar Number",
     };
     return map[key] || key;
