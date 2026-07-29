@@ -51,16 +51,19 @@ document.addEventListener("DOMContentLoaded", () => {
     recognition.continuous = true;
     recognition.interimResults = true;
 
+    let accumTranscript = "";
     recognition.onresult = (event) => {
-      let finalTranscript = "";
+      let interimTranscript = "";
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript + " ";
+          accumTranscript += event.results[i][0].transcript + " ";
+        } else {
+          interimTranscript += event.results[i][0].transcript;
         }
       }
-      if (finalTranscript.trim()) {
-        const current = transcriptText.value;
-        transcriptText.value = (current ? current + " " : "") + finalTranscript.trim();
+      const fullVoiceText = (accumTranscript + " " + interimTranscript).trim();
+      if (fullVoiceText) {
+        transcriptText.value = fullVoiceText;
         onTranscriptUpdated();
       }
     };

@@ -155,6 +155,7 @@ function openFloatingFormitraWidget() {
   const micToggle = document.getElementById("fmt-mic-toggle");
   const modalText = document.getElementById("fmt-modal-text");
 
+  let accumStr = "";
   micToggle.addEventListener("click", () => {
     if (recActive && rec) {
       rec.stop();
@@ -170,12 +171,17 @@ function openFloatingFormitraWidget() {
         rec.lang = "hi-IN";
 
         rec.onresult = (e) => {
-          let str = "";
+          let interimStr = "";
           for (let i = e.resultIndex; i < e.results.length; ++i) {
-            if (e.results[i].isFinal) str += e.results[i][0].transcript + " ";
+            if (e.results[i].isFinal) {
+              accumStr += e.results[i][0].transcript + " ";
+            } else {
+              interimStr += e.results[i][0].transcript;
+            }
           }
-          if (str.trim()) {
-            modalText.value = (modalText.value ? modalText.value + " " : "") + str.trim();
+          const fullText = (accumStr + " " + interimStr).trim();
+          if (fullText) {
+            modalText.value = fullText;
           }
         };
 
@@ -235,7 +241,7 @@ function scrapePageQuestions() {
       }
     });
 
-    const gfInputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], textarea, [role="textbox"], [role="radio"], [role="checkbox"]');
+    const gfInputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], textarea, [role="textbox"]');
     gfInputs.forEach((inp, idx) => {
       const ariaLbl = (inp.getAttribute("aria-label") || inp.getAttribute("title") || "").replace(/\*/g, "").trim();
       if (ariaLbl && ariaLbl.length >= 2 && !questions.some(q => q.title.toLowerCase() === ariaLbl.toLowerCase())) {
@@ -251,7 +257,7 @@ function scrapePageQuestions() {
   if (questions.length === 0) {
     const inputs = document.querySelectorAll("input, select, textarea");
     inputs.forEach((inp, idx) => {
-      if (inp.type === "hidden" || inp.type === "submit" || inp.type === "button") return;
+      if (inp.type === "hidden" || inp.type === "submit" || inp.type === "button" || inp.type === "checkbox" || inp.type === "radio") return;
 
       const labelText  = getFieldLabelText(inp).replace(/\*/g, "").trim();
       const placeholder = inp.placeholder || inp.name || inp.id || inp.getAttribute("aria-label") || "";
@@ -288,15 +294,63 @@ function scrapePageQuestions() {
 
 function extractFormFieldsFromText(text) {
   const fields = {};
-  if (m = text.match(/(?:नाम|name is|name|naam)\s+([A-Za-z\u0900-\u097F\s]{2,25})/i)) fields["name"] = m[1].replace(/(?:है|hai|is|hoon).*/i, "").trim();
-  if (m = text.match(/(?:जयपुर|jaipur)/i)) fields["city"] = "Jaipur";
-  if (m = text.match(/(?:राजस्थान|rajasthan)/i)) fields["state"] = "Rajasthan";
-  if (m = text.match(/(?:b\.?tech|बी\.?टेक)/i)) fields["course"] = "B.Tech";
-  if (m = text.match(/(?:द्वितीय|second|2nd)/i)) fields["year"] = "Second Year";
-  if (m = text.match(/(?:बीआईटी|bit|mesra)/i)) fields["college"] = "BIT Mesra";
+  let m;
+
+  // Name
+  if (m = text.match(/(?:नाम|name is|name|naam|applicant|candidate)\s+([A-Za-z\u0900-\u097F\s]{2,30})/i)) {
+    fields["name"] = m[1].replace(/(?:है|hai|is|hoon|and|category|gender|male|female).*/i, "").trim();
+  }
+  // Gender
+  if (m = text.match(/(?:gender|sex|लिंग)\s*[:\-]?\s*(male|female|transgender|पुरुष|महिला)/i) || text.match(/\b(male|female|transgender|पुरुष|महिला)\b/i)) {
+    const rawG = m[1].toLowerCase();
+    if (rawG === "female" || rawG === "महिला") fields["gender"] = "Female";
+    else if (rawG === "male" || rawG === "पुरुष") fields["gender"] = "Male";
+    else fields["gender"] = "Transgender";
+  }
+  // Category
+  if (m = text.match(/(?:category|caste|वर्ग|श्रेणी)\s*[:\-]?\s*(general|obc|sc|st|ews|सामान्य|ओबीसी)/i) || text.match(/\b(general|obc|sc|st|ews|सामान्य|ओबीसी)\b/i)) {
+    const rawC = m[1].toUpperCase();
+    if (rawC.includes("OBC") || rawC.includes("ओबीसी")) fields["category"] = "OBC";
+    else if (rawC.includes("SC")) fields["category"] = "SC";
+    else if (rawC.includes("ST")) fields["category"] = "ST";
+    else if (rawC.includes("EWS")) fields["category"] = "EWS / EBC";
+    else fields["category"] = "General";
+  }
+  // City
+  if (m = text.match(/(?:city|district|शहर|जिला)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,20})/i) || text.match(/(?:जयपुर|jaipur|दिल्ली|delhi|भुवनेश्वर|bhubaneswar|ranchi|patna|mumbai)/i)) {
+    fields["city"] = m[1] || m[0];
+  }
+  // State
+  if (m = text.match(/(?:state|domicile|राज्य)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,20})/i) || text.match(/(?:राजस्थान|rajasthan|ओडिशा|odisha|jharkhand|bihar|maharashtra|uttar pradesh)/i)) {
+    fields["state"] = m[1] || m[0];
+  }
+  // Course
+  if (m = text.match(/(?:b\.?tech|बी\.?टेक|b\.?sc|m\.?tech|mba|diploma|b.a|m.a)/i)) {
+    fields["course"] = m[0].toUpperCase();
+  }
+  // Year
+  if (m = text.match(/(?:first|second|third|fourth|1st|2nd|3rd|4th|प्रथम|द्वितीय|तृतीय)\s*(?:year|वर्ष)?/i)) {
+    const rawY = m[0].toLowerCase();
+    if (rawY.includes("1st") || rawY.includes("first") || rawY.includes("प्रथम")) fields["year"] = "First Year";
+    else if (rawY.includes("3rd") || rawY.includes("third") || rawY.includes("तृतीय")) fields["year"] = "Third Year";
+    else if (rawY.includes("4th") || rawY.includes("fourth")) fields["year"] = "Fourth Year";
+    else fields["year"] = "Second Year";
+  }
+  // College
+  if (m = text.match(/(?:college|institute|university|school|संस्थान|कॉलेज)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,30})/i) || text.match(/(?:bit\s*mesra|jaipur\s*national|iit|nit)/i)) {
+    fields["college"] = m[1] || m[0];
+  }
+  // DOB
   if (m = text.match(/(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/)) fields["dob"] = m[1];
+  // Income
   if (m = text.match(/(?:आय|income|aay|वार्षिक)\s*₹?\s*([\d\,]+)/i)) fields["income"] = m[1].replace(/\,/g, "");
+  else if (m = text.match(/([\d\.]+)\s*(?:lakh|lakhs|लाख)/i)) {
+    const num = parseFloat(m[1]) * 100000;
+    fields["income"] = String(Math.round(num));
+  }
+  // Mobile
   if (m = text.match(/(\d{10})/)) fields["mobile"] = m[1];
+  // Email
   if (m = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)) fields["email"] = m[1];
 
   return fields;
@@ -345,7 +399,7 @@ const ENGLISH_TO_NATIVE_DICT = {
   "city": {
     "Jaipur": { Hindi: "जयपुर", Odia: "ଜୟପୁର", Tamil: "ஜெய்பூர்", Telugu: "జైపూర్", Bengali: "জয়পুর", Marathi: "जयपूर", Kannada: "ಜೈಪುರ", Malayalam: "ജയ്പൂർ", English: "Jaipur" },
     "Delhi": { Hindi: "दिल्ली", Odia: "ଦିଲ୍ଲୀ", Tamil: "டெல்லி", Telugu: "ఢిల్లీ", Bengali: "দিল্লি", Marathi: "दिल्ली", Kannada: "ದೆಹಲಿ", Malayalam: "ഡൽഹി", English: "Delhi" },
-    "Bhubaneswar": { Hindi: "भुवनेश्वर", Odia: "ଭୁବନେଶ୍ୱର", Tamil: "ପୁବନେଶ୍ବର", Telugu: "భువనేశ్వర్", Bengali: "ভুবনেশ্বর", Marathi: "भुवनेश्वर", Kannada: "<ctrl42><ctrl42><ctrl42>", Malayalam: "ഭുവനേശ്വർ", English: "Bhubaneswar" }
+    "Bhubaneswar": { Hindi: "भुवनेश्वर", Odia: "ଭୁବନେଶ୍ୱର", Tamil: "ପୁବନେଶ୍ବର", Telugu: "భువనేశ్వర్", Bengali: "ଭୁବନେଶ୍ୱର", Marathi: "भुवनेश्वर", Kannada: "ಭುವನೇಶ್ವರ", Malayalam: "ഭുവനേശ്വർ", English: "Bhubaneswar" }
   },
   "state": {
     "Rajasthan": { Hindi: "राजस्थान", Odia: "ରାଜସ୍ଥାନ", Tamil: "ராஜஸ்தான்", Telugu: "రాజస్థాన్", Bengali: "রাজস্থান", Marathi: "राजस्थान", Kannada: "ರಾಜಸ್ಥಾನ", Malayalam: "രാജസ്ഥാൻ", English: "Rajasthan" },
@@ -408,6 +462,25 @@ function transliterateToTargetFormLanguage(key, rawVal, targetFormLang) {
   }
 }
 
+function clickCheckboxOrRadio(element) {
+  try {
+    element.focus();
+    element.click();
+  } catch (e) {}
+
+  if (element.getAttribute("aria-checked") !== null) {
+    element.setAttribute("aria-checked", "true");
+  }
+  if ("checked" in element) {
+    element.checked = true;
+  }
+
+  element.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true }));
+  element.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true }));
+  element.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+  element.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+}
+
 function fillPageFormFields(fields) {
   let count = 0;
 
@@ -461,18 +534,21 @@ function fillPageFormFields(fields) {
         return;
       }
 
-      const options = qContainer.querySelectorAll('[role="radio"], [role="checkbox"], [role="option"]');
+      const options = qContainer.querySelectorAll('[role="radio"], [role="checkbox"], [role="option"], input[type="radio"], input[type="checkbox"]');
       if (options.length > 0) {
         let targetVal = null;
         if (matchRule(qTitle, ["gender", "sex", "लिंग"])) targetVal = formattedFields.gender;
         else if (matchRule(qTitle, ["category", "caste", "वर्ग", "श्रेणी"])) targetVal = formattedFields.category;
         else if (matchRule(qTitle, ["course", "degree"])) targetVal = formattedFields.course;
+        else if (matchRule(qTitle, ["year", "academic year"])) targetVal = formattedFields.year;
+        else if (matchRule(qTitle, ["state", "domicile"])) targetVal = formattedFields.state;
 
         if (targetVal) {
           options.forEach((opt) => {
-            const optText = opt.innerText || opt.getAttribute("aria-label") || "";
-            if (optText.toLowerCase().includes(targetVal.toLowerCase()) || targetVal.toLowerCase().includes(optText.toLowerCase())) {
-              opt.click();
+            const optText = (opt.innerText || opt.getAttribute("aria-label") || opt.value || "").toLowerCase();
+            const searchVal = targetVal.toLowerCase();
+            if (optText && (optText.includes(searchVal) || searchVal.includes(optText))) {
+              clickCheckboxOrRadio(opt);
               highlightFilledInput(opt, targetVal);
               count++;
             }
@@ -505,6 +581,27 @@ function fillPageFormFields(fields) {
     else if (matchRule(fullSearch, ["dob", "date of birth", "birth date", "जन्मतिथि"])) valToSet = formattedFields.dob;
     else if (matchRule(fullSearch, ["mobile", "phone", "contact", "फोन"])) valToSet = formattedFields.mobile;
     else if (matchRule(fullSearch, ["email", "e-mail", "ईमेल"])) valToSet = formattedFields.email;
+
+    if (input.type === "checkbox" || input.type === "radio") {
+      const valStr = `${labelText} ${input.value || ''} ${input.getAttribute('aria-label') || ''}`.toLowerCase();
+      let shouldCheck = false;
+      let matchedVal = "";
+
+      if (formattedFields.gender && matchRule(fullSearch, ["gender", "sex", "लिंग"]) && valStr.includes(formattedFields.gender.toLowerCase())) {
+        shouldCheck = true; matchedVal = formattedFields.gender;
+      } else if (formattedFields.category && matchRule(fullSearch, ["category", "caste", "वर्ग", "श्रेणी"]) && valStr.includes(formattedFields.category.toLowerCase())) {
+        shouldCheck = true; matchedVal = formattedFields.category;
+      } else if (valStr.includes("agree") || valStr.includes("declaration") || valStr.includes("accept") || valStr.includes("terms")) {
+        shouldCheck = true; matchedVal = "Agreed";
+      }
+
+      if (shouldCheck) {
+        clickCheckboxOrRadio(input);
+        highlightFilledInput(input, matchedVal);
+        count++;
+        return;
+      }
+    }
 
     if (valToSet !== null && valToSet !== undefined) {
       setGoogleFormsInputValue(input, valToSet);
