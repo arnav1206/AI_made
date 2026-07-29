@@ -463,23 +463,28 @@ function transliterateToTargetFormLanguage(key, rawVal, targetFormLang) {
   }
 }
 
-function clickCheckboxOrRadio(element) {
-  try {
-    element.focus();
-    element.click();
-  } catch (e) {}
+function forceClickGoogleFormsOption(optElement) {
+  if (!optElement) return;
 
-  if (element.getAttribute("aria-checked") !== null) {
-    element.setAttribute("aria-checked", "true");
+  if (optElement.getAttribute("aria-checked") !== null) {
+    optElement.setAttribute("aria-checked", "true");
   }
-  if ("checked" in element) {
-    element.checked = true;
+  if ("checked" in optElement) {
+    optElement.checked = true;
   }
 
-  element.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true }));
-  element.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true }));
-  element.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
-  element.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+  const targets = [optElement, optElement.parentElement, optElement.firstElementChild].filter(Boolean);
+  targets.forEach(target => {
+    try { target.focus(); } catch(e) {}
+    try { target.click(); } catch(e) {}
+
+    const opts = { bubbles: true, cancelable: true, composed: true };
+    target.dispatchEvent(new MouseEvent("mousedown", opts));
+    target.dispatchEvent(new MouseEvent("mouseup", opts));
+    target.dispatchEvent(new MouseEvent("click", opts));
+    target.dispatchEvent(new Event("change", opts));
+    target.dispatchEvent(new Event("input", opts));
+  });
 }
 
 function fillPageFormFields(fields) {
@@ -535,7 +540,7 @@ function fillPageFormFields(fields) {
         return;
       }
 
-      const options = qContainer.querySelectorAll('[role="radio"], [role="checkbox"], [role="option"], input[type="radio"], input[type="checkbox"]');
+      const options = qContainer.querySelectorAll('[role="radio"], [role="checkbox"], [role="option"], input[type="radio"], input[type="checkbox"], label, div[data-value]');
       if (options.length > 0) {
         let targetVal = null;
         if (matchRule(qTitle, ["gender", "sex", "लिंग"])) targetVal = formattedFields.gender;
@@ -544,17 +549,31 @@ function fillPageFormFields(fields) {
         else if (matchRule(qTitle, ["year", "academic year"])) targetVal = formattedFields.year;
         else if (matchRule(qTitle, ["state", "domicile"])) targetVal = formattedFields.state;
 
-        if (targetVal) {
-          options.forEach((opt) => {
-            const optText = (opt.innerText || opt.getAttribute("aria-label") || opt.value || "").toLowerCase();
-            const searchVal = targetVal.toLowerCase();
-            if (optText && (optText.includes(searchVal) || searchVal.includes(optText))) {
-              clickCheckboxOrRadio(opt);
-              highlightFilledInput(opt, targetVal);
+        const checkTargets = targetVal ? [targetVal] : [formattedFields.gender, formattedFields.category, formattedFields.course, formattedFields.year, formattedFields.state].filter(Boolean);
+
+        let optionMatched = false;
+        options.forEach((opt) => {
+          if (optionMatched && (opt.getAttribute("role") === "radio" || opt.getAttribute("role") === "checkbox")) return;
+
+          const parentText = opt.parentElement ? opt.parentElement.innerText : "";
+          const ariaLabel = opt.getAttribute("aria-label") || "";
+          const dataVal = opt.getAttribute("data-value") || "";
+          const elemText = opt.innerText || opt.value || "";
+
+          const combinedText = `${elemText} ${ariaLabel} ${dataVal} ${parentText}`.toLowerCase();
+
+          for (let tVal of checkTargets) {
+            const searchVal = tVal.toLowerCase().trim();
+            if (searchVal && searchVal.length >= 2 && combinedText.includes(searchVal)) {
+              const clickTarget = opt.closest('[role="checkbox"], [role="radio"]') || opt.querySelector('[role="checkbox"], [role="radio"]') || opt;
+              forceClickGoogleFormsOption(clickTarget);
+              highlightFilledInput(clickTarget, tVal);
               count++;
+              optionMatched = true;
+              break;
             }
-          });
-        }
+          }
+        });
       }
     });
 
