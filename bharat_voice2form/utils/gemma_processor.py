@@ -19,9 +19,10 @@ from utils.constants import INDIAN_STATES
 logger = logging.getLogger(__name__)
 
 # ─── Config ────────────────────────────────────────────────────────
-ENGINE: str = "gemma4"          # Primary: Gemma 4 via google-genai (falls back to smart_nlp if key missing)
+ENGINE: str = "gemma4"          # Primary: Gemma 4 / Gemini via google-genai (falls back to smart_nlp if key missing)
 MODEL_NAME: str = "gemma-4-31b-it"   # Gemma 4 31B Instruct via Gemini API
-MODEL_FALLBACK: str = "gemma-4-12b-it"  # Lighter Gemma 4 fallback
+MODEL_FALLBACK: str = "gemini-2.5-flash"  # High speed Gemini fallback
+MODEL_FALLBACK_2: str = "gemini-1.5-flash"
 
 SYSTEM_PROMPT = """You are an expert multilingual AI form-filling assistant for Indian government applications.
 Given a speech transcript in any Indian language (Hindi, Tamil, Telugu, Bengali, Marathi, Kannada, Malayalam, Odia, English),
@@ -352,8 +353,8 @@ def _extract_gemma4(transcript: str, language: str) -> ExtractionResult:
         f"Transcript:\n{transcript}"
     )
 
-    # Try primary model first, fall back to lighter variant
-    for model_id in (MODEL_NAME, MODEL_FALLBACK):
+    # Try primary model first, fall back to lighter variants
+    for model_id in (MODEL_NAME, MODEL_FALLBACK, MODEL_FALLBACK_2):
         try:
             response = client.models.generate_content(
                 model=model_id,

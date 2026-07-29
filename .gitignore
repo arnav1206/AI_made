@@ -9,3 +9,5 @@ venv/
 node_modules/
 dist/
 .vite/
+
+bharat_voice2form/.streamlit/secrets.toml
