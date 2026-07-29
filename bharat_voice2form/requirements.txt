@@ -5,3 +5,5 @@ SpeechRecognition>=3.10.0
 imageio-ffmpeg>=0.4.9
 Jinja2>=3.1.0
 reportlab>=4.0.0
+groq>=0.13.0
+google-genai>=1.0.0

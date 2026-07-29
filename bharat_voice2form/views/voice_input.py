@@ -88,7 +88,11 @@ def render() -> None:
         # ── 1. Live Streaming Dictation Component ───────────────────
         st.markdown(
             f'<div style="font-weight:800;font-size:1rem;color:#FF7A00;margin:0.5rem 0 0.4rem;">'
-            f'{t("live_dictation_title")}</div>',
+            f'{t("live_dictation_title")}</div>'
+            f'<div style="display:inline-flex;align-items:center;gap:0.4rem;background:rgba(249,115,22,0.1);'
+            f'border:1px solid rgba(249,115,22,0.3);border-radius:20px;padding:0.2rem 0.7rem;'
+            f'font-size:0.75rem;font-weight:700;color:#F97316;margin-bottom:0.5rem;">'
+            f'⚡ Powered by Groq Whisper Large V3 Turbo</div>',
             unsafe_allow_html=True,
         )
         live_text = render_live_speech_dictation(language=lang, is_dark=is_dark)

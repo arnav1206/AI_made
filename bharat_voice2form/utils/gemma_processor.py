@@ -19,14 +19,31 @@ from utils.constants import INDIAN_STATES
 logger = logging.getLogger(__name__)
 
 # ─── Config ────────────────────────────────────────────────────────
-ENGINE: str = "smart_nlp"
-MODEL_NAME: str = "gemma2:2b"
+ENGINE: str = "gemma4"          # Primary: Gemma 4 via google-genai (falls back to smart_nlp if key missing)
+MODEL_NAME: str = "gemma-4-31b-it"   # Gemma 4 31B Instruct via Gemini API
+MODEL_FALLBACK: str = "gemma-4-12b-it"  # Lighter Gemma 4 fallback
 
-SYSTEM_PROMPT = """\
-You are an intelligent form-filling assistant for Indian government scholarship applications.
-Given a user's speech transcript, extract all mentioned fields as a JSON object:
-  - Name, City, State, Course, Year, College, Income, DOB, Phone, Email, Gender, Percentage
-"""
+SYSTEM_PROMPT = """You are an expert multilingual AI form-filling assistant for Indian government applications.
+Given a speech transcript in any Indian language (Hindi, Tamil, Telugu, Bengali, Marathi, Kannada, Malayalam, Odia, English),
+extract all personal information and return ONLY a valid JSON object with these exact keys (use null for missing fields):
+{
+  "Name": "Full Name",
+  "DOB": "DD/MM/YYYY",
+  "Gender": "Male|Female|Transgender",
+  "Category": "General|OBC|SC|ST|EWS",
+  "City": "City name in English",
+  "State": "State name in English",
+  "PinCode": "6-digit PIN",
+  "College": "College/Institute name",
+  "Course": "B.Tech|B.Sc|B.Com|B.A|MBA|M.Tech|etc.",
+  "Year": "First Year|Second Year|Third Year|Fourth Year|Fifth Year",
+  "Income": "Annual family income as integer rupees (e.g. 150000)",
+  "Phone": "10-digit mobile number",
+  "Email": "email address",
+  "Percentage": "marks or CGPA",
+  "Aadhaar": "12-digit aadhaar if mentioned"
+}
+Return ONLY the JSON object. No explanation, no markdown fences, no extra text."""
 
 SAMPLE_DEMO_TRANSCRIPT_SUBSTRINGS = [
     "अदिति वर्मा", "aditi verma", "ranchi", "झारखंड", "bit mesra"
@@ -147,12 +164,12 @@ def extract(
     try:
         if selected_engine == "ollama":
             result = _extract_ollama(transcript, language)
-        elif selected_engine == "gemini_api":
-            result = _extract_gemini_api(transcript, language)
+        elif selected_engine in ("gemma4", "gemini_api"):
+            result = _extract_gemma4(transcript, language)
         else:
             result = _extract_smart_nlp(transcript, language, simulate_delay)
     except Exception as exc:
-        logger.warning("Engine '%s' failed: %s — using dynamic NLP extractor", selected_engine, exc)
+        logger.warning("Engine '%s' failed: %s — falling back to dynamic NLP extractor", selected_engine, exc)
         result = _extract_smart_nlp(transcript, language, simulate_delay)
 
     result.latency_ms = (time.perf_counter() - t0) * 1000
@@ -306,18 +323,62 @@ def _extract_ollama(transcript: str, language: str) -> ExtractionResult:
     return result
 
 
-def _extract_gemini_api(transcript: str, language: str) -> ExtractionResult:
-    import google.generativeai as genai
+def _extract_gemma4(transcript: str, language: str) -> ExtractionResult:
+    """
+    Extract structured form fields using Gemma 4 via the Google AI (google-genai) SDK.
+    Model: gemma-4-31b-it (falls back to gemma-4-12b-it if quota exceeded).
+    Requires GEMINI_API_KEY in Streamlit secrets or environment variable.
+    """
     import os
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-    model = genai.GenerativeModel("gemma-3-4b-it")
-    prompt = SYSTEM_PROMPT + f"\n\nTranscript ({language}):\n{transcript}"
-    response = model.generate_content(prompt)
-    raw_text = response.text
-    data = _parse_json_from_llm(raw_text)
-    result = ExtractionResult(data, "gemini_api", 0.0)
-    result.raw = raw_text
-    return result
+    import streamlit as st
+
+    # Resolve API key: Streamlit secrets → env var
+    api_key = (
+        st.secrets.get("GEMINI_API_KEY")
+        if hasattr(st, "secrets")
+        else os.environ.get("GEMINI_API_KEY", "")
+    )
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY not configured — add it to .streamlit/secrets.toml")
+
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(api_key=api_key)
+
+    prompt = (
+        f"{SYSTEM_PROMPT}\n\n"
+        f"Transcript language: {language}\n"
+        f"Transcript:\n{transcript}"
+    )
+
+    # Try primary model first, fall back to lighter variant
+    for model_id in (MODEL_NAME, MODEL_FALLBACK):
+        try:
+            response = client.models.generate_content(
+                model=model_id,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    temperature=0.1,
+                    max_output_tokens=512,
+                ),
+            )
+            raw_text = response.text.strip()
+            data = _parse_json_from_llm(raw_text)
+            result = ExtractionResult(data, f"Gemma 4 ({model_id})", 0.0)
+            result.raw = raw_text
+            logger.info("Gemma 4 extraction successful with model: %s", model_id)
+            return result
+        except Exception as exc:
+            logger.warning("Gemma 4 model %s failed: %s — trying fallback", model_id, exc)
+            continue
+
+    raise RuntimeError("All Gemma 4 models failed")
+
+
+def _extract_gemini_api(transcript: str, language: str) -> ExtractionResult:
+    """Legacy alias — redirects to Gemma 4 engine."""
+    return _extract_gemma4(transcript, language)
 
 
 def _parse_json_from_llm(raw_text: str) -> dict:

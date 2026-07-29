@@ -24,7 +24,7 @@ from utils.constants import MOCK_TRANSCRIPTS, LANGUAGES
 logger = logging.getLogger(__name__)
 
 # ─── Config ────────────────────────────────────────────────────────
-ENGINE: str = "google_free"
+ENGINE: str = "groq_whisper"    # Primary: Groq Whisper Large V3 Turbo (falls back to google_free if key missing)
 
 _LOCALE_MAP: dict[str, str] = {
     lang[1]: lang[3] for lang in LANGUAGES
@@ -127,6 +127,8 @@ def transcribe(
     try:
         if selected_engine == "whisper":
             return _transcribe_whisper(audio_bytes, language)
+        elif selected_engine == "groq_whisper":
+            return _transcribe_groq_whisper(audio_bytes, language)
         else:
             return _transcribe_google_free(audio_bytes, language)
     except Exception as exc:
@@ -137,7 +139,7 @@ def transcribe(
 
 
 def _transcribe_whisper(audio_bytes: bytes, language: str) -> TranscriptionResult:
-    """OpenAI Whisper STT engine."""
+    """OpenAI Whisper STT engine (local via whisper library)."""
     import whisper, tempfile
     wav_bytes = convert_audio_to_pcm_wav(audio_bytes)
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
@@ -153,6 +155,62 @@ def _transcribe_whisper(audio_bytes: bytes, language: str) -> TranscriptionResul
         if os.path.exists(tmp_path):
             os.unlink(tmp_path)
         raise e
+
+
+def _transcribe_groq_whisper(audio_bytes: bytes, language: str) -> TranscriptionResult:
+    """
+    Groq Whisper Large V3 Turbo STT engine.
+    Ultra-fast (216x real-time), production-grade, multilingual Indian language support.
+    Requires GROQ_API_KEY in Streamlit secrets or environment variable.
+    Falls back to Google Free STT if key is not configured.
+    """
+    import os, io, tempfile
+    import streamlit as st
+
+    # Resolve Groq API key
+    groq_api_key = (
+        st.secrets.get("GROQ_API_KEY")
+        if hasattr(st, "secrets")
+        else os.environ.get("GROQ_API_KEY", "")
+    )
+    if not groq_api_key:
+        logger.info("GROQ_API_KEY not set — falling back to Google Free STT")
+        return _transcribe_google_free(audio_bytes, language)
+
+    from groq import Groq
+
+    locale = _LOCALE_MAP.get(language, "hi")
+    language_code = locale.split("-")[0]   # e.g. "hi" from "hi-IN"
+
+    # Convert to 16kHz WAV for Groq
+    wav_bytes = convert_audio_to_pcm_wav(audio_bytes)
+
+    # Write to temp file (Groq SDK requires a file-like object with a name)
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        tmp.write(wav_bytes)
+        tmp_path = tmp.name
+
+    try:
+        client = Groq(api_key=groq_api_key)
+        with open(tmp_path, "rb") as audio_file:
+            transcription = client.audio.transcriptions.create(
+                file=("audio.wav", audio_file.read()),
+                model="whisper-large-v3-turbo",
+                language=language_code,
+                response_format="text",
+                prompt=f"Indian government form application speech in {language}.",
+            )
+        text = str(transcription).strip()
+        if text:
+            return TranscriptionResult(text, language, 0.97, "Groq Whisper Large V3 Turbo")
+        else:
+            raise ValueError("Empty transcription from Groq Whisper")
+    except Exception as exc:
+        logger.warning("Groq Whisper failed: %s — falling back to Google Free STT", exc)
+        return _transcribe_google_free(audio_bytes, language)
+    finally:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
 
 
 def get_supported_languages() -> list[str]:

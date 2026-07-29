@@ -41,6 +41,17 @@ def render() -> None:
 
     section_heading(t("ai_title"), t("ai_sub"))
 
+    # ── Gemma 4 AI Engine Badge ──────────────────────────────────────
+    st.markdown(
+        '<div style="display:inline-flex;align-items:center;gap:0.5rem;'
+        'background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(99,102,241,0.15));'
+        'border:1px solid rgba(99,102,241,0.4);border-radius:25px;padding:0.3rem 1rem;'
+        'font-size:0.8rem;font-weight:800;color:#818CF8;margin-bottom:1rem;">'
+        '🤖 AI Extraction powered by <span style="color:#A5B4FC;margin-left:0.3rem;">'
+        'Google Gemma 4 (gemma-4-31b-it)</span></div>',
+        unsafe_allow_html=True,
+    )
+
     transcript = session.get("transcript", "—")
     language   = session.get("selected_language", "Hindi")
 
