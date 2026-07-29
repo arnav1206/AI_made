@@ -11,7 +11,7 @@ import streamlit as st
 
 def inject_global_css() -> None:
     """Inject global CSS rules for Light/Dark mode and high-contrast UI components."""
-    is_dark = st.session_state.get("dark_mode", False)
+    is_dark = st.session_state.get("dark_mode", True)
 
     if is_dark:
         bg_main      = "#0B0F17"

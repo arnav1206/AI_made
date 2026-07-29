@@ -121,7 +121,7 @@ def _theme_toggle_button() -> None:
 def _language_selector() -> None:
     """Language selectbox — visible text before & inside dropdown."""
     langs   = get_available_languages()
-    current = session.get("selected_language", "Hindi")
+    current = session.get("selected_language", "English")
     try:
         idx = langs.index(current)
     except ValueError:

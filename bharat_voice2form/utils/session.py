@@ -2,6 +2,7 @@
 utils/session.py
 ================
 Centralised session-state management for Bharat Voice2Form / Formitra.
+Defaults to Dark Mode and English language.
 """
 
 from __future__ import annotations
@@ -18,7 +19,8 @@ from utils.constants import (
 _DEFAULTS: dict = {
     "page":               "login",
     "selected_form":      "",
-    "selected_language":  "Hindi",
+    "selected_language":  "English",
+    "dark_mode":          True,
     "is_recording":       False,
     "transcript":         "",
     "extracted_data":     {},
@@ -106,7 +108,7 @@ def save_form_data() -> dict:
 def full_reset() -> None:
     """Hard-reset all transient state except the page key."""
     transient_keys = [
-        "selected_form", "selected_language", "is_recording",
+        "selected_form", "selected_language", "dark_mode", "is_recording",
         "transcript", "extracted_data", "extraction_done",
         "form_data", "application_no", "declaration_agreed",
     ]

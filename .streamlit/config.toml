@@ -9,8 +9,9 @@ enableXsrfProtection = false
 gatherUsageStats = false
 
 [theme]
+base = "dark"
 primaryColor = "#FF7A00"
-backgroundColor = "#0F172A"
-secondaryBackgroundColor = "#1E293B"
+backgroundColor = "#0B0F17"
+secondaryBackgroundColor = "#151C2C"
 textColor = "#F8FAFC"
 font = "sans serif"
