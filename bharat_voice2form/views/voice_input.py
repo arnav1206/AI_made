@@ -90,7 +90,7 @@ def render() -> None:
             f'{t("live_dictation_title")}</div>',
             unsafe_allow_html=True,
         )
-        live_text = render_live_speech_dictation(language=lang)
+        live_text = render_live_speech_dictation(language=lang, is_dark=is_dark)
 
         if live_text and isinstance(live_text, str) and live_text.strip():
             _update_transcript(live_text)

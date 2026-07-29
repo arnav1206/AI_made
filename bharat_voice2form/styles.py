@@ -2,7 +2,7 @@
 styles.py
 =========
 Global design system & CSS injection for Formitra (भारत Formitra).
-Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, hero banner, sidebar active tab highlights, tabs, cards, selectboxes, top header transparency, toolbar icons, buttons, and expanders.
+Comprehensive Light/Dark theme styling covering inputs, text, placeholders, popovers, hero banner, sidebar active tab highlights, tabs, cards, selectboxes, audio inputs, top header transparency, toolbar icons, buttons, and expanders.
 """
 
 from __future__ import annotations
@@ -191,14 +191,14 @@ def inject_global_css() -> None:
             font-weight: 800 !important;
         }}
 
-        /* ── Voice Dictate Popover Buttons High-Contrast Fix ── */
+        /* ── Voice Dictate Popover Buttons Dynamic Theme ── */
         div[data-testid="stPopover"] > button,
         .stPopover > button,
         button[data-testid="stBaseButton-popover"],
         [data-testid="stPopover"] button {{
-            background-color: #1E293B !important;
-            background: #1E293B !important;
-            color: #F8FAFC !important;
+            background-color: {input_bg} !important;
+            background: {input_bg} !important;
+            color: {input_text} !important;
             border: 1.5px solid rgba(255, 122, 0, 0.45) !important;
             border-radius: 10px !important;
         }}
@@ -211,8 +211,8 @@ def inject_global_css() -> None:
         button[data-testid="stBaseButton-popover"] span,
         [data-testid="stPopover"] button p,
         [data-testid="stPopover"] button span {{
-            color: #F8FAFC !important;
-            -webkit-text-fill-color: #F8FAFC !important;
+            color: {input_text} !important;
+            -webkit-text-fill-color: {input_text} !important;
             font-weight: 800 !important;
         }}
         div[data-testid="stPopover"] > button:hover,
@@ -224,57 +224,50 @@ def inject_global_css() -> None:
             background: #FF7A00 !important;
             color: #FFFFFF !important;
         }}
-        div[data-testid="stPopover"] > button:hover p,
-        div[data-testid="stPopover"] > button:hover span,
-        button[data-testid="stBaseButton-popover"]:hover p,
-        button[data-testid="stBaseButton-popover"]:hover span {{
-            color: #FFFFFF !important;
-            -webkit-text-fill-color: #FFFFFF !important;
-        }}
 
-        /* ── Voice Dictate Popover Body & Dialog Container Fix ── */
+        /* ── Voice Dictate Popover Body & Dialog Container ── */
         div[data-testid="stPopoverBody"],
         [data-testid="stPopoverBody"],
         div[data-testid="stPopoverContent"] {{
-            background-color: #1E293B !important;
-            background: #1E293B !important;
-            color: #F8FAFC !important;
+            background-color: {bg_card} !important;
+            background: {bg_card} !important;
+            color: {text_primary} !important;
             border: 1.5px solid rgba(255, 122, 0, 0.5) !important;
             border-radius: 16px !important;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6) !important;
+            box-shadow: {card_shadow} !important;
         }}
         div[data-testid="stPopoverBody"] p,
         div[data-testid="stPopoverBody"] label,
         div[data-testid="stPopoverBody"] span,
         div[data-testid="stPopoverBody"] div,
-        div[data-testid="stPopoverBody"] h1,
-        div[data-testid="stPopoverBody"] h2,
-        div[data-testid="stPopoverBody"] h3,
-        div[data-testid="stPopoverBody"] h4,
         [data-testid="stPopoverBody"] p,
         [data-testid="stPopoverBody"] label,
         [data-testid="stPopoverBody"] span,
         [data-testid="stPopoverBody"] div {{
-            color: #F8FAFC !important;
-            -webkit-text-fill-color: #F8FAFC !important;
+            color: {text_primary} !important;
+            -webkit-text-fill-color: {text_primary} !important;
             font-weight: 700 !important;
         }}
-        div[data-testid="stPopoverBody"] .stButton > button,
-        [data-testid="stPopoverBody"] button:not([data-testid="stBaseButton-popover"]) {{
-            background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%) !important;
-            color: #FFFFFF !important;
-            border: none !important;
-            border-radius: 50px !important;
-            font-weight: 800 !important;
-            box-shadow: 0 4px 14px rgba(255, 122, 0, 0.4) !important;
+
+        /* ── Streamlit Audio Input Component Dynamic Theme ── */
+        div[data-testid="stAudioInput"],
+        [data-testid="stAudioInput"],
+        div[data-testid="stAudioInput"] > div,
+        div[aria-label="Audio recorder"] {{
+            background-color: {input_bg} !important;
+            background: {input_bg} !important;
+            color: {text_primary} !important;
+            border: 1.5px solid {border_col} !important;
+            border-radius: 14px !important;
         }}
-        div[data-testid="stPopoverBody"] .stButton > button p,
-        div[data-testid="stPopoverBody"] .stButton > button span,
-        [data-testid="stPopoverBody"] button:not([data-testid="stBaseButton-popover"]) p,
-        [data-testid="stPopoverBody"] button:not([data-testid="stBaseButton-popover"]) span {{
-            color: #FFFFFF !important;
-            -webkit-text-fill-color: #FFFFFF !important;
-            font-weight: 800 !important;
+        div[data-testid="stAudioInput"] p,
+        div[data-testid="stAudioInput"] span,
+        div[data-testid="stAudioInput"] label,
+        div[data-testid="stAudioInput"] div,
+        div[data-testid="stAudioInput"] svg {{
+            color: {text_primary} !important;
+            -webkit-text-fill-color: {text_primary} !important;
+            fill: {text_primary} !important;
         }}
 
         /* ── Step Progress Bar Layout ── */
@@ -355,8 +348,11 @@ def inject_global_css() -> None:
             font-weight: 700 !important;
             font-size: 0.95rem !important;
         }}
-        div[data-baseweb="select"] span {{
+        div[data-baseweb="select"] span,
+        div[data-baseweb="select"] div,
+        div[data-baseweb="select"] input {{
             color: {select_text} !important;
+            -webkit-text-fill-color: {select_text} !important;
             font-weight: 700 !important;
         }}
         ul[data-baseweb="menu"] {{

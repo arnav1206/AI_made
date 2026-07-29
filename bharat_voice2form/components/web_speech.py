@@ -4,6 +4,7 @@ components/web_speech.py
 Live streaming speech dictation component.
 Performs real-time HTML5 browser speech-to-text in 8 Indian languages.
 100% Multilingual translation support via t().
+Dynamic Light/Dark theme mode contrast support.
 Transcribes live as user speaks, and returns the final transcribed text on stop.
 """
 
@@ -24,7 +25,7 @@ _LOCALE_MAP: dict[str, str] = {
 }
 
 
-def render_live_speech_dictation(language: str = "Hindi") -> str | None:
+def render_live_speech_dictation(language: str = "Hindi", is_dark: bool = True) -> str | None:
     """
     Render HTML5 live speech transcription component.
 
@@ -32,6 +33,8 @@ def render_live_speech_dictation(language: str = "Hindi") -> str | None:
     ----------
     language : str
         Target language name (e.g. "Hindi", "Tamil", "English").
+    is_dark : bool
+        Whether Dark mode is currently active.
 
     Returns
     -------
@@ -47,6 +50,23 @@ def render_live_speech_dictation(language: str = "Hindi") -> str | None:
     recording_in_prog = t("recording_in_progress", "🗣️ Live recording in progress... Speak into mic")
     recording_stopped = t("recording_stopped", "✅ Recording stopped. Live speech captured!")
 
+    if is_dark:
+        card_bg     = "linear-gradient(135deg, #0F172A 0%, #1E293B 100%)"
+        card_border = "1px solid rgba(255, 255, 255, 0.15)"
+        status_col  = "#94A3B8"
+        live_bg     = "rgba(255, 255, 255, 0.06)"
+        live_txt    = "#F8FAFC"
+        live_border = "1.5px solid rgba(255, 255, 255, 0.15)"
+        card_shadow = "0 10px 30px rgba(15, 23, 42, 0.4)"
+    else:
+        card_bg     = "linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%)"
+        card_border = "2px solid #FED7AA"
+        status_col  = "#475569"
+        live_bg     = "#FFFFFF"
+        live_txt    = "#0F172A"
+        live_border = "1.5px solid #CBD5E1"
+        card_shadow = "0 10px 25px rgba(0, 0, 0, 0.08)"
+
     html_code = f"""
     <!DOCTYPE html>
     <html>
@@ -60,13 +80,13 @@ def render_live_speech_dictation(language: str = "Hindi") -> str | None:
                 background: transparent;
             }}
             .dictation-card {{
-                background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+                background: {card_bg};
                 border-radius: 20px;
                 padding: 1.5rem;
-                color: #FFFFFF;
+                color: {live_txt};
                 text-align: center;
-                box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
-                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: {card_shadow};
+                border: {card_border};
             }}
             .mic-btn {{
                 background: linear-gradient(135deg, #FF7A00 0%, #EA580C 100%);
@@ -99,23 +119,23 @@ def render_live_speech_dictation(language: str = "Hindi") -> str | None:
             .status-text {{
                 font-size: 0.88rem;
                 margin-top: 0.85rem;
-                color: #94A3B8;
+                color: {status_col};
                 font-weight: 600;
             }}
             .live-box {{
                 margin-top: 1rem;
-                background: rgba(255, 255, 255, 0.06);
+                background: {live_bg};
                 border-radius: 12px;
                 padding: 1rem;
                 font-size: 1.05rem;
-                color: #F8FAFC;
+                color: {live_txt};
                 min-height: 60px;
                 text-align: left;
-                border: 1.5px solid rgba(255, 255, 255, 0.15);
+                border: {live_border};
                 line-height: 1.6;
             }}
             .interim {{
-                color: #FDE047;
+                color: #D97706;
                 font-style: italic;
             }}
         </style>
