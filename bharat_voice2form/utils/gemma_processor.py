@@ -361,7 +361,7 @@ def _extract_gemma4(transcript: str, language: str) -> ExtractionResult:
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     temperature=0.1,
-                    max_output_tokens=512,
+                    max_output_tokens=1024,
                 ),
             )
             raw_text = ""
@@ -398,30 +398,23 @@ def _parse_json_from_llm(raw_text: str) -> dict:
     if not raw_text:
         raise ValueError("Empty text received from LLM")
 
-    # 1. Search for ```json ... ``` code fence
-    fence_matches = re.findall(r"```(?:json)?\s*(\{.*?\})\s*```", raw_text, re.DOTALL | re.IGNORECASE)
-    for block in reversed(fence_matches):
-        try:
-            return json.loads(block.strip())
-        except Exception:
-            pass
+    # Find first '{' and last '}'
+    first_brace = raw_text.find('{')
+    last_brace = raw_text.rfind('}')
 
-    # 2. Try direct json.loads after stripping top/bottom code fences
-    cleaned = re.sub(r"^```(?:json)?\s*", "", raw_text.strip(), flags=re.IGNORECASE)
-    cleaned = re.sub(r"\s*```$", "", cleaned).strip()
-    try:
-        return json.loads(cleaned)
-    except Exception:
-        pass
-
-    # 3. Extract JSON object bounded by last '{' block
-    first_brace = cleaned.find('{')
-    last_brace = cleaned.rfind('}')
     if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
-        candidate = cleaned[first_brace:last_brace + 1]
+        candidate = raw_text[first_brace:last_brace + 1]
         try:
             return json.loads(candidate)
-        except Exception as err:
-            logger.warning("Outer brace JSON parse failed: %s", err)
+        except Exception:
+            # Fix trailing commas inside JSON object before parsing
+            cleaned_cand = re.sub(r",\s*([\}\]])", r"\1", candidate)
+            try:
+                return json.loads(cleaned_cand)
+            except Exception:
+                pass
 
-    raise ValueError(f"Could not parse valid JSON from LLM output: {raw_text[:120]}")
+    # Direct fallback if no braces found
+    cleaned = re.sub(r"^```(?:json)?\s*", "", raw_text.strip(), flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s*```$", "", cleaned).strip()
+    return json.loads(cleaned)
