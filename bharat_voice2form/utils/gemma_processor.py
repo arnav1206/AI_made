@@ -430,36 +430,64 @@ def _extract_smart_nlp(
             break
 
     # ── 5. Year extraction ──────────────────────────────────────────
-    if re.search(r"\b(first year|1st year|1st yr|first|प्रथम वर्ष|पहला साल|1st|प्रथम)\b", text_lower):
+    if re.search(r"\b(first year|1st year|1st yr|first|प्रथम वर्ष|पहला साल|पहला वर्ष|पहल साल|1st|प्रथम|1st year student)\b", text_lower):
         extracted["Year"] = "First Year"
-    elif re.search(r"\b(second year|2nd year|2nd yr|second|द्वितीय वर्ष|दूसरा साल|2nd|द्वितीय)\b", text_lower):
+    elif re.search(r"\b(second year|2nd year|2nd yr|second|द्वितीय वर्ष|दूसरा साल|दूसरा वर्ष|दूसरे साल|2nd|द्वितीय|2nd year student)\b", text_lower):
         extracted["Year"] = "Second Year"
-    elif re.search(r"\b(third year|3rd year|3rd yr|third|तृतीय वर्ष|तीसरा साल|3rd|तृतीय)\b", text_lower):
+    elif re.search(r"\b(third year|3rd year|3rd yr|third|तृतीय वर्ष|तीसरा साल|तीसरा वर्ष|तीसरे साल|3rd|तृतीय|pre-final year|3rd year student)\b", text_lower):
         extracted["Year"] = "Third Year"
-    elif re.search(r"\b(fourth year|4th year|4th yr|fourth|चौथा साल|4th|चतुर्थ)\b", text_lower):
+    elif re.search(r"\b(fourth year|4th year|4th yr|fourth|final year|last year|चतुर्थ वर्ष|चौथा साल|चौथा वर्ष|चौथे साल|4th|चतुर्थ|4th year student)\b", text_lower):
         extracted["Year"] = "Fourth Year"
-    elif re.search(r"\b(fifth year|5th year|5th yr|fifth|5th)\b", text_lower):
+    elif re.search(r"\b(fifth year|5th year|5th yr|fifth|5th|5th year student)\b", text_lower):
         extracted["Year"] = "Fifth Year"
 
-    # ── 6. Income extraction ────────────────────────────────────────
+    # ── 6. Category & Gender extraction ─────────────────────────────
+    if re.search(r"\b(obc|obc-ncl|ओबीसी)\b", text_lower):
+        extracted["Category"] = "OBC"
+    elif re.search(r"\b(sc|scheduled caste|एससी)\b", text_lower):
+        extracted["Category"] = "SC"
+    elif re.search(r"\b(st|scheduled tribe|एसटी)\b", text_lower):
+        extracted["Category"] = "ST"
+    elif re.search(r"\b(ews|economically weaker|ईडब्ल्यूएस)\b", text_lower):
+        extracted["Category"] = "EWS"
+    elif re.search(r"\b(general|general category|सामान्य|unreserved)\b", text_lower):
+        extracted["Category"] = "General"
+
+    if re.search(r"\b(male|ladka|purush|पुरुष|लड़का|boy|man)\b", text_lower):
+        extracted["Gender"] = "Male"
+    elif re.search(r"\b(female|ladki|mahila|महिला|लड़की|girl|woman)\b", text_lower):
+        extracted["Gender"] = "Female"
+    elif re.search(r"\b(transgender|other|अन्य)\b", text_lower):
+        extracted["Gender"] = "Transgender"
+
+    # ── 7. Income extraction ────────────────────────────────────────
     parsed_inc = _parse_income(text)
     if parsed_inc:
         extracted["Income"] = parsed_inc
 
-    # ── 7. Phone extraction ─────────────────────────────────────────
+    # ── 8. Phone extraction ─────────────────────────────────────────
     phone_match = re.search(r"\b[6-9]\d{9}\b", text)
     if phone_match:
         extracted["Phone"] = phone_match.group(0)
 
-    # ── 8. DOB extraction ───────────────────────────────────────────
+    # ── 9. DOB extraction ───────────────────────────────────────────
     dob_match = re.search(r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b", text)
     if dob_match:
         extracted["DOB"] = dob_match.group(0)
 
-    # ── 9. Email extraction ─────────────────────────────────────────
+    # ── 10. Email extraction ─────────────────────────────────────────
     email_match = re.search(r"[\w.-]+@[\w.-]+\.\w+", text)
     if email_match:
         extracted["Email"] = email_match.group(0)
+
+    # ── 11. PinCode & Aadhaar extraction ──────────────────────────────
+    pin_match = re.search(r"\b(?:pin|pincode|pin code|पिन कोड)\s*[:=]?\s*(\d{6})\b", text_lower)
+    if pin_match:
+        extracted["PinCode"] = pin_match.group(1)
+
+    aadhaar_match = re.search(r"\b\d{4}\s?\d{4}\s?\d{4}\b", text)
+    if aadhaar_match:
+        extracted["Aadhaar"] = re.sub(r"\s", "", aadhaar_match.group(0))
 
     # ── 10. College extraction ──────────────────────────────────────
     college_match = re.search(
