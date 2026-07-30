@@ -60,11 +60,12 @@ def speech_tips_card() -> None:
     text_col   = "#F8FAFC" if is_dark else "#475569"
     card_bg    = "#151C2C" if is_dark else "#FFFFFF"
     border_c   = "rgba(255, 122, 0, 0.4)" if is_dark else "#FED7AA"
-    custom_url = session.get("custom_form_url")
     dynamic_qs = session.get("dynamic_form_questions")
+    extracted  = session.get("extracted_data", {})
+    is_g_form  = bool(dynamic_qs) or session.get("is_google_form_imported") or ("Google Form" in str(session.get("selected_form")))
 
-    badge_html = ""
-    list_html  = ""
+    std_keys    = {"Name", "DOB", "Gender", "Category", "Address", "City", "State", "PIN Code", "College", "Course", "Year", "Income", "Phone", "Email", "Percentage", "Full Name", "Date of Birth", "Annual Family Income"}
+    custom_keys = [k for k in extracted.keys() if k and k not in std_keys]
 
     if dynamic_qs:
         badge_html = (
@@ -78,14 +79,20 @@ def speech_tips_card() -> None:
             req_tag = ' <span style="color:#EF4444;">*</span>' if q.get("required") else ""
             q_items.append(f'<li>📋 <strong>{q["title"]}</strong>{req_tag}</li>')
         list_html = "".join(q_items)
+        title_text = f"📋 Imported Google Form Questions ({len(dynamic_qs)} Fields)"
+    elif custom_keys or is_g_form:
+        keys_to_show = custom_keys if custom_keys else list(extracted.keys())
+        badge_html = (
+            f'<div style="background:rgba(5, 150, 105, 0.15);border:1px solid rgba(5, 150, 105, 0.4);'
+            f'color:#10B981;border-radius:6px;padding:0.3rem 0.65rem;font-size:0.78rem;font-weight:800;'
+            f'margin-bottom:0.6rem;display:inline-block;">'
+            f'✨ {len(keys_to_show)} Imported Form Questions Ready for Voice</div>'
+        )
+        list_html = "".join([f'<li>📋 <strong>{k}</strong></li>' for k in keys_to_show])
+        title_text = f"📋 Imported Form Questions ({len(keys_to_show)} Fields)"
     else:
-        if custom_url:
-            badge_html = (
-                f'<div style="background:rgba(5, 150, 105, 0.15);border:1px solid rgba(5, 150, 105, 0.4);'
-                f'color:#10B981;border-radius:6px;padding:0.3rem 0.65rem;font-size:0.78rem;font-weight:800;'
-                f'margin-bottom:0.6rem;display:inline-block;">'
-                f'✨ Form Questions Imported & Analyzed</div>'
-            )
+        title_text = "📋 Required Form Fields to Dictate"
+        badge_html = ""
         list_html = (
             f'<li>👤 <strong>Full Name & Date of Birth</strong></li>'
             f'<li>🏷️ <strong>Gender & Category (SC/ST/OBC/General)</strong></li>'
@@ -96,17 +103,15 @@ def speech_tips_card() -> None:
             f'<li>📞 <strong>Mobile Phone Number</strong></li>'
         )
 
-    title_text = f"📋 Imported Form Questions ({len(dynamic_qs)} Fields)" if dynamic_qs else "📋 Required Form Fields to Dictate"
-
     st.markdown(
-        f'<div class="card" style="margin-top:0.5rem;background:{card_bg};border:1px solid {border_c};">'
+        f'<div class="card" style="background:{card_bg};border:1px solid {border_c};border-radius:14px;padding:1.1rem;">'
         f'{badge_html}'
-        f'<div style="font-weight:800;font-size:1.02rem;color:#FF7A00;margin-bottom:0.3rem;">'
-        f'{title_text}</div>'
-        f'<div style="font-size:0.8rem;opacity:0.85;margin-bottom:0.75rem;line-height:1.4;">'
+        f'<div style="font-weight:800;font-size:0.96rem;color:#FF7A00;margin-bottom:0.4rem;">{title_text}</div>'
+        f'<div style="font-size:0.8rem;color:{text_col};opacity:0.85;margin-bottom:0.75rem;">'
         f'Speak into the mic to provide answers for these form questions:</div>'
-        f'<ul style="margin:0;padding-left:1.2rem;font-size:0.88rem;color:{text_col};line-height:1.9;font-weight:600;">'
+        f'<ul style="font-size:0.84rem;color:{text_col};line-height:1.9;padding-left:1.2rem;margin:0;">'
         f'{list_html}'
-        f'</ul></div>',
+        f'</ul>'
+        f'</div>',
         unsafe_allow_html=True,
     )
