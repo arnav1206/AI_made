@@ -111,6 +111,12 @@ def _theme_toggle_button() -> None:
         st.rerun()
 
 
+def _on_sidebar_lang_change() -> None:
+    chosen = st.session_state.get("sidebar_lang_select")
+    if chosen:
+        st.session_state["selected_language"] = chosen
+
+
 def _language_selector() -> None:
     """Language selectbox — visible text before & inside dropdown."""
     langs   = get_available_languages()
@@ -125,18 +131,14 @@ def _language_selector() -> None:
         f'{t("ui_language")}</div>',
         unsafe_allow_html=True,
     )
-    chosen = st.selectbox(
+    st.selectbox(
         t("ui_language"),
         langs,
         index=idx,
         key="sidebar_lang_select",
+        on_change=_on_sidebar_lang_change,
         label_visibility="collapsed",
     )
-    if chosen != current:
-        session.set("selected_language", chosen)
-        st.session_state["sidebar_lang_select"] = chosen
-        st.session_state["lang_select"] = chosen
-        st.rerun()
 
 
 def _nav_section() -> None:

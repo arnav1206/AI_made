@@ -20,6 +20,12 @@ from utils.voice_assist    import render_voice_assistant_player
 import utils.session as session
 
 
+def _on_voice_lang_change() -> None:
+    chosen = st.session_state.get("lang_select")
+    if chosen:
+        st.session_state["selected_language"] = chosen
+
+
 def _update_transcript(text: str) -> None:
     """Synchronise transcript state across session and text-area widget key."""
     clean_text = text.strip()
@@ -71,12 +77,8 @@ def render() -> None:
             langs,
             index=lang_idx,
             key="lang_select",
+            on_change=_on_voice_lang_change,
         )
-        if lang != current_lang:
-            session.set("selected_language", lang)
-            st.session_state["sidebar_lang_select"] = lang
-            st.session_state["lang_select"] = lang
-            st.rerun()
 
         # Language Auto-Detector Badge
         if det_lang := session.get("detected_language"):
