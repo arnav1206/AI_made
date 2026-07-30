@@ -24,7 +24,7 @@ from utils.constants import MOCK_TRANSCRIPTS, LANGUAGES
 logger = logging.getLogger(__name__)
 
 # ─── Config ────────────────────────────────────────────────────────
-ENGINE: str = "groq_whisper"    # Primary: Groq Whisper Large V3 Turbo (falls back to google_free if key missing)
+ENGINE: str = "wispr_flow"     # Primary: Wispr Flow API (falls back to groq_whisper / google_free)
 
 _LOCALE_MAP: dict[str, str] = {
     lang[1]: lang[3] for lang in LANGUAGES
@@ -125,10 +125,12 @@ def transcribe(
         return _transcribe_mock(language)
 
     try:
-        if selected_engine == "whisper":
-            return _transcribe_whisper(audio_bytes, language)
+        if selected_engine == "wispr_flow":
+            return _transcribe_wispr_flow(audio_bytes, language)
         elif selected_engine == "groq_whisper":
             return _transcribe_groq_whisper(audio_bytes, language)
+        elif selected_engine == "whisper":
+            return _transcribe_whisper(audio_bytes, language)
         else:
             return _transcribe_google_free(audio_bytes, language)
     except Exception as exc:
@@ -211,6 +213,59 @@ def _transcribe_groq_whisper(audio_bytes: bytes, language: str) -> Transcription
     finally:
         if os.path.exists(tmp_path):
             os.unlink(tmp_path)
+
+
+def _transcribe_wispr_flow(audio_bytes: bytes, language: str) -> TranscriptionResult:
+    """
+    Wispr Flow Voice Interface REST API integration.
+    Endpoint: https://platform-api.wisprflow.ai/api/v1/dash/api
+    Requires WISPR_FLOW_API_KEY in Streamlit secrets or environment variable.
+    Falls back to Groq Whisper if key is not configured.
+    """
+    import os, base64, urllib.request, json
+    import streamlit as st
+
+    # Resolve Wispr Flow API key
+    wispr_key = (
+        st.secrets.get("WISPR_FLOW_API_KEY")
+        if hasattr(st, "secrets")
+        else os.environ.get("WISPR_FLOW_API_KEY", "")
+    )
+    if not wispr_key:
+        logger.info("WISPR_FLOW_API_KEY not configured — using Groq Whisper Large V3 Turbo")
+        return _transcribe_groq_whisper(audio_bytes, language)
+
+    try:
+        wav_bytes = convert_audio_to_pcm_wav(audio_bytes)
+        base64_audio = base64.b64encode(wav_bytes).decode("utf-8")
+
+        payload = json.dumps({
+            "audio": base64_audio,
+            "language": _LOCALE_MAP.get(language, "hi-IN").split("-")[0],
+            "context": {"app": "Bharat Voice2Form", "language": language}
+        }).encode("utf-8")
+
+        req = urllib.request.Request(
+            "https://platform-api.wisprflow.ai/api/v1/dash/api",
+            data=payload,
+            headers={
+                "Authorization": f"Bearer {wispr_key}",
+                "Content-Type": "application/json",
+            },
+            method="POST"
+        )
+
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            text = data.get("text") or data.get("transcription") or ""
+            if text:
+                return TranscriptionResult(text.strip(), language, 0.98, "Wispr Flow AI")
+            else:
+                raise ValueError(f"Empty transcription response: {data}")
+
+    except Exception as exc:
+        logger.warning("Wispr Flow API failed: %s — falling back to Groq Whisper", exc)
+        return _transcribe_groq_whisper(audio_bytes, language)
 
 
 def get_supported_languages() -> list[str]:
