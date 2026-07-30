@@ -58,78 +58,86 @@ SAMPLE_MOCK_EXTRACTION: dict[str, str] = {
     "Income": "200000",
 }
 
-# English & Devanagari City Mappings
+# Comprehensive City Mappings (English, Devanagari & Common Variant Names)
 _CITY_MAP: dict[str, str] = {
-    "जयपुर": "Jaipur", "jaipur": "Jaipur",
-    "राँची": "Ranchi", "रांची": "Ranchi", "ranchi": "Ranchi",
-    "पटना": "Patna", "patna": "Patna",
-    "दिल्ली": "Delhi", "नई दिल्ली": "New Delhi", "delhi": "Delhi", "new delhi": "New Delhi",
-    "लखनऊ": "Lucknow", "lucknow": "Lucknow",
-    "मुंबई": "Mumbai", "mumbai": "Mumbai",
-    "पुणे": "Pune", "pune": "Pune",
-    "भोपाल": "Bhopal", "bhopal": "Bhopal",
-    "इंदौर": "Indore", "indore": "Indore",
-    "अहमदाबाद": "Ahmedabad", "ahmedabad": "Ahmedabad",
-    "चेन्नई": "Chennai", "chennai": "Chennai",
-    "हैदराबाद": "Hyderabad", "hyderabad": "Hyderabad",
-    "बेंगलुरु": "Bengaluru", "bangalore": "Bengaluru", "bengaluru": "Bengaluru",
-    "कोलकाता": "Kolkata", "kolkata": "Kolkata",
-    "चंडीगढ़": "Chandigarh", "chandigarh": "Chandigarh",
-    "गुवाहाटी": "Guwahati", "guwahati": "Guwahati",
-    "देहरादून": "Dehradun", "dehradun": "Dehradun",
-    "शिमला": "Shimla", "shimla": "Shimla",
-    "भुवनेश्वर": "Bhubaneswar", "bhubaneswar": "Bhubaneswar",
-    "रायपुर": "Raipur", "raipur": "Raipur",
-    "वाराणसी": "Varanasi", "varanasi": "Varanasi",
-    "आगरा": "Agra", "agra": "Agra",
-    "कानपुर": "Kanpur", "kanpur": "Kanpur",
-    "नागपुर": "Nagpur", "nagpur": "Nagpur",
-    "कोटा": "Kota", "kota": "Kota",
-    "अजमेर": "Ajmer", "ajmer": "Ajmer",
-    "जोधपुर": "Jodhpur", "jodhpur": "Jodhpur",
-    "उदयपुर": "Udaipur", "udaipur": "Udaipur",
+    "jaipur": "Jaipur", "जयपुर": "Jaipur",
+    "ranchi": "Ranchi", "राँची": "Ranchi", "रांची": "Ranchi",
+    "patna": "Patna", "पटना": "Patna",
+    "delhi": "Delhi", "new delhi": "New Delhi", "दिल्ली": "Delhi", "नई दिल्ली": "New Delhi",
+    "lucknow": "Lucknow", "लखनऊ": "Lucknow",
+    "mumbai": "Mumbai", "मुंबई": "Mumbai",
+    "pune": "Pune", "पुणे": "Pune",
+    "bhopal": "Bhopal", "भोपाल": "Bhopal",
+    "indore": "Indore", "इंदौर": "Indore",
+    "ahmedabad": "Ahmedabad", "अहमदाबाद": "Ahmedabad",
+    "chennai": "Chennai", "चेन्नई": "Chennai",
+    "hyderabad": "Hyderabad", "हैदराबाद": "Hyderabad",
+    "bengaluru": "Bengaluru", "bangalore": "Bengaluru", "बेंगलुरु": "Bengaluru",
+    "kolkata": "Kolkata", "कोलकाता": "Kolkata",
+    "chandigarh": "Chandigarh", "चंडीगढ़": "Chandigarh",
+    "guwahati": "Guwahati", "गुवाहाटी": "Guwahati",
+    "dehradun": "Dehradun", "देहरादून": "Dehradun",
+    "shimla": "Shimla", "शिमला": "Shimla",
+    "bhubaneswar": "Bhubaneswar", "भुवनेश्वर": "Bhubaneswar",
+    "raipur": "Raipur", "रायपुर": "Raipur",
+    "varanasi": "Varanasi", "वाराणसी": "Varanasi",
+    "agra": "Agra", "आगरा": "Agra",
+    "kanpur": "Kanpur", "कानपुर": "Kanpur",
+    "nagpur": "Nagpur", "नागपुर": "Nagpur",
+    "kota": "Kota", "कोटा": "Kota",
+    "ajmer": "Ajmer", "अजमेर": "Ajmer",
+    "jodhpur": "Jodhpur", "जोधपुर": "Jodhpur",
+    "udaipur": "Udaipur", "उदयपुर": "Udaipur",
 }
 
-# English & Devanagari State Mappings
+# State Mappings including official 2-letter postal codes & Devanagari
 _STATE_MAP: dict[str, str] = {
-    "राजस्थान": "Rajasthan", "rajasthan": "Rajasthan",
-    "झारखंड": "Jharkhand", "jharkhand": "Jharkhand",
-    "बिहार": "Bihar", "bihar": "Bihar",
-    "उत्तर प्रदेश": "Uttar Pradesh", "uttar pradesh": "Uttar Pradesh", "up": "Uttar Pradesh",
-    "मध्य प्रदेश": "Madhya Pradesh", "madhya pradesh": "Madhya Pradesh", "mp": "Madhya Pradesh",
-    "महाराष्ट्र": "Maharashtra", "maharashtra": "Maharashtra",
-    "दिल्ली": "Delhi",
-    "हरियाणा": "Haryana", "haryana": "Haryana",
-    "पंजाब": "Punjab", "punjab": "Punjab",
-    "गुजरात": "Gujarat", "gujarat": "Gujarat",
-    "पश्चिम बंगाल": "West Bengal", "west bengal": "West Bengal",
-    "तमिलनाडु": "Tamil Nadu", "tamil nadu": "Tamil Nadu",
-    "कर्नाटक": "Karnataka", "karnataka": "Karnataka",
-    "केरल": "Kerala", "kerala": "Kerala",
-    "तेलंगाना": "Telangana", "telangana": "Telangana",
-    "आंध्र प्रदेश": "Andhra Pradesh", "andhra pradesh": "Andhra Pradesh",
-    "उत्तराखंड": "Uttarakhand", "uttarakhand": "Uttarakhand",
-    "हिमाचल प्रदेश": "Himachal Pradesh", "himachal pradesh": "Himachal Pradesh",
-    "छत्तीसगढ़": "Chhattisgarh", "chhattisgarh": "Chhattisgarh", "chhatisgarh": "Chhattisgarh",
-    "ओडिशा": "Odisha", "odisha": "Odisha",
-    "असम": "Assam", "assam": "Assam",
+    "rajasthan": "Rajasthan", "राजस्थान": "Rajasthan",
+    "jharkhand": "Jharkhand", "झारखंड": "Jharkhand",
+    "bihar": "Bihar", "बिहार": "Bihar",
+    "uttar pradesh": "Uttar Pradesh", "उत्तर प्रदेश": "Uttar Pradesh",
+    "madhya pradesh": "Madhya Pradesh", "मध्य प्रदेश": "Madhya Pradesh",
+    "maharashtra": "Maharashtra", "महाराष्ट्र": "Maharashtra",
+    "delhi": "Delhi", "दिल्ली": "Delhi",
+    "haryana": "Haryana", "हरियाणा": "Haryana",
+    "punjab": "Punjab", "पंजाब": "Punjab",
+    "gujarat": "Gujarat", "गुजरात": "Gujarat",
+    "west bengal": "West Bengal", "पश्चिम बंगाल": "West Bengal",
+    "tamil nadu": "Tamil Nadu", "तमिलनाडु": "Tamil Nadu",
+    "karnataka": "Karnataka", "कर्नाटक": "Karnataka",
+    "kerala": "Kerala", "केरल": "Kerala",
+    "telangana": "Telangana", "तेलंगाना": "Telangana",
+    "andhra pradesh": "Andhra Pradesh", "आंध्र प्रदेश": "Andhra Pradesh",
+    "uttarakhand": "Uttarakhand", "उत्तराखंड": "Uttarakhand",
+    "himachal pradesh": "Himachal Pradesh", "हिमाचल प्रदेश": "Himachal Pradesh",
+    "chhattisgarh": "Chhattisgarh", "छत्तीसगढ़": "Chhattisgarh",
+    "odisha": "Odisha", "ओडिशा": "Odisha",
+    "assam": "Assam", "असम": "Assam",
 }
 
-# Course Mappings
-_COURSE_MAP: dict[str, str] = {
-    "b.tech": "B.Tech", "btech": "B.Tech", "बीटेक": "B.Tech", "बी.टेक": "B.Tech", "engineering": "B.Tech",
-    "b.sc": "B.Sc", "bsc": "B.Sc", "बीएससी": "B.Sc", "बी.एससी": "B.Sc",
-    "b.com": "B.Com", "bcom": "B.Com", "बीकॉम": "B.Com", "बी.कॉम": "B.Com",
-    "b.a": "B.A", "ba": "B.A", "बीए": "B.A", "बी.ए": "B.A",
-    "bca": "BCA", "बीसीए": "BCA",
-    "m.tech": "M.Tech", "mtech": "M.Tech", "एमटेक": "M.Tech",
-    "m.sc": "M.Sc", "msc": "M.Sc", "एमएससी": "M.Sc",
-    "mba": "MBA", "एमबीए": "MBA",
-    "mca": "MCA", "एमसीए": "MCA",
-    "mbbs": "MBBS", "एमबीबीएस": "MBBS",
-    "polytechnic": "Polytechnic", "पॉलीटेक्निक": "Polytechnic",
-    "diploma": "Diploma", "डिप्लोमा": "Diploma",
+_STATE_ABBR: dict[str, str] = {
+    "up": "Uttar Pradesh", "mp": "Madhya Pradesh", "rj": "Rajasthan",
+    "mh": "Maharashtra", "dl": "Delhi", "hr": "Haryana", "pb": "Punjab",
+    "gj": "Gujarat", "wb": "West Bengal", "tn": "Tamil Nadu", "ka": "Karnataka",
+    "kl": "Kerala", "ts": "Telangana", "ap": "Andhra Pradesh", "uk": "Uttarakhand",
+    "hp": "Himachal Pradesh", "cg": "Chhattisgarh"
 }
+
+# Course Mappings with regex boundaries
+_COURSE_PATTERNS: list[tuple[str, str]] = [
+    (r"\b(b\.?tech|btech|engineering|बीटेक|बी\.टेक)\b", "B.Tech"),
+    (r"\b(b\.?sc|bsc|बीएससी|बी\.एससी)\b", "B.Sc"),
+    (r"\b(b\.?com|bcom|बीकॉम|बी\.कॉम)\b", "B.Com"),
+    (r"\b(b\.?a|ba|बीए|बी\.ए)\b", "B.A"),
+    (r"\b(bca|बीसीए)\b", "BCA"),
+    (r"\b(m\.?tech|mtech|एमटेक)\b", "M.Tech"),
+    (r"\b(m\.?sc|msc|एमएससी)\b", "M.Sc"),
+    (r"\b(mba|एमबीए)\b", "MBA"),
+    (r"\b(mca|एमसीए)\b", "MCA"),
+    (r"\b(mbbs|एमबीबीएस)\b", "MBBS"),
+    (r"\b(polytechnic|पॉलीटेक्निक)\b", "Polytechnic"),
+    (r"\b(diploma|डिप्लोमा)\b", "Diploma"),
+]
 
 _STOPWORDS = {"is", "am", "hai", "hain", "hu", "hoon", "from", "se", "living", "in", "student", "छात्र", "हूँ", "है", "है।", "से", "का", "की", "के", "रहने", "वाला", "वाली"}
 
@@ -183,6 +191,47 @@ def _clean_name(name_str: str) -> str:
     return " ".join(cleaned).title() if cleaned else name_str.title()
 
 
+def _parse_income(text: str) -> str | None:
+    """
+    Robust income parser handling word multipliers, Devanagari numbers, and formatted digits.
+    """
+    text_lower = text.lower()
+    
+    # 1. Check Devanagari & Hindi words
+    if "पचास हजार" in text_lower or "50 thousand" in text_lower or "50 hazar" in text_lower or "fifty thousand" in text_lower:
+        return "50000"
+    if "डेढ़ लाख" in text_lower or "1.5 lakh" in text_lower or "1.5 lac" in text_lower or "1 lakh 50" in text_lower:
+        return "150000"
+    if "ढाई लाख" in text_lower or "2.5 lakh" in text_lower or "2.5 lac" in text_lower:
+        return "250000"
+    if "एक लाख" in text_lower or "1 lakh" in text_lower or "1 lac" in text_lower or "100k" in text_lower:
+        return "100000"
+    if "दो लाख" in text_lower or "2 lakh" in text_lower or "2 lacs" in text_lower or "200k" in text_lower:
+        return "200000"
+    if "तीन लाख" in text_lower or "3 lakh" in text_lower or "3 lacs" in text_lower or "300k" in text_lower:
+        return "300000"
+    if "पांच लाख" in text_lower or "5 lakh" in text_lower or "5 lacs" in text_lower or "500k" in text_lower:
+        return "500000"
+        
+    # 2. Check regex numbers with lakh / lacs / lac / k / thousand
+    lakh_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:lakh|lacs|lac|लाख|लख)\b", text_lower)
+    if lakh_match:
+        val = float(lakh_match.group(1))
+        return str(int(val * 100000))
+        
+    thousand_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:thousand|hazar|हजार|k)\b", text_lower)
+    if thousand_match:
+        val = float(thousand_match.group(1))
+        return str(int(val * 1000))
+        
+    # 3. Check plain 5 to 7 digit numbers
+    num_matches = re.findall(r"\b\d{5,7}\b", text_lower)
+    if num_matches:
+        return num_matches[0]
+        
+    return None
+
+
 def _extract_smart_nlp(
     transcript: str, language: str, simulate_delay: bool
 ) -> ExtractionResult:
@@ -190,7 +239,7 @@ def _extract_smart_nlp(
     Dynamically extract structured data from user's transcript using robust NLP rules.
     """
     if simulate_delay:
-        time.sleep(0.15)
+        time.sleep(0.01)
 
     extracted: dict[str, str] = {}
     text = transcript.strip()
@@ -211,72 +260,56 @@ def _extract_smart_nlp(
         if match:
             raw_n = match.group(1).strip()
             cleaned = _clean_name(raw_n)
-            if not any(c.lower() in cleaned.lower() for c in list(_COURSE_MAP.keys()) + list(_CITY_MAP.keys())):
-                extracted["Name"] = cleaned
-                break
+            extracted["Name"] = cleaned
+            break
 
     if "Name" not in extracted:
         cap_words = re.findall(r"\b[A-Z][a-z]+\b", text)
         if len(cap_words) >= 2:
             candidate = f"{cap_words[0]} {cap_words[1]}"
-            if not any(c.lower() in candidate.lower() for c in list(_COURSE_MAP.keys()) + ["Scholarship", "Application"]):
-                extracted["Name"] = _clean_name(candidate)
+            extracted["Name"] = _clean_name(candidate)
 
-    # ── 2. City extraction ──────────────────────────────────────────
+    # ── 2. City extraction (sorted by length descending to match multi-word cities first) ───────────────────
     text_lower = text.lower()
-    for city_key, city_val in _CITY_MAP.items():
+    for city_key in sorted(_CITY_MAP.keys(), key=len, reverse=True):
         if city_key in text_lower:
-            extracted["City"] = city_val
+            extracted["City"] = _CITY_MAP[city_key]
             break
 
-    # ── 3. State extraction ─────────────────────────────────────────
-    for state_key, state_val in _STATE_MAP.items():
+    # ── 3. State extraction (sorted by length descending) ─────────────────────────
+    for state_key in sorted(_STATE_MAP.keys(), key=len, reverse=True):
         if state_key in text_lower:
-            extracted["State"] = state_val
+            extracted["State"] = _STATE_MAP[state_key]
             break
+            
+    if "State" not in extracted:
+        for abbr, full_state in _STATE_ABBR.items():
+            if re.search(rf"\b{abbr}\b", text_lower):
+                extracted["State"] = full_state
+                break
 
     # ── 4. Course extraction ────────────────────────────────────────
-    for course_key, course_val in _COURSE_MAP.items():
-        if course_key in text_lower:
+    for pat, course_val in _COURSE_PATTERNS:
+        if re.search(pat, text_lower):
             extracted["Course"] = course_val
             break
 
     # ── 5. Year extraction ──────────────────────────────────────────
-    if re.search(r"\b(first year|1st year|first|प्रथम वर्ष|पहला साल|1st|प्रथम)\b", text, re.IGNORECASE):
+    if re.search(r"\b(first year|1st year|1st yr|first|प्रथम वर्ष|पहला साल|1st|प्रथम)\b", text_lower):
         extracted["Year"] = "First Year"
-    elif re.search(r"\b(second year|2nd year|second|द्वितीय वर्ष|दूसरा साल|2nd|द्वितीय)\b", text, re.IGNORECASE):
+    elif re.search(r"\b(second year|2nd year|2nd yr|second|द्वितीय वर्ष|दूसरा साल|2nd|द्वितीय)\b", text_lower):
         extracted["Year"] = "Second Year"
-    elif re.search(r"\b(third year|3rd year|third|तृतीय वर्ष|तीसरा साल|3rd|तृतीय)\b", text, re.IGNORECASE):
+    elif re.search(r"\b(third year|3rd year|3rd yr|third|तृतीय वर्ष|तीसरा साल|3rd|तृतीय)\b", text_lower):
         extracted["Year"] = "Third Year"
-    elif re.search(r"\b(fourth year|4th year|fourth|चौथा साल|4th|चतुर्थ)\b", text, re.IGNORECASE):
+    elif re.search(r"\b(fourth year|4th year|4th yr|fourth|चौथा साल|4th|चतुर्थ)\b", text_lower):
         extracted["Year"] = "Fourth Year"
-    elif re.search(r"\b(fifth year|5th year|fifth|5th)\b", text, re.IGNORECASE):
+    elif re.search(r"\b(fifth year|5th year|5th yr|fifth|5th)\b", text_lower):
         extracted["Year"] = "Fifth Year"
 
     # ── 6. Income extraction ────────────────────────────────────────
-    inc_match = re.search(
-        r"(?:income|aay|आया|आय|वार्षिक आय|வருமானம்|ఆదాయం|வருடாந்திர|rs\.?|₹|\blakh\b|\blacs\b|\bलाख\b)\s*[:=]?\s*(\d+(?:\.\d+)?|\d+\s*(?:lakh|lacs|लख|लाख|लाख रुपये|हजार))",
-        text,
-        re.IGNORECASE,
-    )
-    if inc_match:
-        val_str = inc_match.group(1).lower()
-        if "lakh" in val_str or "lac" in val_str or "लाख" in val_str:
-            num_part = re.findall(r"\d+(?:\.\d+)?", val_str)
-            if num_part:
-                amt = int(float(num_part[0]) * 100000)
-                extracted["Income"] = str(amt)
-        elif "hazar" in val_str or "हजार" in val_str:
-            num_part = re.findall(r"\d+(?:\.\d+)?", val_str)
-            if num_part:
-                amt = int(float(num_part[0]) * 1000)
-                extracted["Income"] = str(amt)
-        else:
-            extracted["Income"] = re.sub(r"[^\d]", "", val_str)
-    else:
-        num_matches = re.findall(r"\b\d{5,7}\b", text)
-        if num_matches:
-            extracted["Income"] = num_matches[0]
+    parsed_inc = _parse_income(text)
+    if parsed_inc:
+        extracted["Income"] = parsed_inc
 
     # ── 7. Phone extraction ─────────────────────────────────────────
     phone_match = re.search(r"\b[6-9]\d{9}\b", text)
@@ -295,12 +328,18 @@ def _extract_smart_nlp(
 
     # ── 10. College extraction ──────────────────────────────────────
     college_match = re.search(
-        r"(?:college|university|institute|संस्थान|कॉलेज|विश्वविद्यालय)\s*(?:is|name|:]?\s*)?([A-Za-z\u0900-\u097F\s]{3,30})",
+        r"\b(?:at|in|college|university|institute|संस्थान|कॉलेज|विश्वविद्यालय)\s+([A-Z][A-Za-z0-9\s]{2,25})",
         text,
-        re.IGNORECASE,
     )
     if college_match:
         extracted["College"] = college_match.group(1).strip().title()
+    else:
+        # Check known colleges
+        known_colleges = ["BIT Mesra", "IIT Delhi", "IIT Bombay", "Delhi University", "Lucknow University", "BHU Varanasi", "Anna University", "VTU Belgaum", "Jadavpur University", "NIT Trichy", "BITS Pilani"]
+        for col in known_colleges:
+            if col.lower() in text_lower:
+                extracted["College"] = col
+                break
 
     res = ExtractionResult(extracted, "Gemma AI (Dynamic NLP)", 0.0)
     res.raw = json.dumps(extracted, indent=2, ensure_ascii=False)
@@ -326,7 +365,7 @@ def _extract_ollama(transcript: str, language: str) -> ExtractionResult:
 def _extract_gemma4(transcript: str, language: str) -> ExtractionResult:
     """
     Extract structured form fields using Gemma 4 via the Google AI (google-genai) SDK.
-    Model: gemma-4-31b-it (falls back to gemma-4-12b-it if quota exceeded).
+    Model: gemma-4-31b-it (falls back to gemma-4-26b-a4b-it if quota exceeded).
     Requires GEMINI_API_KEY in Streamlit secrets or environment variable.
     """
     import os
