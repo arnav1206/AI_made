@@ -87,14 +87,39 @@ def render() -> None:
         "Financial & Contact Details": t("section_financial"),
     }
 
+    dynamic_qs     = session.get("dynamic_form_questions")
+    extracted_data = session.get("extracted_data", {})
+
     # ── Section tables ─────────────────────────────────────────────
-    for section in SCHOLARSHIP_SECTIONS:
-        sec_title = section_key_map.get(section["title"], f'{section["icon"]} {section["title"]}')
-        preview_table(
-            section_title=sec_title,
-            fields=section["fields"],
-            form_data=form_data,
+    if dynamic_qs:
+        st.markdown(
+            f'<div class="card" style="border-left:5px solid #FF7A00;margin-bottom:1.5rem;">'
+            f'<div style="font-weight:800;font-size:1.1rem;color:#FF7A00;margin-bottom:0.5rem;">'
+            f'📋 Imported Google Form Application Details ({len(dynamic_qs)} Fields)</div>'
+            f'<div style="font-size:0.88rem;opacity:0.85;margin-bottom:1rem;">'
+            f'Extracted values from voice input for your Google Form fields:</div>',
+            unsafe_allow_html=True,
         )
+
+        for q in dynamic_qs:
+            q_title = q["title"]
+            val = form_data.get(q_title) or extracted_data.get(q_title) or "—"
+            if val == "—":
+                for k, v in extracted_data.items():
+                    if v and (k.lower() in q_title.lower() or q_title.lower() in k.lower()):
+                        val = v
+                        break
+            field_mapping_row(label=q_title, value=str(val), found=(val != "—"))
+
+        st.markdown('</div>', unsafe_allow_html=True)
+    else:
+        for section in SCHOLARSHIP_SECTIONS:
+            sec_title = section_key_map.get(section["title"], f'{section["icon"]} {section["title"]}')
+            preview_table(
+                section_title=sec_title,
+                fields=section["fields"],
+                form_data=form_data,
+            )
 
     # ── Declaration ────────────────────────────────────────────────
     st.markdown(
@@ -110,7 +135,7 @@ def render() -> None:
 
     # ── Pre-Generate PDF Document for Download ──────────────
     pdf_res = generate_pdf(
-        form_data=form_data,
+        form_data=extracted_data if dynamic_qs else form_data,
         application_no=app_no,
         form_title=form_name,
     )
@@ -121,22 +146,19 @@ def render() -> None:
         logo_b64 = _get_logo_b64()
         logo_tag = f'<img src="data:image/png;base64,{logo_b64}" width="48" height="48" style="border-radius:8px;object-fit:contain;background:#0F172A;padding:2px;" />' if logo_b64 else '<span style="font-size:2rem;">🏛️</span>'
 
-        items = list(form_data.items()) if form_data else [
-            ("Full Name", "Rahul Sharma"),
-            ("Date of Birth", "15/08/2003"),
-            ("Gender", "Male"),
-            ("Category", "General"),
-            ("Address", "Jaipur, Rajasthan"),
-            ("City", "Jaipur"),
-            ("State", "Rajasthan"),
-            ("PIN Code", "302001"),
-            ("College", "BIT Mesra"),
-            ("Course", "B.Tech"),
-            ("Year", "Second Year"),
-            ("Annual Family Income", "₹1,50,000"),
-            ("Mobile Number", "9876543210"),
-            ("Email Address", "rahul.sharma@example.com"),
-        ]
+        if dynamic_qs:
+            items = []
+            for q in dynamic_qs:
+                q_t = q["title"]
+                v = form_data.get(q_t) or extracted_data.get(q_t) or "—"
+                if v == "—":
+                    for k, val_found in extracted_data.items():
+                        if val_found and (k.lower() in q_t.lower() or q_t.lower() in k.lower()):
+                            v = val_found
+                            break
+                items.append((q_t, str(v)))
+        else:
+            items = list(form_data.items()) if form_data else list(extracted_data.items())
 
         grid_rows = ""
         for idx, (k, v) in enumerate(items):
