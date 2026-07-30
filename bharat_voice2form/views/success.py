@@ -46,7 +46,10 @@ def render() -> None:
     else:
         ref_code = session.get("reference_code")
 
-    form_title = session.get("selected_form") or "Scholarship Application"
+    form_title     = session.get("selected_form") or "Scholarship Application"
+    language       = session.get("selected_language", "English")
+    form_data      = session.get("form_data", {})
+    now            = datetime.now().strftime("%d %b %Y, %I:%M %p")
     dynamic_qs     = session.get("dynamic_form_questions")
     extracted_data = session.get("extracted_data", {})
     is_google_form = bool(dynamic_qs) or session.get("is_google_form_imported") or ("Google Form" in str(form_title))
