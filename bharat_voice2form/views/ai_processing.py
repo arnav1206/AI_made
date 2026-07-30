@@ -116,9 +116,28 @@ def render() -> None:
 
     extracted = session.get("extracted_data", {})
 
+    dynamic_questions = session.get("dynamic_form_questions")
+    if dynamic_questions:
+        required_fields_list = [(q["id"], q["title"], q["title"]) for q in dynamic_questions]
+    else:
+        required_fields_list = _ALL_REQUIRED_FIELDS
+
     # Compute Provided vs Missing Required Info
-    provided_fields = [(key, t(t_key, default_lbl)) for key, t_key, default_lbl in _ALL_REQUIRED_FIELDS if key in extracted and extracted[key]]
-    missing_fields  = [(key, t(t_key, default_lbl)) for key, t_key, default_lbl in _ALL_REQUIRED_FIELDS if key not in extracted or not extracted[key]]
+    provided_fields = []
+    missing_fields = []
+
+    for qid, t_key, default_lbl in required_fields_list:
+        val = extracted.get(default_lbl) or extracted.get(qid)
+        if not val:
+            for k, v in extracted.items():
+                if v and (k.lower() in default_lbl.lower() or default_lbl.lower() in k.lower()):
+                    val = v
+                    break
+        lbl_trans = t(t_key, default_lbl) if not dynamic_questions else default_lbl
+        if val:
+            provided_fields.append((qid, lbl_trans))
+        else:
+            missing_fields.append((qid, lbl_trans))
 
     # ── Success & Audit Banner with Voice Assist ───────────────────
     st.markdown(
@@ -260,6 +279,7 @@ def _run_simulation(transcript: str, language: str) -> None:
         time.sleep(duration)
     placeholder.empty()
 
-    result = extract(transcript=transcript, language=language)
+    dynamic_questions = session.get("dynamic_form_questions")
+    result = extract(transcript=transcript, language=language, dynamic_questions=dynamic_questions)
     session.set("extracted_data",  result.data)
     session.set("extraction_done", True)

@@ -262,6 +262,7 @@ def extract(
     *,
     engine: str | None = None,
     simulate_delay: bool = True,
+    dynamic_questions: list[dict] | None = None,
 ) -> ExtractionResult:
     """
     Extract structured information from user transcript dynamically.
@@ -273,12 +274,12 @@ def extract(
         if selected_engine == "ollama":
             result = _extract_ollama(transcript, language)
         elif selected_engine in ("gemma4", "gemini_api"):
-            result = _extract_gemma4(transcript, language)
+            result = _extract_gemma4(transcript, language, dynamic_questions=dynamic_questions)
         else:
-            result = _extract_smart_nlp(transcript, language, simulate_delay)
+            result = _extract_smart_nlp(transcript, language, simulate_delay, dynamic_questions=dynamic_questions)
     except Exception as exc:
         logger.warning("Engine '%s' failed: %s — falling back to dynamic NLP extractor", selected_engine, exc)
-        result = _extract_smart_nlp(transcript, language, simulate_delay)
+        result = _extract_smart_nlp(transcript, language, simulate_delay, dynamic_questions=dynamic_questions)
 
     result.latency_ms = (time.perf_counter() - t0) * 1000
     return result
@@ -333,7 +334,7 @@ def _parse_income(text: str) -> str | None:
 
 
 def _extract_smart_nlp(
-    transcript: str, language: str, simulate_delay: bool
+    transcript: str, language: str, simulate_delay: bool, dynamic_questions: list[dict] | None = None
 ) -> ExtractionResult:
     """
     Dynamically extract structured data from user's transcript using robust NLP rules.
@@ -343,6 +344,18 @@ def _extract_smart_nlp(
 
     extracted: dict[str, str] = {}
     text = transcript.strip()
+
+    # ── Custom dynamic field patterns (Instagram, LinkedIn, Role, Domain, etc.) ────
+    custom_field_patterns = [
+        ("Instagram", r"(?:instagram|insta|ig)\s*(?:is|link|handle|:]?\s*)?([A-Za-z0-9_.-]+(?:\s+[A-Za-z0-9_.-]+)?)"),
+        ("LinkedIn link", r"(?:linkedin|linked in)\s*(?:is|link|profile|:]?\s*)?([A-Za-z0-9_.-]+(?:\s+[A-Za-z0-9_.-]+)?)"),
+        ("Role", r"(?:role|roll|position|post)\s*(?:is|:]?\s*)?([A-Za-z0-9_.-]+)"),
+        ("Domain", r"(?:domain|dept|department|wing)\s*(?:is|:]?\s*)?([A-Za-z0-9_.-]+)"),
+    ]
+    for c_key, c_pat in custom_field_patterns:
+        c_m = re.search(c_pat, text, re.IGNORECASE)
+        if c_m:
+            extracted[c_key] = c_m.group(1).strip()
 
     is_sample_demo = any(sub in text.lower() for sub in SAMPLE_DEMO_TRANSCRIPT_SUBSTRINGS)
     if is_sample_demo:
@@ -529,7 +542,7 @@ def _extract_ollama(transcript: str, language: str) -> ExtractionResult:
     return result
 
 
-def _extract_gemma4(transcript: str, language: str) -> ExtractionResult:
+def _extract_gemma4(transcript: str, language: str, dynamic_questions: list[dict] | None = None) -> ExtractionResult:
     """
     Extract structured form fields using Gemma 4 via the Google AI (google-genai) SDK.
     Model: gemma-4-31b-it (falls back to gemma-4-26b-a4b-it if quota exceeded).
@@ -552,12 +565,23 @@ def _extract_gemma4(transcript: str, language: str) -> ExtractionResult:
 
     client = genai.Client(api_key=api_key)
 
-    prompt = (
-        f"Extract all personal and application details from the transcript below.\n"
-        f"Return ONLY the JSON object with keys: Name, DOB, Gender, Category, City, State, PinCode, College, Course, Year, Income, Phone, Email, Percentage, Aadhaar.\n"
-        f"Do not add any explanation or intro text.\n\n"
-        f"Transcript ({language}):\n{transcript}"
-    )
+    if dynamic_questions:
+        q_titles = [q.get("title", "").strip() for q in dynamic_questions if q.get("title")]
+        prompt = (
+            f"You are an expert AI form-filling assistant.\n"
+            f"Extract the exact value for each of the following form questions from the user's speech transcript:\n\n"
+            f"FORM QUESTIONS TO FILL:\n"
+            + "\n".join([f"- {title}" for title in q_titles]) + "\n\n"
+            f"Return ONLY a JSON object where keys are the exact Question Titles listed above, and values are the extracted string answers from the transcript. If a question was NOT mentioned or answered in the transcript, set its value to null.\n\n"
+            f"Transcript ({language}):\n{transcript}"
+        )
+    else:
+        prompt = (
+            f"Extract all personal and application details from the transcript below.\n"
+            f"Return ONLY the JSON object with keys: Name, DOB, Gender, Category, City, State, PinCode, College, Course, Year, Income, Phone, Email, Percentage, Aadhaar.\n"
+            f"Do not add any explanation or intro text.\n\n"
+            f"Transcript ({language}):\n{transcript}"
+        )
 
     # Try primary Gemma 4 model first, fall back to lighter variant
     for model_id in (MODEL_NAME, MODEL_FALLBACK):
