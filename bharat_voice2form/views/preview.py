@@ -89,7 +89,9 @@ def render() -> None:
 
     dynamic_qs     = session.get("dynamic_form_questions")
     extracted_data = session.get("extracted_data", {})
-    is_google_form = bool(dynamic_qs) or session.get("is_google_form_imported") or ("Google Form" in str(form_name))
+    std_keys       = {"Name", "DOB", "Gender", "Category", "Address", "City", "State", "PIN Code", "College", "Course", "Year", "Income", "Phone", "Email", "Percentage", "Full Name", "Date of Birth", "PIN Code", "Annual Family Income", "Phone Number", "Percentage / CGPA"}
+    has_custom_keys = any(k not in std_keys for k in extracted_data.keys() if k)
+    is_google_form = bool(dynamic_qs) or session.get("is_google_form_imported") or ("Google Form" in str(form_name)) or has_custom_keys
 
     # ── Section tables ─────────────────────────────────────────────
     if is_google_form:
