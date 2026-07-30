@@ -13,6 +13,7 @@ from components.layout   import tricolour_bar, section_heading, info_box, spacer
 from components.progress import step_progress_bar
 from utils.constants     import FORM_TYPES
 from utils.translations  import t
+from utils.google_form_scraper import extract_google_form_questions
 import utils.session as session
 
 
@@ -49,18 +50,18 @@ def render() -> None:
         if st.button(t("analyze_fill_btn"), use_container_width=True, type="primary"):
             if custom_url.strip():
                 url_str = custom_url.strip()
-                form_title = "Google Forms Application" if "google.com" in url_str else "External Web Form"
+                form_title = "Google Form" if "google.com" in url_str else "External Web Form"
                 
-                # Popup 1: Importing status notification
-                st.toast("⏳ Importing & Analyzing Form Questions... Please wait.", icon="⏳")
-                time.sleep(0.5)
+                with st.spinner("🔍 Scraping & Analyzing Dynamic Form Questions..."):
+                    questions = extract_google_form_questions(url_str)
 
-                session.set("selected_form", f"{form_title} ({url_str[:35]}...)")
+                session.set("selected_form", f"{form_title} ({url_str[:30]}...)")
                 session.set("custom_form_url", url_str)
-                
-                # Popup 2: Success notification & navigate to voice input page
-                st.toast("🎉 Form questions imported successfully! Taking you to Voice Input...", icon="🎉")
-                time.sleep(0.3)
+                session.set("dynamic_form_questions", questions)
+                session.set("is_google_form_imported", True)
+
+                st.toast(f"🎉 Extracted {len(questions)} dynamic questions from URL!", icon="🎉")
+                time.sleep(0.4)
 
                 session.navigate("voice_input")
                 st.rerun()

@@ -84,8 +84,42 @@ def render() -> None:
 
     form_col, tip_col = st.columns([3, 2], gap="large")
 
+    dynamic_questions = session.get("dynamic_form_questions")
+
     # ── Left: Form sections ────────────────────────────────────────
     with form_col:
+        if dynamic_questions:
+            form_card_open("📋", f"Imported Form Questions ({len(dynamic_questions)} Extracted Fields)")
+            st.markdown(
+                '<div style="font-size:0.85rem;color:#10B981;font-weight:700;margin-bottom:1rem;">'
+                '✅ These questions were dynamically extracted from your imported Google Form URL. '
+                'Voice input has auto-populated the matching fields below!</div>',
+                unsafe_allow_html=True,
+            )
+            for q in dynamic_questions:
+                # Find matching extracted value from AI speech processing
+                matched_val = ""
+                for k, v in extracted.items():
+                    if v and (k.lower() in q["title"].lower() or q["title"].lower() in k.lower()):
+                        matched_val = str(v)
+                        break
+
+                q_label = f"{q['title']} {'*' if q['required'] else ''}"
+
+                if q["type"] in ("choice", "dropdown", "checkboxes") and q["options"]:
+                    opts = ["— Select —"] + q["options"]
+                    idx = 0
+                    if matched_val:
+                        for i, opt in enumerate(q["options"]):
+                            if matched_val.lower() in opt.lower() or opt.lower() in matched_val.lower():
+                                idx = i + 1
+                                break
+                    st.selectbox(q_label, options=opts, index=idx, key=f"dyn_q_{q['id']}")
+                else:
+                    st.text_input(q_label, value=matched_val, key=f"dyn_q_{q['id']}")
+
+            form_card_close()
+
         form_card_open("👤", t("section_personal").replace("👤 ", ""))
         personal_info_fields(extracted)
         form_card_close()

@@ -178,6 +178,7 @@ def render() -> None:
         prov_str = ", ".join([f"{lbl}: {extracted[k]}" for k, lbl in provided_fields])
         speech_summary_parts.append(f"Extracted information: {prov_str}.")
     speech_summary_parts.append(f"You are eligible for {eligible_count} government scholarship schemes.")
+    speech_summary_parts.append(f"You are eligible for {len(elig.schemes)} government scholarship schemes.")
     if missing_fields:
         miss_str = ", ".join([lbl for _, lbl in missing_fields])
         speech_summary_parts.append(f"Please provide missing fields: {miss_str}.")
@@ -190,12 +191,12 @@ def render() -> None:
     spacer()
 
     # ── Information Breakdown Cards ────────────────────────────────
-    c_prov, c_miss = st.columns(2)
+    c_prov, c_miss = st.columns([1, 1], gap="medium")
 
     with c_prov:
-        prov_list = "".join(f'<li style="margin-bottom:0.3rem;"><b>{lbl}</b>: {extracted.get(k, "")}</li>' for k, lbl in provided_fields)
+        prov_list = "".join(f'<li style="margin-bottom:0.3rem;"><b>{lbl}</b></li>' for _, lbl in provided_fields)
         if not prov_list:
-            prov_list = '<li>No fields identified directly. Please check transcript.</li>'
+            prov_list = '<li>No fields detected from audio</li>'
         st.markdown(
             f'<div class="card" style="border-left:4px solid #10B981;background:{card_bg_prov};">'
             f'<div style="font-weight:800;font-size:0.95rem;color:{card_txt_prov};margin-bottom:0.5rem;">'
@@ -230,10 +231,15 @@ def render() -> None:
 
     with right_col:
         section_heading(t("field_mapping_title"), t("field_mapping_sub"))
-        for key, t_key, default_lbl in _ALL_REQUIRED_FIELDS:
-            lbl_trans = t(t_key, default_lbl)
-            val       = extracted.get(key, "—")
-            found     = key in extracted and bool(extracted[key])
+        for qid, t_key, default_lbl in required_fields_list:
+            lbl_trans = t(t_key, default_lbl) if not dynamic_questions else default_lbl
+            val = extracted.get(qid, "—")
+            if val == "—":
+                for k, v in extracted.items():
+                    if v and (k.lower() in default_lbl.lower() or default_lbl.lower() in k.lower()):
+                        val = v
+                        break
+            found = val != "—"
             field_mapping_row(label=lbl_trans, value=val, found=found)
 
     spacer()
