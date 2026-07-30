@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 import streamlit as st
 import streamlit.components.v1 as components
+from utils.translations import t
 
 _LOCALE_MAP: dict[str, str] = {
     "Hindi":     "hi-IN",
