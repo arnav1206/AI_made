@@ -17,6 +17,7 @@ from utils.translations    import t, get_available_languages
 from utils.speech_to_text  import transcribe, ENGINE
 from utils.lang_detector   import detect_language
 from utils.voice_assist    import render_voice_assistant_player
+from utils.gemma_processor import extract
 import utils.session as session
 
 
