@@ -611,20 +611,26 @@ function fillPageFormFields(fields) {
 
       const options = qContainer.querySelectorAll('[role="radio"], [role="checkbox"], [role="option"], input[type="radio"], input[type="checkbox"], label, div[data-value], .docssharedWizToggleLabeledContainer, .quantumWizTogglePapercheckboxInnerBox');
       if (options.length > 0) {
-        let checkTargets = [];
-        if (valToSet) {
-          checkTargets.push(String(valToSet));
-        }
+        let rawTargets = [];
+        if (valToSet) rawTargets.push(String(valToSet));
         for (let fk of Object.keys(fields)) {
           if (fields[fk]) {
             const fkLow = fk.toLowerCase();
             if (qTitle.includes(fkLow) || fkLow.includes(qTitle)) {
-              checkTargets.push(String(fields[fk]));
+              rawTargets.push(String(fields[fk]));
             }
           }
         }
         Object.values(formattedFields).forEach(v => {
-          if (v && !checkTargets.includes(String(v))) checkTargets.push(String(v));
+          if (v) rawTargets.push(String(v));
+        });
+
+        let checkTargets = [];
+        rawTargets.forEach(tStr => {
+          tStr.split(/(?:,|\s+and\s+|\s+aur\s+|\s+&\s+)/i).forEach(sub => {
+            const sClean = sub.trim();
+            if (sClean && !checkTargets.includes(sClean)) checkTargets.push(sClean);
+          });
         });
 
         let optionMatched = false;
