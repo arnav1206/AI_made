@@ -24,6 +24,7 @@ def _update_transcript(text: str) -> None:
     """Synchronise transcript state across session and text-area widget key."""
     clean_text = text.strip()
     session.set("transcript", clean_text)
+    st.session_state["transcript"] = clean_text
     st.session_state["transcript_editor"] = clean_text
 
     # Auto-detect language if script indicates non-English/Devanagari

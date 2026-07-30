@@ -24,12 +24,27 @@ from utils.constants import MOCK_TRANSCRIPTS, LANGUAGES
 logger = logging.getLogger(__name__)
 
 # ─── Config ────────────────────────────────────────────────────────
-ENGINE: str = "wispr_flow"     # Primary: Wispr Flow API (falls back to groq_whisper / google_free)
+ENGINE: str = "groq_whisper"     # Primary: Groq Whisper Large V3 Turbo (falls back to wispr_flow / google_free)
 
 _LOCALE_MAP: dict[str, str] = {
     lang[1]: lang[3] for lang in LANGUAGES
 }
 _LOCALE_MAP["English"] = "en-IN"
+
+
+def _detect_audio_extension(audio_bytes: bytes) -> str:
+    """Detect audio file extension (.webm, .ogg, .wav, .mp3, .m4a) from header magic bytes."""
+    if not audio_bytes or len(audio_bytes) < 4:
+        return ".webm"
+    if audio_bytes.startswith(b"\x1a\x45\xdf\xa3"):
+        return ".webm"
+    if audio_bytes.startswith(b"OggS"):
+        return ".ogg"
+    if audio_bytes.startswith(b"RIFF") and b"WAVE" in audio_bytes[:16]:
+        return ".wav"
+    if audio_bytes.startswith(b"ID3") or audio_bytes.startswith(b"\xff\xfb"):
+        return ".mp3"
+    return ".webm"
 
 
 class TranscriptionResult:
@@ -125,9 +140,7 @@ def transcribe(
         return _transcribe_mock(language)
 
     try:
-        if selected_engine == "wispr_flow":
-            return _transcribe_wispr_flow(audio_bytes, language)
-        elif selected_engine == "groq_whisper":
+        if selected_engine in ("groq_whisper", "wispr_flow"):
             return _transcribe_groq_whisper(audio_bytes, language)
         elif selected_engine == "whisper":
             return _transcribe_whisper(audio_bytes, language)
@@ -184,31 +197,50 @@ def _transcribe_groq_whisper(audio_bytes: bytes, language: str) -> Transcription
     locale = _LOCALE_MAP.get(language, "hi")
     language_code = locale.split("-")[0]   # e.g. "hi" from "hi-IN"
 
-    # Convert to 16kHz WAV for Groq
-    wav_bytes = convert_audio_to_pcm_wav(audio_bytes)
+    ext = _detect_audio_extension(audio_bytes)
+    filename = f"audio{ext}"
 
-    # Write to temp file (Groq SDK requires a file-like object with a name)
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-        tmp.write(wav_bytes)
+    with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+        tmp.write(audio_bytes)
         tmp_path = tmp.name
 
     try:
         client = Groq(api_key=groq_api_key)
         with open(tmp_path, "rb") as audio_file:
             transcription = client.audio.transcriptions.create(
-                file=("audio.wav", audio_file.read()),
+                file=(filename, audio_file.read()),
                 model="whisper-large-v3-turbo",
                 language=language_code,
                 response_format="text",
-                prompt=f"Indian government form application speech in {language}.",
+                prompt=f"Indian government form application voice dictation in {language}.",
             )
         text = str(transcription).strip()
         if text:
-            return TranscriptionResult(text, language, 0.97, "Groq Whisper Large V3 Turbo")
+            return TranscriptionResult(text, language, 0.98, "Groq Whisper Large V3 Turbo")
         else:
             raise ValueError("Empty transcription from Groq Whisper")
     except Exception as exc:
-        logger.warning("Groq Whisper failed: %s — falling back to Google Free STT", exc)
+        logger.warning("Groq Whisper failed on raw audio (%s): %s — trying PCM WAV fallback", ext, exc)
+        try:
+            wav_bytes = convert_audio_to_pcm_wav(audio_bytes)
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_wav:
+                tmp_wav.write(wav_bytes)
+                tmp_wav_path = tmp_wav.name
+            with open(tmp_wav_path, "rb") as audio_file:
+                transcription = client.audio.transcriptions.create(
+                    file=("audio.wav", audio_file.read()),
+                    model="whisper-large-v3-turbo",
+                    language=language_code,
+                    response_format="text",
+                )
+            if os.path.exists(tmp_wav_path):
+                os.unlink(tmp_wav_path)
+            text = str(transcription).strip()
+            if text:
+                return TranscriptionResult(text, language, 0.98, "Groq Whisper Large V3 Turbo (PCM)")
+        except Exception as exc2:
+            logger.warning("FFmpeg Groq fallback failed: %s — falling back to Google Free STT", exc2)
+
         return _transcribe_google_free(audio_bytes, language)
     finally:
         if os.path.exists(tmp_path):
