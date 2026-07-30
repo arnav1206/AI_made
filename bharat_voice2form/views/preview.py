@@ -16,7 +16,7 @@ import streamlit.components.v1 as components
 
 from components.layout   import tricolour_bar, section_heading, spacer
 from components.progress import step_progress_bar
-from components.cards    import preview_table
+from components.cards    import preview_table, field_mapping_row
 from utils.constants     import SCHOLARSHIP_SECTIONS
 from utils.translations  import t
 from utils.pdf_generator import generate as generate_pdf
