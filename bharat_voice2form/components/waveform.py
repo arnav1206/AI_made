@@ -61,31 +61,52 @@ def speech_tips_card() -> None:
     card_bg    = "#151C2C" if is_dark else "#FFFFFF"
     border_c   = "rgba(255, 122, 0, 0.4)" if is_dark else "#FED7AA"
     custom_url = session.get("custom_form_url")
+    dynamic_qs = session.get("dynamic_form_questions")
 
     badge_html = ""
-    if custom_url:
+    list_html  = ""
+
+    if dynamic_qs:
         badge_html = (
             f'<div style="background:rgba(5, 150, 105, 0.15);border:1px solid rgba(5, 150, 105, 0.4);'
             f'color:#10B981;border-radius:6px;padding:0.3rem 0.65rem;font-size:0.78rem;font-weight:800;'
             f'margin-bottom:0.6rem;display:inline-block;">'
-            f'✨ Form Questions Imported & Analyzed</div>'
+            f'✨ {len(dynamic_qs)} Google Form Questions Extracted & Ready for Voice</div>'
         )
+        q_items = []
+        for q in dynamic_qs:
+            req_tag = ' <span style="color:#EF4444;">*</span>' if q.get("required") else ""
+            q_items.append(f'<li>📋 <strong>{q["title"]}</strong>{req_tag}</li>')
+        list_html = "".join(q_items)
+    else:
+        if custom_url:
+            badge_html = (
+                f'<div style="background:rgba(5, 150, 105, 0.15);border:1px solid rgba(5, 150, 105, 0.4);'
+                f'color:#10B981;border-radius:6px;padding:0.3rem 0.65rem;font-size:0.78rem;font-weight:800;'
+                f'margin-bottom:0.6rem;display:inline-block;">'
+                f'✨ Form Questions Imported & Analyzed</div>'
+            )
+        list_html = (
+            f'<li>👤 <strong>Full Name & Date of Birth</strong></li>'
+            f'<li>🏷️ <strong>Gender & Category (SC/ST/OBC/General)</strong></li>'
+            f'<li>📍 <strong>Full Residential Address & State</strong></li>'
+            f'<li>🎓 <strong>College Name & Course Name</strong></li>'
+            f'<li>📅 <strong>Current Academic Year & Marks (Percentage/CGPA)</strong></li>'
+            f'<li>💼 <strong>Annual Family Income (in INR)</strong></li>'
+            f'<li>📞 <strong>Mobile Phone Number</strong></li>'
+        )
+
+    title_text = f"📋 Imported Form Questions ({len(dynamic_qs)} Fields)" if dynamic_qs else "📋 Required Form Fields to Dictate"
 
     st.markdown(
         f'<div class="card" style="margin-top:0.5rem;background:{card_bg};border:1px solid {border_c};">'
         f'{badge_html}'
         f'<div style="font-weight:800;font-size:1.02rem;color:#FF7A00;margin-bottom:0.3rem;">'
-        f'📋 Required Form Fields to Dictate</div>'
+        f'{title_text}</div>'
         f'<div style="font-size:0.8rem;opacity:0.85;margin-bottom:0.75rem;line-height:1.4;">'
-        f'Speak into the mic to provide answers for the required form fields:</div>'
+        f'Speak into the mic to provide answers for these form questions:</div>'
         f'<ul style="margin:0;padding-left:1.2rem;font-size:0.88rem;color:{text_col};line-height:1.9;font-weight:600;">'
-        f'<li>👤 <strong>Full Name & Date of Birth</strong></li>'
-        f'<li>🏷️ <strong>Gender & Category (SC/ST/OBC/General)</strong></li>'
-        f'<li>📍 <strong>Full Residential Address & State</strong></li>'
-        f'<li>🎓 <strong>College Name & Course Name</strong></li>'
-        f'<li>📅 <strong>Current Academic Year & Marks (Percentage/CGPA)</strong></li>'
-        f'<li>💼 <strong>Annual Family Income (in INR)</strong></li>'
-        f'<li>📞 <strong>Mobile Phone Number</strong></li>'
+        f'{list_html}'
         f'</ul></div>',
         unsafe_allow_html=True,
     )
