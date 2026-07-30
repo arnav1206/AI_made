@@ -3,7 +3,7 @@ components/web_speech.py
 ========================
 Live streaming speech dictation component.
 Performs real-time HTML5 browser speech-to-text in 8 Indian languages.
-Uses Streamlit Custom bidirectional components to return values back to Python.
+Renders inline HTML to prevent path resolution issues when directory paths contain spaces.
 """
 
 from __future__ import annotations
@@ -23,36 +23,30 @@ _LOCALE_MAP: dict[str, str] = {
     "English":   "en-IN",
 }
 
-# Get current path to components folder
-parent_dir = os.path.dirname(os.path.abspath(__file__))
-comp_dir = os.path.join(parent_dir, "web_speech_comp")
-
-# Declare custom bidirectional WebSpeech component
-_web_speech_component = components.declare_component("web_speech_component", path=comp_dir)
+# Path to index.html
+_PARENT_DIR = os.path.dirname(os.path.abspath(__file__))
+_INDEX_HTML_PATH = os.path.join(_PARENT_DIR, "web_speech_comp", "index.html")
 
 
 def render_live_speech_dictation(language: str = "Hindi", is_dark: bool = True) -> str | None:
     """
-    Render HTML5 live speech transcription component.
-
-    Parameters
-    ----------
-    language : str
-        Target language name (e.g. "Hindi", "Tamil", "English").
-    is_dark : bool
-        Whether Dark mode is currently active.
-
-    Returns
-    -------
-    str | None
-        Live transcribed speech text.
+    Render HTML5 live speech transcription component reliably without static server path bugs.
     """
     locale = _LOCALE_MAP.get(language, "hi-IN")
-    
-    # Return the real-time values from the bidirectional component
-    return _web_speech_component(
-        language=language,
-        locale=locale,
-        is_dark=is_dark,
-        key="web_speech_dictation_comp"
-    )
+    theme_class = "dark-theme" if is_dark else "light-theme"
+
+    try:
+        with open(_INDEX_HTML_PATH, "r", encoding="utf-8") as f:
+            html_content = f.read()
+
+        # Inject dynamic locale, language name, and theme class into HTML template
+        html_content = html_content.replace('targetLocale = "hi-IN";', f'targetLocale = "{locale}";')
+        html_content = html_content.replace('languageName = "Hindi";', f'languageName = "{language}";')
+        html_content = html_content.replace('<body class="dark-theme">', f'<body class="{theme_class}">')
+
+        # Render inline HTML safely
+        components.html(html_content, height=210, scrolling=False)
+    except Exception as exc:
+        st.warning(f"⚠️ Live dictation widget initialization note: {exc}")
+
+    return None
