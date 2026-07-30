@@ -13,6 +13,7 @@ import json
 import logging
 import re
 import time
+import difflib
 
 from utils.constants import INDIAN_STATES
 
@@ -140,6 +141,33 @@ _COURSE_PATTERNS: list[tuple[str, str]] = [
 ]
 
 _STOPWORDS = {"is", "am", "hai", "hain", "hu", "hoon", "from", "se", "living", "in", "student", "छात्र", "हूँ", "है", "है।", "से", "का", "की", "के", "रहने", "वाला", "वाली"}
+
+# Automatic State Inference from City
+_CITY_TO_STATE_MAP: dict[str, str] = {
+    "Jaipur": "Rajasthan", "Kota": "Rajasthan", "Ajmer": "Rajasthan", "Jodhpur": "Rajasthan", "Udaipur": "Rajasthan",
+    "Ranchi": "Jharkhand", "Jamshedpur": "Jharkhand", "Dhanbad": "Jharkhand",
+    "Patna": "Bihar", "Gaya": "Bihar", "Muzaffarpur": "Bihar",
+    "Lucknow": "Uttar Pradesh", "Varanasi": "Uttar Pradesh", "Agra": "Uttar Pradesh", "Kanpur": "Uttar Pradesh", "Noida": "Uttar Pradesh",
+    "Delhi": "Delhi", "New Delhi": "Delhi",
+    "Mumbai": "Maharashtra", "Pune": "Maharashtra", "Nagpur": "Maharashtra", "Nashik": "Maharashtra",
+    "Bhopal": "Madhya Pradesh", "Indore": "Madhya Pradesh", "Gwalior": "Madhya Pradesh",
+    "Ahmedabad": "Gujarat", "Surat": "Gujarat", "Vadodara": "Gujarat",
+    "Chennai": "Tamil Nadu", "Coimbatore": "Tamil Nadu", "Madurai": "Tamil Nadu",
+    "Hyderabad": "Telangana", "Warangal": "Telangana",
+    "Bengaluru": "Karnataka", "Mysuru": "Karnataka", "Mangaluru": "Karnataka",
+    "Kolkata": "West Bengal", "Howrah": "West Bengal",
+    "Chandigarh": "Punjab", "Ludhiana": "Punjab", "Amritsar": "Punjab",
+    "Dehradun": "Uttarakhand", "Haridwar": "Uttarakhand",
+    "Shimla": "Himachal Pradesh", "Dharamshala": "Himachal Pradesh",
+    "Bhubaneswar": "Odisha", "Cuttack": "Odisha",
+    "Raipur": "Chhattisgarh", "Bhilai": "Chhattisgarh",
+    "Guwahati": "Assam", "Thiruvananthapuram": "Kerala", "Kochi": "Kerala"
+}
+
+KNOWN_COLLEGES = [
+    "BIT Mesra", "IIT Delhi", "IIT Bombay", "Delhi University", "Lucknow University",
+    "BHU Varanasi", "Anna University", "VTU Belgaum", "Jadavpur University", "NIT Trichy", "BITS Pilani", "Manipal Institute"
+]
 
 
 class ExtractionResult:
@@ -276,6 +304,21 @@ def _extract_smart_nlp(
             extracted["City"] = _CITY_MAP[city_key]
             break
 
+    # Fuzzy city matcher for ASR typos
+    if "City" not in extracted:
+        words = re.findall(r"\b[A-Za-z]{4,15}\b", text)
+        known_cities = list(set(_CITY_MAP.values()))
+        for w in words:
+            matches = difflib.get_close_matches(w.lower(), [c.lower() for c in known_cities], n=1, cutoff=0.82)
+            if matches:
+                matched_lower = matches[0]
+                for c in known_cities:
+                    if c.lower() == matched_lower:
+                        extracted["City"] = c
+                        break
+                if "City" in extracted:
+                    break
+
     # ── 3. State extraction (sorted by length descending) ─────────────────────────
     for state_key in sorted(_STATE_MAP.keys(), key=len, reverse=True):
         if state_key in text_lower:
@@ -287,6 +330,12 @@ def _extract_smart_nlp(
             if re.search(rf"\b{abbr}\b", text_lower):
                 extracted["State"] = full_state
                 break
+
+    # Automatic State Inference from City if State is missing
+    if "City" in extracted and ("State" not in extracted or not extracted["State"]):
+        inferred_state = _CITY_TO_STATE_MAP.get(extracted["City"])
+        if inferred_state:
+            extracted["State"] = inferred_state
 
     # ── 4. Course extraction ────────────────────────────────────────
     for pat, course_val in _COURSE_PATTERNS:
