@@ -59,8 +59,9 @@ SAMPLE_MOCK_EXTRACTION: dict[str, str] = {
     "Income": "200000",
 }
 
-# Comprehensive City Mappings (English, Devanagari & Common Variant Names)
+# Comprehensive Indian Cities & Districts Mappings (English, Devanagari & Common Variants)
 _CITY_MAP: dict[str, str] = {
+    # Tier 1 & State Capitals
     "jaipur": "Jaipur", "जयपुर": "Jaipur",
     "ranchi": "Ranchi", "राँची": "Ranchi", "रांची": "Ranchi",
     "patna": "Patna", "पटना": "Patna",
@@ -81,14 +82,76 @@ _CITY_MAP: dict[str, str] = {
     "shimla": "Shimla", "शिमला": "Shimla",
     "bhubaneswar": "Bhubaneswar", "भुवनेश्वर": "Bhubaneswar",
     "raipur": "Raipur", "रायपुर": "Raipur",
-    "varanasi": "Varanasi", "वाराणसी": "Varanasi",
-    "agra": "Agra", "आगरा": "Agra",
+    
+    # Major UP Districts
     "kanpur": "Kanpur", "कानपुर": "Kanpur",
-    "nagpur": "Nagpur", "नागपुर": "Nagpur",
-    "kota": "Kota", "कोटा": "Kota",
-    "ajmer": "Ajmer", "अजमेर": "Ajmer",
+    "varanasi": "Varanasi", "वाराणसी": "Varanasi", "banaras": "Varanasi",
+    "agra": "Agra", "आगरा": "Agra",
+    "prayagraj": "Prayagraj", "allahabad": "Prayagraj", "इलाहाबाद": "Prayagraj", "प्रयागराज": "Prayagraj",
+    "meerut": "Meerut", "मेरठ": "Meerut",
+    "bareilly": "Bareilly", "बरेली": "Bareilly",
+    "aligarh": "Aligarh", "अलीगढ़": "Aligarh",
+    "gorakhpur": "Gorakhpur", "गोरखपुर": "Gorakhpur",
+    "ghaziabad": "Ghaziabad", "गाजियाबाद": "Ghaziabad",
+    "noida": "Noida", "नोएडा": "Noida",
+    "mathura": "Mathura", "मथुरा": "Mathura",
+    "jhansi": "Jhansi", "झांसी": "Jhansi",
+    "muzaffarnagar": "Muzaffarnagar", "मुजफ्फरनगर": "Muzaffarnagar",
+    "moradabad": "Moradabad", "मुरादाबाद": "Moradabad",
+    "ayodhya": "Ayodhya", "अयोध्या": "Ayodhya",
+    "saharanpur": "Saharanpur", "सहारनपुर": "Saharanpur",
+
+    # Major Rajasthan Districts
     "jodhpur": "Jodhpur", "जोधपुर": "Jodhpur",
+    "kota": "Kota", "कोटा": "Kota",
+    "bikaner": "Bikaner", "बीकानेर": "Bikaner",
+    "ajmer": "Ajmer", "अजमेर": "Ajmer",
     "udaipur": "Udaipur", "उदयपुर": "Udaipur",
+    "bhilwara": "Bhilwara", "भीलवाड़ा": "Bhilwara",
+    "alwar": "Alwar", "अलवर": "Alwar",
+    "sikar": "Sikar", "सीकर": "Sikar",
+    "jhunjhunu": "Jhunjhunu", "झुंझुनू": "Jhunjhunu",
+
+    # Major Bihar & Jharkhand Districts
+    "jamshedpur": "Jamshedpur", "जमशेदपुर": "Jamshedpur",
+    "dhanbad": "Dhanbad", "धनबाद": "Dhanbad",
+    "bokaro": "Bokaro", "बोकारो": "Bokaro",
+    "hazaribagh": "Hazaribagh", "हजारीबाग": "Hazaribagh",
+    "gaya": "Gaya", "गया": "Gaya",
+    "bhagalpur": "Bhagalpur", "भागलपुर": "Bhagalpur",
+    "muzaffarpur": "Muzaffarpur", "मुजफ्फरपुर": "Muzaffarpur",
+    "purnia": "Purnia", "पूर्णिया": "Purnia",
+    "darbhanga": "Darbhanga", "दरभंगा": "Darbhanga",
+
+    # Major MP & Maharashtra Districts
+    "jabalpur": "Jabalpur", "जबलपुर": "Jabalpur",
+    "gwalior": "Gwalior", "ग्वालियर": "Gwalior",
+    "ujjain": "Ujjain", "उज्जैन": "Ujjain",
+    "nagpur": "Nagpur", "नागपुर": "Nagpur",
+    "nashik": "Nashik", "नासिक": "Nashik",
+    "aurangabad": "Aurangabad", "औरंगाबाद": "Aurangabad",
+    "solapur": "Solapur", "सोलापुर": "Solapur",
+    "kolhapur": "Kolhapur", "कोल्हापुर": "Kolhapur",
+    "thane": "Thane", "ठाणे": "Thane",
+
+    # Major Punjab & Haryana Districts
+    "gurgaon": "Gurugram", "gurugram": "Gurugram", "गुड़गांव": "Gurugram",
+    "faridabad": "Faridabad", "फरीदाबाद": "Faridabad",
+    "panipat": "Panipat", "पानीपत": "Panipat",
+    "ambala": "Ambala", "अंबाला": "Ambala",
+    "rohtak": "Rohtak", "रोहतक": "Rohtak",
+    "karnal": "Karnal", "करनाल": "Karnal",
+    "ludhiana": "Ludhiana", "लुधियाना": "Ludhiana",
+    "amritsar": "Amritsar", "अमृतसर": "Amritsar",
+    "jalandhar": "Jalandhar", "जालंधर": "Jalandhar",
+    "patiala": "Patiala", "पटियाला": "Patiala",
+
+    # Major South & East Districts
+    "coimbatore": "Coimbatore", "मदुरै": "Madurai", "madurai": "Madurai",
+    "visakhapatnam": "Visakhapatnam", "vijayawada": "Vijayawada", "guntur": "Guntur",
+    "tirupati": "Tirupati", "warangal": "Warangal", "mysuru": "Mysuru", "mysore": "Mysuru",
+    "mangalore": "Mangaluru", "mangaluru": "Mangaluru", "hubli": "Hubballi", "hubballi": "Hubballi",
+    "cuttack": "Cuttack", "rourkela": "Rourkela", "siliguri": "Siliguri", "durgapur": "Durgapur",
 }
 
 # State Mappings including official 2-letter postal codes & Devanagari
@@ -145,21 +208,26 @@ _STOPWORDS = {"is", "am", "hai", "hain", "hu", "hoon", "from", "se", "living", "
 # Automatic State Inference from City
 _CITY_TO_STATE_MAP: dict[str, str] = {
     "Jaipur": "Rajasthan", "Kota": "Rajasthan", "Ajmer": "Rajasthan", "Jodhpur": "Rajasthan", "Udaipur": "Rajasthan",
-    "Ranchi": "Jharkhand", "Jamshedpur": "Jharkhand", "Dhanbad": "Jharkhand",
-    "Patna": "Bihar", "Gaya": "Bihar", "Muzaffarpur": "Bihar",
+    "Bikaner": "Rajasthan", "Bhilwara": "Rajasthan", "Alwar": "Rajasthan", "Sikar": "Rajasthan", "Jhunjhunu": "Rajasthan",
+    "Ranchi": "Jharkhand", "Jamshedpur": "Jharkhand", "Dhanbad": "Jharkhand", "Bokaro": "Jharkhand", "Hazaribagh": "Jharkhand",
+    "Patna": "Bihar", "Gaya": "Bihar", "Muzaffarpur": "Bihar", "Bhagalpur": "Bihar", "Purnia": "Bihar", "Darbhanga": "Bihar",
     "Lucknow": "Uttar Pradesh", "Varanasi": "Uttar Pradesh", "Agra": "Uttar Pradesh", "Kanpur": "Uttar Pradesh", "Noida": "Uttar Pradesh",
+    "Prayagraj": "Uttar Pradesh", "Meerut": "Uttar Pradesh", "Bareilly": "Uttar Pradesh", "Aligarh": "Uttar Pradesh",
+    "Gorakhpur": "Uttar Pradesh", "Ghaziabad": "Uttar Pradesh", "Mathura": "Uttar Pradesh", "Jhansi": "Uttar Pradesh",
+    "Muzaffarnagar": "Uttar Pradesh", "Moradabad": "Uttar Pradesh", "Ayodhya": "Uttar Pradesh", "Saharanpur": "Uttar Pradesh",
     "Delhi": "Delhi", "New Delhi": "Delhi",
-    "Mumbai": "Maharashtra", "Pune": "Maharashtra", "Nagpur": "Maharashtra", "Nashik": "Maharashtra",
-    "Bhopal": "Madhya Pradesh", "Indore": "Madhya Pradesh", "Gwalior": "Madhya Pradesh",
+    "Mumbai": "Maharashtra", "Pune": "Maharashtra", "Nagpur": "Maharashtra", "Nashik": "Maharashtra", "Aurangabad": "Maharashtra", "Solapur": "Maharashtra", "Kolhapur": "Maharashtra", "Thane": "Maharashtra",
+    "Bhopal": "Madhya Pradesh", "Indore": "Madhya Pradesh", "Gwalior": "Madhya Pradesh", "Jabalpur": "Madhya Pradesh", "Ujjain": "Madhya Pradesh",
     "Ahmedabad": "Gujarat", "Surat": "Gujarat", "Vadodara": "Gujarat",
     "Chennai": "Tamil Nadu", "Coimbatore": "Tamil Nadu", "Madurai": "Tamil Nadu",
     "Hyderabad": "Telangana", "Warangal": "Telangana",
-    "Bengaluru": "Karnataka", "Mysuru": "Karnataka", "Mangaluru": "Karnataka",
-    "Kolkata": "West Bengal", "Howrah": "West Bengal",
-    "Chandigarh": "Punjab", "Ludhiana": "Punjab", "Amritsar": "Punjab",
+    "Bengaluru": "Karnataka", "Mysuru": "Karnataka", "Mangaluru": "Karnataka", "Hubballi": "Karnataka",
+    "Kolkata": "West Bengal", "Howrah": "West Bengal", "Siliguri": "West Bengal", "Durgapur": "West Bengal",
+    "Chandigarh": "Punjab", "Ludhiana": "Punjab", "Amritsar": "Punjab", "Jalandhar": "Punjab", "Patiala": "Punjab",
+    "Gurugram": "Haryana", "Faridabad": "Haryana", "Panipat": "Haryana", "Ambala": "Haryana", "Rohtak": "Haryana", "Karnal": "Haryana",
     "Dehradun": "Uttarakhand", "Haridwar": "Uttarakhand",
     "Shimla": "Himachal Pradesh", "Dharamshala": "Himachal Pradesh",
-    "Bhubaneswar": "Odisha", "Cuttack": "Odisha",
+    "Bhubaneswar": "Odisha", "Cuttack": "Odisha", "Rourkela": "Odisha",
     "Raipur": "Chhattisgarh", "Bhilai": "Chhattisgarh",
     "Guwahati": "Assam", "Thiruvananthapuram": "Kerala", "Kochi": "Kerala"
 }
@@ -297,12 +365,30 @@ def _extract_smart_nlp(
             candidate = f"{cap_words[0]} {cap_words[1]}"
             extracted["Name"] = _clean_name(candidate)
 
-    # ── 2. City extraction (sorted by length descending to match multi-word cities first) ───────────────────
+    # ── 2. City / District extraction ──────────────────────────────────
     text_lower = text.lower()
-    for city_key in sorted(_CITY_MAP.keys(), key=len, reverse=True):
-        if city_key in text_lower:
-            extracted["City"] = _CITY_MAP[city_key]
-            break
+
+    # Context-based Regex for City / District / Town (e.g. "district Kanpur", "Jila Patna", "from Aligarh")
+    city_context_patterns = [
+        r"(?:district|jila|जिला|city|शहर|dist|shahar)\s*(?:is|name|:]?\s*)?([A-Za-z\u0900-\u097F]{3,20})",
+        r"\b([A-Za-z\u0900-\u097F]{3,20})\s+(?:district|jila|जिला|city|शहर)\b",
+        r"(?:from|rehte hain|rehta hu|se hu|living in|resident of|wasi|n निवासी)\s+([A-Za-z\u0900-\u097F]{3,20})",
+    ]
+    for c_pat in city_context_patterns:
+        c_match = re.search(c_pat, text, re.IGNORECASE)
+        if c_match:
+            candidate = c_match.group(1).strip()
+            # Clean stop words
+            if candidate.lower() not in _STOPWORDS and candidate.lower() not in ["first", "second", "third", "fourth", "btech", "bsc", "bcom"]:
+                extracted["City"] = _CITY_MAP.get(candidate.lower(), candidate.title())
+                break
+
+    # Dictionary lookup (sorted by length descending to match multi-word cities first)
+    if "City" not in extracted:
+        for city_key in sorted(_CITY_MAP.keys(), key=len, reverse=True):
+            if city_key in text_lower:
+                extracted["City"] = _CITY_MAP[city_key]
+                break
 
     # Fuzzy city matcher for ASR typos
     if "City" not in extracted:
