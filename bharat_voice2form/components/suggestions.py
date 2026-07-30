@@ -12,6 +12,7 @@ import streamlit as st
 from components.cards import suggestion_card
 from components.progress import completion_meter
 from utils.translations import t
+import utils.session as session
 
 
 def render_panel(
