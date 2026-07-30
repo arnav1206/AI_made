@@ -93,13 +93,18 @@ def render() -> None:
 
     # ── Section tables ─────────────────────────────────────────────
     if is_google_form:
-        q_items = dynamic_qs if dynamic_qs else [{"id": f"eq_{i}", "title": k} for k in extracted_data.keys()]
+        if dynamic_qs:
+            req_qs = [q for q in dynamic_qs if q.get("required")]
+            q_items = req_qs if req_qs else dynamic_qs
+        else:
+            q_items = [{"id": f"eq_{i}", "title": k, "required": True} for k in extracted_data.keys()]
+
         st.markdown(
             f'<div class="card" style="border-left:5px solid #FF7A00;margin-bottom:1.5rem;">'
             f'<div style="font-weight:800;font-size:1.1rem;color:#FF7A00;margin-bottom:0.5rem;">'
-            f'📋 Imported Google Form Application Details ({len(q_items)} Fields)</div>'
+            f'📋 Required Form Fields ({len(q_items)} Fields)</div>'
             f'<div style="font-size:0.88rem;opacity:0.85;margin-bottom:1rem;">'
-            f'Extracted values from voice input for your Google Form fields:</div>',
+            f'Required fields for your imported Google Form:</div>',
             unsafe_allow_html=True,
         )
 
@@ -150,7 +155,12 @@ def render() -> None:
 
         if is_google_form:
             items = []
-            q_items = dynamic_qs if dynamic_qs else [{"title": k} for k in extracted_data.keys()]
+            if dynamic_qs:
+                req_qs = [q for q in dynamic_qs if q.get("required")]
+                q_items = req_qs if req_qs else dynamic_qs
+            else:
+                q_items = [{"title": k} for k in extracted_data.keys()]
+
             for q in q_items:
                 q_t = q["title"]
                 v = form_data.get(q_t) or extracted_data.get(q_t) or "—"
