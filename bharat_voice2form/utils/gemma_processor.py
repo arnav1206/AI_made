@@ -280,7 +280,28 @@ def extract(
     except Exception as exc:
         logger.warning("Engine '%s' failed: %s — falling back to dynamic NLP extractor", selected_engine, exc)
         result = _extract_smart_nlp(transcript, language, simulate_delay, dynamic_questions=dynamic_questions)
+    # ── Strict filtering: keep ONLY non-empty extracted fields matching dynamic questions ──
+    clean_data: dict[str, str] = {}
 
+    if dynamic_questions:
+        allowed_titles = {q.get("title", "").strip().lower(): q.get("title", "").strip() for q in dynamic_questions if q.get("title")}
+        for k, v in result.data.items():
+            if v and str(v).strip() and str(v).strip().lower() not in ("none", "null", "—", "false"):
+                matched_title = allowed_titles.get(k.strip().lower())
+                if matched_title:
+                    clean_data[matched_title] = str(v).strip()
+                else:
+                    for title_lower, title_orig in allowed_titles.items():
+                        if k.strip().lower() in title_lower or title_lower in k.strip().lower():
+                            clean_data[title_orig] = str(v).strip()
+                            break
+    else:
+        for k, v in result.data.items():
+            if v and str(v).strip() and str(v).strip().lower() not in ("none", "null", "—", "false"):
+                clean_data[k] = str(v).strip()
+
+    result.data = clean_data
+    result.raw  = json.dumps(clean_data, indent=2, ensure_ascii=False)
     result.latency_ms = (time.perf_counter() - t0) * 1000
     return result
 
@@ -407,12 +428,12 @@ def _extract_smart_nlp(
                 extracted["City"] = _CITY_MAP[city_key]
                 break
 
-    # Fuzzy city matcher for ASR typos
-    if "City" not in extracted:
+    # Fuzzy city matcher for ASR typos (only if city/district context keywords exist)
+    if "City" not in extracted and any(k in text_lower for k in ["city", "district", "jila", " जिला", "शहर"]):
         words = re.findall(r"\b[A-Za-z]{4,15}\b", text)
         known_cities = list(set(_CITY_MAP.values()))
         for w in words:
-            matches = difflib.get_close_matches(w.lower(), [c.lower() for c in known_cities], n=1, cutoff=0.82)
+            matches = difflib.get_close_matches(w.lower(), [c.lower() for c in known_cities], n=1, cutoff=0.85)
             if matches:
                 matched_lower = matches[0]
                 for c in known_cities:
