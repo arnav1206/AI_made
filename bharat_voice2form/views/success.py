@@ -47,13 +47,13 @@ def render() -> None:
         ref_code = session.get("reference_code")
 
     form_title = session.get("selected_form") or "Scholarship Application"
-    language   = session.get("selected_language", "English")
-    form_data  = session.get("form_data", {})
-    now        = datetime.now().strftime("%d %b %Y, %I:%M %p")
+    dynamic_qs     = session.get("dynamic_form_questions")
+    extracted_data = session.get("extracted_data", {})
+    is_google_form = bool(dynamic_qs) or session.get("is_google_form_imported") or ("Google Form" in str(form_title))
 
     # Generate PDF document for download
     pdf_res = generate_pdf(
-        form_data=form_data,
+        form_data=extracted_data if is_google_form else form_data,
         application_no=ref_code,
         form_title=form_title,
     )
@@ -142,22 +142,22 @@ animation: fall 3s infinite ease-in-out;
             logo_b64 = _get_logo_b64()
             logo_tag = f'<img src="data:image/png;base64,{logo_b64}" width="48" height="48" style="border-radius:8px;object-fit:contain;background:#0F172A;padding:2px;" />' if logo_b64 else '<span style="font-size:2rem;">🏛️</span>'
 
-            items = list(form_data.items()) if form_data else [
-                ("Full Name", "Rahul Sharma"),
-                ("Date of Birth", "15/08/2003"),
-                ("Gender", "Male"),
-                ("Category", "General"),
-                ("Address", "Jaipur, Rajasthan"),
-                ("City", "Jaipur"),
-                ("State", "Rajasthan"),
-                ("PIN Code", "302001"),
-                ("College", "BIT Mesra"),
-                ("Course", "B.Tech"),
-                ("Year", "Second Year"),
-                ("Annual Family Income", "₹1,50,000"),
-                ("Mobile Number", "9876543210"),
-                ("Email Address", "rahul.sharma@example.com"),
-            ]
+            if is_google_form:
+                items = []
+                q_items = dynamic_qs if dynamic_qs else [{"title": k} for k in extracted_data.keys()]
+                for q in q_items:
+                    q_t = q["title"]
+                    v = form_data.get(q_t) or extracted_data.get(q_t) or "—"
+                    if v == "—":
+                        for k, val_found in extracted_data.items():
+                            if val_found and (k.lower() in q_t.lower() or q_t.lower() in k.lower()):
+                                v = val_found
+                                break
+                    items.append((q_t, str(v)))
+                if not items:
+                    items = list(extracted_data.items())
+            else:
+                items = list(form_data.items()) if form_data else list(extracted_data.items())
 
             grid_rows = ""
             for idx, (k, v) in enumerate(items):
