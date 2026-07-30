@@ -82,6 +82,10 @@ _CITY_MAP: dict[str, str] = {
     "shimla": "Shimla", "शिमला": "Shimla",
     "bhubaneswar": "Bhubaneswar", "भुवनेश्वर": "Bhubaneswar",
     "raipur": "Raipur", "रायपुर": "Raipur",
+    "haridwar": "Haridwar", "हरिद्वार": "Haridwar",
+    "rishikesh": "Rishikesh", "ऋषिकेश": "Rishikesh",
+    "roorkee": "Roorkee", "रुड़की": "Roorkee",
+    "haldwani": "Haldwani", "हल्द्वानी": "Haldwani",
     
     # Major UP Districts
     "kanpur": "Kanpur", "कानपुर": "Kanpur",
@@ -172,7 +176,7 @@ _STATE_MAP: dict[str, str] = {
     "kerala": "Kerala", "केरल": "Kerala",
     "telangana": "Telangana", "तेलंगाना": "Telangana",
     "andhra pradesh": "Andhra Pradesh", "आंध्र प्रदेश": "Andhra Pradesh",
-    "uttarakhand": "Uttarakhand", "उत्तराखंड": "Uttarakhand",
+    "uttarakhand": "Uttarakhand", "uttrakhand": "Uttarakhand", "उत्तराखंड": "Uttarakhand", "uk": "Uttarakhand",
     "himachal pradesh": "Himachal Pradesh", "हिमाचल प्रदेश": "Himachal Pradesh",
     "chhattisgarh": "Chhattisgarh", "छत्तीसगढ़": "Chhattisgarh",
     "odisha": "Odisha", "ओडिशा": "Odisha",
@@ -225,7 +229,7 @@ _CITY_TO_STATE_MAP: dict[str, str] = {
     "Kolkata": "West Bengal", "Howrah": "West Bengal", "Siliguri": "West Bengal", "Durgapur": "West Bengal",
     "Chandigarh": "Punjab", "Ludhiana": "Punjab", "Amritsar": "Punjab", "Jalandhar": "Punjab", "Patiala": "Punjab",
     "Gurugram": "Haryana", "Faridabad": "Haryana", "Panipat": "Haryana", "Ambala": "Haryana", "Rohtak": "Haryana", "Karnal": "Haryana",
-    "Dehradun": "Uttarakhand", "Haridwar": "Uttarakhand",
+    "Dehradun": "Uttarakhand", "Haridwar": "Uttarakhand", "Rishikesh": "Uttarakhand", "Roorkee": "Uttarakhand", "Haldwani": "Uttarakhand",
     "Shimla": "Himachal Pradesh", "Dharamshala": "Himachal Pradesh",
     "Bhubaneswar": "Odisha", "Cuttack": "Odisha", "Rourkela": "Odisha",
     "Raipur": "Chhattisgarh", "Bhilai": "Chhattisgarh",
@@ -453,7 +457,7 @@ def _extract_smart_nlp(
     elif re.search(r"\b(general|general category|सामान्य|unreserved)\b", text_lower):
         extracted["Category"] = "General"
 
-    if re.search(r"\b(male|ladka|purush|पुरुष|लड़का|boy|man)\b", text_lower):
+    if re.search(r"\b(male|mel|ladka|purush|पुरुष|लड़का|boy|man)\b", text_lower):
         extracted["Gender"] = "Male"
     elif re.search(r"\b(female|ladki|mahila|महिला|लड़की|girl|woman)\b", text_lower):
         extracted["Gender"] = "Female"

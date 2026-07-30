@@ -22,16 +22,18 @@ import utils.session as session
 
 # All fields required for scholarship application
 _ALL_REQUIRED_FIELDS = [
-    ("Name",    "reg_name",    "Full Name"),
-    ("City",    "lbl_city",    "City / District"),
-    ("State",   "reg_state",   "State"),
-    ("Course",  "lbl_course",  "Course Name"),
-    ("Year",    "lbl_year",    "Current Year"),
-    ("Income",  "lbl_income",  "Annual Family Income"),
-    ("DOB",     "lbl_dob",     "Date of Birth"),
-    ("Phone",   "reg_phone",   "Phone Number"),
-    ("Email",   "reg_email",   "Email Address"),
-    ("College", "lbl_college", "College / Institution"),
+    ("Name",     "reg_name",     "Full Name"),
+    ("City",     "lbl_city",     "City / District"),
+    ("State",    "reg_state",    "State"),
+    ("Course",   "lbl_course",   "Course Name"),
+    ("Year",     "lbl_year",     "Current Year"),
+    ("Income",   "lbl_income",   "Annual Family Income"),
+    ("Category", "lbl_category", "Category"),
+    ("Gender",   "lbl_gender",   "Gender"),
+    ("DOB",      "lbl_dob",      "Date of Birth"),
+    ("Phone",    "reg_phone",    "Phone Number"),
+    ("Email",    "reg_email",    "Email Address"),
+    ("College",  "lbl_college",  "College / Institution"),
 ]
 
 
