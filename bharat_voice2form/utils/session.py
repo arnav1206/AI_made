@@ -54,6 +54,9 @@ def get(key: str, default=None):
 def set(key: str, value) -> None:  # noqa: A001
     """Write to session state."""
     st.session_state[key] = value
+    if key == "selected_language":
+        st.session_state["sidebar_lang_select"] = value
+        st.session_state["lang_select"] = value
 
 
 def reset_recording() -> None:

@@ -74,6 +74,8 @@ def render() -> None:
         )
         if lang != current_lang:
             session.set("selected_language", lang)
+            st.session_state["sidebar_lang_select"] = lang
+            st.session_state["lang_select"] = lang
             st.rerun()
 
         # Language Auto-Detector Badge

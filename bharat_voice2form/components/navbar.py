@@ -134,6 +134,8 @@ def _language_selector() -> None:
     )
     if chosen != current:
         session.set("selected_language", chosen)
+        st.session_state["sidebar_lang_select"] = chosen
+        st.session_state["lang_select"] = chosen
         st.rerun()
 
 

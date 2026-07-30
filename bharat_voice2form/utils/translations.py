@@ -1680,7 +1680,12 @@ _LIST_TRANSLATIONS: dict[str, list[str]] = {
 
 def t(key: str, default: str | None = None) -> str:
     """Retrieve translated string for current language with English fallback."""
-    lang = st.session_state.get("selected_language", "Hindi")
+    lang = (
+        st.session_state.get("selected_language") or
+        st.session_state.get("sidebar_lang_select") or
+        st.session_state.get("lang_select") or
+        "Hindi"
+    )
     if key in _TRANSLATIONS:
         entry = _TRANSLATIONS[key]
         if lang in entry:
