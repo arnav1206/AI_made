@@ -477,9 +477,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const fields = {};
     let m;
 
+    // Custom Dynamic Field Patterns (Instagram, LinkedIn, Role, Domain, etc.)
+    if (m = text.match(/(?:instagram|insta|ig)\s*(?:is|link|handle|:]?\s*)?([A-Za-z0-9_.-]+(?:\s+[A-Za-z0-9_.-]+)?)/i)) {
+      fields["Instagram"] = m[1].trim();
+      fields["instagram"] = m[1].trim();
+    }
+    if (m = text.match(/(?:linkedin|linked in)\s*(?:is|link|profile|:]?\s*)?([A-Za-z0-9_.-]+(?:\s+[A-Za-z0-9_.-]+)?)/i)) {
+      fields["LinkedIn link"] = m[1].trim();
+      fields["linkedin"] = m[1].trim();
+    }
+    if (m = text.match(/(?:role|roll|position|post)\s*(?:is|:]?\s*)?([A-Za-z0-9_.-]+)/i)) {
+      fields["Role"] = m[1].trim();
+      fields["role"] = m[1].trim();
+    }
+    if (m = text.match(/(?:domain|dept|department|wing)\s*(?:is|:]?\s*)?([A-Za-z0-9_.-]+)/i)) {
+      fields["Domain"] = m[1].trim();
+      fields["domain"] = m[1].trim();
+    }
+
     // Name
     if (m = text.match(/(?:नाम|name is|name|naam|applicant|candidate)\s+([A-Za-z\u0900-\u097F\s]{2,30})/i)) {
-      fields["name"] = m[1].replace(/(?:है|hai|is|hoon|and|category|gender|male|female).*/i, "").trim();
+      fields["name"] = m[1].replace(/(?:है|hai|is|hoon|and|category|gender|male|female|instagram|linkedin|roll|role|domain).*/i, "").trim();
+      fields["Full Name"] = fields["name"];
     }
     // Gender
     if (m = text.match(/(?:gender|sex|लिंग)\s*[:\-]?\s*(male|female|transgender|पुरुष|महिला)/i) || text.match(/\b(male|female|transgender|पुरुष|महिला)\b/i)) {
@@ -497,13 +516,13 @@ document.addEventListener("DOMContentLoaded", () => {
       else if (rawC.includes("EWS")) fields["category"] = "EWS / EBC";
       else fields["category"] = "General";
     }
-    // City
-    if (m = text.match(/(?:city|district|शहर|जिला)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,20})/i) || text.match(/(?:जयपुर|jaipur|दिल्ली|delhi|भुवनेश्वर|bhubaneswar|ranchi|patna|mumbai)/i)) {
-      fields["city"] = m[1] || m[0];
+    // City (only if city context exists)
+    if (m = text.match(/(?:city|district|शहर|जिला)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,20})/i)) {
+      fields["city"] = m[1].trim();
     }
-    // State
-    if (m = text.match(/(?:state|domicile|राज्य)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,20})/i) || text.match(/(?:राजस्थान|rajasthan|ओडिशा|odisha|jharkhand|bihar|maharashtra|uttar pradesh)/i)) {
-      fields["state"] = m[1] || m[0];
+    // State (only if state context exists)
+    if (m = text.match(/(?:state|domicile|राज्य)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,20})/i)) {
+      fields["state"] = m[1].trim();
     }
     // Course
     if (m = text.match(/(?:b\.?tech|बी\.?टेक|b\.?sc|m\.?tech|mba|diploma|b.a|m.a)/i)) {
@@ -518,8 +537,8 @@ document.addEventListener("DOMContentLoaded", () => {
       else fields["year"] = "Second Year";
     }
     // College
-    if (m = text.match(/(?:college|institute|university|school|संस्थान|कॉलेज)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,30})/i) || text.match(/(?:bit\s*mesra|jaipur\s*national|iit|nit)/i)) {
-      fields["college"] = m[1] || m[0];
+    if (m = text.match(/(?:college|institute|university|school|संस्थान|कॉलेज)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,30})/i)) {
+      fields["college"] = m[1].trim();
     }
     // DOB
     if (m = text.match(/(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/)) fields["dob"] = m[1];
@@ -529,29 +548,27 @@ document.addEventListener("DOMContentLoaded", () => {
       const num = parseFloat(m[1]) * 100000;
       fields["income"] = String(Math.round(num));
     }
-    // Attendees / Guest Count
-    if (m = text.match(/(?:हम|we|are)?\s*(एक|दो|तीन|चार|पांच|छह|सात|आठ|नौ|दस|\d+)\s*(?:लोग|person|people|guest|guests|attend|अटैंड)/i) || text.match(/(\d+)\s*(?:लोग|people|guests)/i)) {
-      const wordMap = { "एक": "1", "दो": "2", "तीन": "3", "चार": "4", "पांच": "5", "छह": "6", "सात": "7", "आठ": "8", "नौ": "9", "दस": "10" };
-      const rawNum = m[1].toLowerCase();
-      fields["attendees"] = wordMap[rawNum] || rawNum;
-    }
-    // Dietary Restrictions / Allergies
-    if (m = text.match(/(?:allergy|allergies|एलर्जी|diet|food)\s*[:\-]?\s*([^\n\.]+)/i) || text.match(/(?:कोई\s*एलर्जी\s*नहीं|no\s*allergy|no\s*allergies|none)/i)) {
-      const rawA = m[0].toLowerCase();
-      if (rawA.includes("कोई नहीं") || rawA.includes("कोई एलर्जी नहीं") || rawA.includes("no") || rawA.includes("none")) {
-        fields["allergies"] = "None (कोई एलर्जी नहीं)";
-      } else {
-        fields["allergies"] = m[1] || m[0];
-      }
-    }
-    // RSVP Attendance
-    if (m = text.match(/(?:अटैंड\s*करेंगे|will\s*attend|attending|coming|yes|हाँ)/i)) {
-      fields["rsvp"] = "Yes (अटैंड करेंगे)";
-    }
     // Mobile
     if (m = text.match(/(\d{10})/)) fields["mobile"] = m[1];
     // Email
     if (m = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)) fields["email"] = m[1];
+
+    // Filter keys if imported questions exist
+    if (importedQuestions && importedQuestions.length > 0) {
+      const cleanFields = {};
+      const qTitles = importedQuestions.map(q => q.title.toLowerCase());
+      for (let k of Object.keys(fields)) {
+        if (!fields[k]) continue;
+        const kLower = k.toLowerCase();
+        for (let qt of qTitles) {
+          if (kLower === qt || kLower.includes(qt) || qt.includes(kLower)) {
+            cleanFields[k] = fields[k];
+            break;
+          }
+        }
+      }
+      return cleanFields;
+    }
 
     return fields;
   }
@@ -596,6 +613,10 @@ document.addEventListener("DOMContentLoaded", () => {
       rsvp: "RSVP Attendance",
       comments: "Comments / Notes",
       aadhaar: "Aadhaar Number",
+      instagram: "Instagram Link",
+      linkedin: "LinkedIn Link",
+      role: "Role",
+      domain: "Domain",
     };
     return map[key] || key;
   }

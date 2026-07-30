@@ -297,9 +297,28 @@ function extractFormFieldsFromText(text) {
   const fields = {};
   let m;
 
+  // Custom Dynamic Field Patterns (Instagram, LinkedIn, Role, Domain, etc.)
+  if (m = text.match(/(?:instagram|insta|ig)\s*(?:is|link|handle|:]?\s*)?([A-Za-z0-9_.-]+(?:\s+[A-Za-z0-9_.-]+)?)/i)) {
+    fields["instagram"] = m[1].trim();
+    fields["Instagram"] = m[1].trim();
+  }
+  if (m = text.match(/(?:linkedin|linked in)\s*(?:is|link|profile|:]?\s*)?([A-Za-z0-9_.-]+(?:\s+[A-Za-z0-9_.-]+)?)/i)) {
+    fields["linkedin"] = m[1].trim();
+    fields["LinkedIn link"] = m[1].trim();
+  }
+  if (m = text.match(/(?:role|roll|position|post)\s*(?:is|:]?\s*)?([A-Za-z0-9_.-]+)/i)) {
+    fields["role"] = m[1].trim();
+    fields["Role"] = m[1].trim();
+  }
+  if (m = text.match(/(?:domain|dept|department|wing)\s*(?:is|:]?\s*)?([A-Za-z0-9_.-]+)/i)) {
+    fields["domain"] = m[1].trim();
+    fields["Domain"] = m[1].trim();
+  }
+
   // Name
   if (m = text.match(/(?:नाम|name is|name|naam|applicant|candidate)\s+([A-Za-z\u0900-\u097F\s]{2,30})/i)) {
-    fields["name"] = m[1].replace(/(?:है|hai|is|hoon|and|category|gender|male|female).*/i, "").trim();
+    fields["name"] = m[1].replace(/(?:है|hai|is|hoon|and|category|gender|male|female|instagram|linkedin|roll|role|domain).*/i, "").trim();
+    fields["Full Name"] = fields["name"];
   }
   // Gender
   if (m = text.match(/(?:gender|sex|लिंग)\s*[:\-]?\s*(male|female|transgender|पुरुष|महिला)/i) || text.match(/\b(male|female|transgender|पुरुष|महिला)\b/i)) {
@@ -317,13 +336,13 @@ function extractFormFieldsFromText(text) {
     else if (rawC.includes("EWS")) fields["category"] = "EWS / EBC";
     else fields["category"] = "General";
   }
-  // City
-  if (m = text.match(/(?:city|district|शहर|जिला)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,20})/i) || text.match(/(?:जयपुर|jaipur|दिल्ली|delhi|भुवनेश्वर|bhubaneswar|ranchi|patna|mumbai)/i)) {
-    fields["city"] = m[1] || m[0];
+  // City (only if city/district context exists)
+  if (m = text.match(/(?:city|district|शहर|जिला)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,20})/i)) {
+    fields["city"] = m[1].trim();
   }
-  // State
-  if (m = text.match(/(?:state|domicile|राज्य)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,20})/i) || text.match(/(?:राजस्थान|rajasthan|ओडिशा|odisha|jharkhand|bihar|maharashtra|uttar pradesh)/i)) {
-    fields["state"] = m[1] || m[0];
+  // State (only if state/domicile context exists)
+  if (m = text.match(/(?:state|domicile|राज्य)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,20})/i)) {
+    fields["state"] = m[1].trim();
   }
   // Course
   if (m = text.match(/(?:b\.?tech|बी\.?टेक|b\.?sc|m\.?tech|mba|diploma|b.a|m.a)/i)) {
@@ -338,8 +357,8 @@ function extractFormFieldsFromText(text) {
     else fields["year"] = "Second Year";
   }
   // College
-  if (m = text.match(/(?:college|institute|university|school|संस्थान|कॉलेज)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,30})/i) || text.match(/(?:bit\s*mesra|jaipur\s*national|iit|nit)/i)) {
-    fields["college"] = m[1] || m[0];
+  if (m = text.match(/(?:college|institute|university|school|संस्थान|कॉलेज)\s*[:\-]?\s*([A-Za-z\u0900-\u097F\s]{2,30})/i)) {
+    fields["college"] = m[1].trim();
   }
   // Attendees / Guest Count
   if (m = text.match(/(?:हम|we|are)?\s*(एक|दो|तीन|चार|पांच|छह|सात|आठ|नौ|दस|\d+)\s*(?:लोग|person|people|guest|guests|attend|अटैंड)/i) || text.match(/(\d+)\s*(?:लोग|people|guests)/i)) {
@@ -557,8 +576,19 @@ function fillPageFormFields(fields) {
       else if (matchRule(qTitle, ["email", "e-mail", "ईमेल"])) valToSet = formattedFields.email;
       else if (matchRule(qTitle, ["attend", "attendees", "people", "guests", "number of", "how many", "कितने लोग", "लोग"])) valToSet = formattedFields.attendees;
       else if (matchRule(qTitle, ["allergy", "allergies", "diet", "dietary", "food", "एलर्जी", "खान-पान"])) valToSet = formattedFields.allergies;
-      else if (matchRule(qTitle, ["rsvp", "attend", "coming", "भाग लेंगे", "उपस्थित"])) valToSet = formattedFields.rsvp;
-      else if (matchRule(qTitle, ["comment", "remark", "note", "message", "टिप्पणी", "संदेश"])) valToSet = formattedFields.comments;
+      else if (matchRule(qTitle, ["instagram", "insta", "ig"])) valToSet = fields.instagram || fields.Instagram;
+      else if (matchRule(qTitle, ["linkedin", "linked in"])) valToSet = fields.linkedin || fields["LinkedIn link"];
+      else if (matchRule(qTitle, ["role", "position", "post"])) valToSet = fields.role || fields.Role;
+      else if (matchRule(qTitle, ["domain", "dept", "department"])) valToSet = fields.domain || fields.Domain;
+
+      if (!valToSet) {
+        for (let fk of Object.keys(fields)) {
+          if (fields[fk] && fk.length >= 2 && (qTitle.includes(fk.toLowerCase()) || fk.toLowerCase().includes(qTitle))) {
+            valToSet = fields[fk];
+            break;
+          }
+        }
+      }
 
       if (textInput && valToSet !== null && valToSet !== undefined) {
         setGoogleFormsInputValue(textInput, valToSet);
