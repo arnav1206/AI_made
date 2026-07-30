@@ -545,15 +545,19 @@ def _extract_smart_nlp(
     if dynamic_questions:
         filtered_extracted = {}
         for q in dynamic_questions:
-            q_title = q["title"]
-            v_found = extracted.get(q_title)
+            raw_title = q["title"]
+            clean_title = raw_title.rstrip(" *").strip()
+            v_found = extracted.get(raw_title) or extracted.get(clean_title)
             if not v_found:
                 for k, v in list(extracted.items()):
-                    if v and (k.lower() in q_title.lower() or q_title.lower() in k.lower()):
+                    k_clean = k.rstrip(" *").strip().lower()
+                    t_clean = clean_title.lower()
+                    if v and (k_clean in t_clean or t_clean in k_clean or (k_clean == "name" and "name" in t_clean)):
                         v_found = v
                         break
             if v_found:
-                filtered_extracted[q_title] = str(v_found)
+                filtered_extracted[raw_title] = str(v_found)
+                filtered_extracted[clean_title] = str(v_found)
         extracted = filtered_extracted
 
     res = ExtractionResult(extracted, "Gemma AI (Dynamic NLP)", 0.0)

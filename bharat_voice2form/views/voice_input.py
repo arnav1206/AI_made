@@ -193,6 +193,10 @@ def render() -> None:
             disabled=not has_transcript,
         ):
             session.reset_extraction()
+            dynamic_qs = session.get("dynamic_form_questions")
+            res = extract(transcript=active_transcript, language=lang, dynamic_questions=dynamic_qs)
+            session.set("extracted_data", res.data)
+            session.set("extraction_done", True)
             session.navigate("ai_processing")
 
     if not has_transcript:
