@@ -135,26 +135,26 @@ def render() -> None:
                     st.text_input(q_label, value=matched_val, key=f"dyn_q_{q['id']}")
 
             form_card_close()
+        else:
+            form_card_open("👤", t("section_personal").replace("👤 ", ""))
+            personal_info_fields(extracted)
+            form_card_close()
 
-        form_card_open("👤", t("section_personal").replace("👤 ", ""))
-        personal_info_fields(extracted)
-        form_card_close()
+            form_card_open("📍", t("section_address").replace("📍 ", ""))
+            address_fields(extracted)
+            form_card_close()
 
-        form_card_open("📍", t("section_address").replace("📍 ", ""))
-        address_fields(extracted)
-        form_card_close()
+            form_card_open("🎓", t("section_academic").replace("🎓 ", ""))
+            academic_fields(extracted)
+            form_card_close()
 
-        form_card_open("🎓", t("section_academic").replace("🎓 ", ""))
-        academic_fields(extracted)
-        form_card_close()
-
-        form_card_open("💰", t("section_financial").replace("💰 ", ""))
-        financial_contact_fields(extracted)
-        form_card_close()
+            form_card_open("💰", t("section_financial").replace("💰 ", ""))
+            financial_contact_fields(extracted)
+            form_card_close()
 
     # ── Right: AI Suggestions ──────────────────────────────────────
     with tip_col:
-        render_suggestions(extracted=extracted, total_fields=15)
+        render_suggestions(extracted=extracted, total_fields=len(dynamic_questions) if dynamic_questions else 15)
 
     # ── Action buttons ─────────────────────────────────────────────
     spacer()
@@ -173,26 +173,30 @@ def render() -> None:
 
     with b3:
         if st.button(t("btn_preview"), use_container_width=True, type="primary"):
-            gender   = st.session_state.get("field_gender", "— Select —")
-            category = st.session_state.get("field_category", "— Select —")
-            state    = st.session_state.get("field_state", "— Select —")
-            year     = st.session_state.get("field_year", "— Select —")
-            name     = st.session_state.get("field_name", "").strip()
-
-            unselected = []
-            if not name:
-                unselected.append("Full Name")
-            if gender == "— Select —":
-                unselected.append("Gender")
-            if category == "— Select —":
-                unselected.append("Category")
-            if state in ("— Select —", "— Select State —"):
-                unselected.append("State of Domicile")
-            if year == "— Select —":
-                unselected.append("Current Academic Year")
-
-            if unselected:
-                st.warning(f"⚠️ Pre-Submission Alert: Please select/provide valid options for: **{', '.join(unselected)}** before proceeding.")
-            else:
+            if dynamic_questions:
                 session.save_form_data()
                 session.navigate("preview")
+            else:
+                gender   = st.session_state.get("field_gender", "— Select —")
+                category = st.session_state.get("field_category", "— Select —")
+                state    = st.session_state.get("field_state", "— Select —")
+                year     = st.session_state.get("field_year", "— Select —")
+                name     = st.session_state.get("field_name", "").strip()
+
+                unselected = []
+                if not name:
+                    unselected.append("Full Name")
+                if gender == "— Select —":
+                    unselected.append("Gender")
+                if category == "— Select —":
+                    unselected.append("Category")
+                if state in ("— Select —", "— Select State —"):
+                    unselected.append("State of Domicile")
+                if year == "— Select —":
+                    unselected.append("Current Academic Year")
+
+                if unselected:
+                    st.warning(f"⚠️ Pre-Submission Alert: Please select/provide valid options for: **{', '.join(unselected)}** before proceeding.")
+                else:
+                    session.save_form_data()
+                    session.navigate("preview")

@@ -81,8 +81,32 @@ def reset_form_fields() -> None:
 
 def save_form_data() -> dict:
     """
-    Collect all field_* keys from session state into a structured dict.
+    Collect form values from session state into a structured dict.
+    Handles both imported Google Forms (dynamic_form_questions) and standard scholarship forms.
     """
+    dynamic_qs = st.session_state.get("dynamic_form_questions")
+    extracted  = st.session_state.get("extracted_data", {})
+
+    if dynamic_qs:
+        form_data = {}
+        for q in dynamic_qs:
+            q_t = q["title"]
+            val = st.session_state.get(f"dyn_q_{q['id']}", "")
+            if not val or val == "— Select —":
+                val = extracted.get(q_t, "")
+                if not val:
+                    for k, v in extracted.items():
+                        if v and (k.lower() in q_t.lower() or q_t.lower() in k.lower()):
+                            val = v
+                            break
+            form_data[q_t] = str(val or "")
+        for k, v in extracted.items():
+            if k not in form_data and v:
+                form_data[k] = str(v)
+        st.session_state.form_data = form_data
+        st.session_state.extracted_data = form_data
+        return form_data
+
     mapping = {
         "Full Name":            "field_name",
         "Date of Birth":        "field_dob",
