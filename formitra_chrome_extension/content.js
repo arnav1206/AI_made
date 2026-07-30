@@ -511,7 +511,19 @@ function forceClickGoogleFormsOption(optElement) {
     optElement.checked = true;
   }
 
-  const targets = [optElement, optElement.parentElement, optElement.firstElementChild].filter(Boolean);
+  const checkboxHost = optElement.closest('[role="checkbox"], [role="radio"]') || optElement;
+  if (checkboxHost && checkboxHost.getAttribute("aria-checked") !== null) {
+    checkboxHost.setAttribute("aria-checked", "true");
+  }
+
+  const targets = [
+    optElement,
+    checkboxHost,
+    optElement.parentElement,
+    optElement.querySelector('.quantumWizTogglePapercheckboxInnerBox, .uVda2e, .N2zD20'),
+    optElement.firstElementChild
+  ].filter(Boolean);
+
   targets.forEach(target => {
     try { target.focus(); } catch(e) {}
     try { target.click(); } catch(e) {}
@@ -597,31 +609,35 @@ function fillPageFormFields(fields) {
         return;
       }
 
-      const options = qContainer.querySelectorAll('[role="radio"], [role="checkbox"], [role="option"], input[type="radio"], input[type="checkbox"], label, div[data-value]');
+      const options = qContainer.querySelectorAll('[role="radio"], [role="checkbox"], [role="option"], input[type="radio"], input[type="checkbox"], label, div[data-value], .docssharedWizToggleLabeledContainer, .quantumWizTogglePapercheckboxInnerBox');
       if (options.length > 0) {
-        let targetVal = null;
-        if (matchRule(qTitle, ["gender", "sex", "लिंग"])) targetVal = formattedFields.gender;
-        else if (matchRule(qTitle, ["category", "caste", "वर्ग", "श्रेणी"])) targetVal = formattedFields.category;
-        else if (matchRule(qTitle, ["course", "degree"])) targetVal = formattedFields.course;
-        else if (matchRule(qTitle, ["year", "academic year"])) targetVal = formattedFields.year;
-        else if (matchRule(qTitle, ["state", "domicile"])) targetVal = formattedFields.state;
-
-        const checkTargets = targetVal ? [targetVal] : [formattedFields.gender, formattedFields.category, formattedFields.course, formattedFields.year, formattedFields.state].filter(Boolean);
+        let checkTargets = [];
+        if (valToSet) {
+          checkTargets.push(String(valToSet));
+        }
+        for (let fk of Object.keys(fields)) {
+          if (fields[fk]) {
+            const fkLow = fk.toLowerCase();
+            if (qTitle.includes(fkLow) || fkLow.includes(qTitle)) {
+              checkTargets.push(String(fields[fk]));
+            }
+          }
+        }
+        Object.values(formattedFields).forEach(v => {
+          if (v && !checkTargets.includes(String(v))) checkTargets.push(String(v));
+        });
 
         let optionMatched = false;
         options.forEach((opt) => {
-          if (optionMatched && (opt.getAttribute("role") === "radio" || opt.getAttribute("role") === "checkbox")) return;
-
-          const parentText = opt.parentElement ? opt.parentElement.innerText : "";
-          const ariaLabel = opt.getAttribute("aria-label") || "";
-          const dataVal = opt.getAttribute("data-value") || "";
-          const elemText = opt.innerText || opt.value || "";
-
+          const parentText   = opt.parentElement ? opt.parentElement.innerText : "";
+          const ariaLabel    = opt.getAttribute("aria-label") || "";
+          const dataVal      = opt.getAttribute("data-value") || "";
+          const elemText     = opt.innerText || opt.value || "";
           const combinedText = `${elemText} ${ariaLabel} ${dataVal} ${parentText}`.toLowerCase();
 
           for (let tVal of checkTargets) {
             const searchVal = tVal.toLowerCase().trim();
-            if (searchVal && searchVal.length >= 2 && combinedText.includes(searchVal)) {
+            if (searchVal && searchVal.length >= 1 && (combinedText.includes(searchVal) || searchVal.includes(elemText.toLowerCase().trim()))) {
               const clickTarget = opt.closest('[role="checkbox"], [role="radio"]') || opt.querySelector('[role="checkbox"], [role="radio"]') || opt;
               forceClickGoogleFormsOption(clickTarget);
               highlightFilledInput(clickTarget, tVal);
