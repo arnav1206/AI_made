@@ -175,10 +175,9 @@ def render() -> None:
     # ── Voice Assist Speech Output ────────────────────────────────
     speech_summary_parts = []
     if provided_fields:
-        prov_str = ", ".join([f"{lbl}: {extracted[k]}" for k, lbl in provided_fields])
+        prov_str = ", ".join([f"{lbl}: {extracted.get(k, '')}" for k, lbl in provided_fields])
         speech_summary_parts.append(f"Extracted information: {prov_str}.")
     speech_summary_parts.append(f"You are eligible for {eligible_count} government scholarship schemes.")
-    speech_summary_parts.append(f"You are eligible for {len(elig.schemes)} government scholarship schemes.")
     if missing_fields:
         miss_str = ", ".join([lbl for _, lbl in missing_fields])
         speech_summary_parts.append(f"Please provide missing fields: {miss_str}.")
