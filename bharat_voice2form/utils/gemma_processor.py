@@ -542,6 +542,20 @@ def _extract_smart_nlp(
                 extracted["College"] = col
                 break
 
+    if dynamic_questions:
+        filtered_extracted = {}
+        for q in dynamic_questions:
+            q_title = q["title"]
+            v_found = extracted.get(q_title)
+            if not v_found:
+                for k, v in list(extracted.items()):
+                    if v and (k.lower() in q_title.lower() or q_title.lower() in k.lower()):
+                        v_found = v
+                        break
+            if v_found:
+                filtered_extracted[q_title] = str(v_found)
+        extracted = filtered_extracted
+
     res = ExtractionResult(extracted, "Gemma AI (Dynamic NLP)", 0.0)
     res.raw = json.dumps(extracted, indent=2, ensure_ascii=False)
     return res

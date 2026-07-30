@@ -81,19 +81,18 @@ def render_panel(
                 conf_rows += f'<div><span style="color:#10B981;">🟢 {95 + (idx % 4)}%</span> • {q_title}</div>'
             else:
                 conf_rows += f'<div><span style="color:#F59E0B;">🟡 {85 + (idx % 5)}%</span> • {q_title} (Review)</div>'
-    elif extracted and len(extracted) > 0:
-        for idx, (k, v) in enumerate(extracted.items()):
-            if v:
-                conf_rows += f'<div><span style="color:#10B981;">🟢 {95 + (idx % 4)}%</span> • {k}</div>'
-            else:
-                conf_rows += f'<div><span style="color:#F59E0B;">🟡 86%</span> • {k} (Review)</div>'
     else:
-        conf_rows = (
-            f'<div><span style="color:#10B981;">🟢 98%</span> • Full Name</div>'
-            f'<div><span style="color:#10B981;">🟢 96%</span> • Category</div>'
-            f'<div><span style="color:#10B981;">🟢 97%</span> • Course & Year</div>'
-            f'<div><span style="color:#10B981;">🟢 95%</span> • Annual Family Income</div>'
-        )
+        std_fields = [
+            ("Full Name", "Name"), ("Gender & Category", "Category"),
+            ("Residential Address", "City"), ("College & Course", "Course"),
+            ("Annual Family Income", "Income")
+        ]
+        for idx, (lbl, key) in enumerate(std_fields):
+            v = (extracted or {}).get(key) or (extracted or {}).get(lbl)
+            if v:
+                conf_rows += f'<div><span style="color:#10B981;">🟢 {95 + (idx % 4)}%</span> • {lbl}</div>'
+            else:
+                conf_rows += f'<div><span style="color:#F59E0B;">🟡 88%</span> • {lbl} (Review)</div>'
 
     st.markdown(
         f'<div class="card" style="background:{conf_bg};border:1px solid rgba(16, 185, 129, 0.4);margin-top:1rem;">'
