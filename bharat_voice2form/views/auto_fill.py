@@ -31,6 +31,8 @@ def render() -> None:
     language  = session.get("selected_language", "Hindi")
 
     # ── Missing Required Fields Detector & AI Voice Assistant ──────
+    dynamic_questions = session.get("dynamic_form_questions")
+
     required_map = [
         ("field_name", "Full Name", t("reg_name", "Full Name")),
         ("field_dob", "Date of Birth", t("lbl_dob", "Date of Birth")),
@@ -43,12 +45,26 @@ def render() -> None:
     missing_labels_en = []
     missing_labels_hi = []
 
-    for f_key, lbl_en, lbl_hi in required_map:
-        val = session.get(f_key, "").strip()
-        if not val:
-            missing_keys.append(f_key)
-            missing_labels_en.append(lbl_en)
-            missing_labels_hi.append(lbl_hi)
+    if dynamic_questions:
+        for q in dynamic_questions:
+            q_title = q["title"]
+            val = extracted.get(q_title) or session.get(f"dyn_q_{q['id']}", "")
+            if not val:
+                for k, v in extracted.items():
+                    if v and (k.lower() in q_title.lower() or q_title.lower() in k.lower()):
+                        val = v
+                        break
+            if not val:
+                missing_keys.append(q["id"])
+                missing_labels_en.append(q_title)
+                missing_labels_hi.append(q_title)
+    else:
+        for f_key, lbl_en, lbl_hi in required_map:
+            val = session.get(f_key, "").strip() or extracted.get(lbl_en, "").strip()
+            if not val:
+                missing_keys.append(f_key)
+                missing_labels_en.append(lbl_en)
+                missing_labels_hi.append(lbl_hi)
 
     if missing_keys:
         if language == "Hindi":
