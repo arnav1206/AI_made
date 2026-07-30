@@ -35,14 +35,19 @@ def render_live_speech_dictation(language: str = "Hindi", is_dark: bool = True) 
     locale = _LOCALE_MAP.get(language, "hi-IN")
     theme_class = "dark-theme" if is_dark else "light-theme"
 
+    btn_text = t("start_dictation_btn", "Start Live Dictation")
+    status_text = t("tap_to_start", "Tap button to start live voice transcription")
+
     try:
         with open(_INDEX_HTML_PATH, "r", encoding="utf-8") as f:
             html_content = f.read()
 
-        # Inject dynamic locale, language name, and theme class into HTML template
+        # Inject dynamic locale, language name, translations, and theme class into HTML template
         html_content = html_content.replace('targetLocale = "hi-IN";', f'targetLocale = "{locale}";')
         html_content = html_content.replace('languageName = "Hindi";', f'languageName = "{language}";')
         html_content = html_content.replace('<body class="dark-theme">', f'<body class="{theme_class}">')
+        html_content = html_content.replace('Start Live Dictation', f'{btn_text}')
+        html_content = html_content.replace('Tap button to start live voice transcription', status_text)
 
         # Render inline HTML safely
         components.html(html_content, height=210, scrolling=False)

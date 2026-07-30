@@ -108,7 +108,7 @@ def speech_tips_card() -> None:
         f'{badge_html}'
         f'<div style="font-weight:800;font-size:0.96rem;color:#FF7A00;margin-bottom:0.4rem;">{title_text}</div>'
         f'<div style="font-size:0.8rem;color:{text_col};opacity:0.85;margin-bottom:0.75rem;">'
-        f'Speak into the mic to provide answers for these form questions:</div>'
+        f'{t("speak_into_mic_prompt", "Speak into the mic to provide answers for these form questions:")}</div>'
         f'<ul style="font-size:0.84rem;color:{text_col};line-height:1.9;padding-left:1.2rem;margin:0;">'
         f'{list_html}'
         f'</ul>'

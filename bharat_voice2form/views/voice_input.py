@@ -86,7 +86,7 @@ def render() -> None:
                 f'<div style="background:#ECFDF5;border:1px solid #6EE7B7;border-radius:8px;'
                 f'padding:0.4rem 0.8rem;font-size:0.82rem;color:#065F46;font-weight:700;'
                 f'margin-bottom:0.75rem;">'
-                f'🌐 Auto-Detected Speech Language: <u>{det_lang}</u></div>',
+                f'🌐 {t("auto_detected_lang", "Auto-Detected Speech Language")}: <u>{det_lang}</u></div>',
                 unsafe_allow_html=True,
             )
 
@@ -167,12 +167,12 @@ def render() -> None:
             render_voice_assistant_player(
                 text=transcript,
                 language=lang,
-                label=f"🔊 Listen to Transcript in {lang}",
+                label=f"🔊 {t('listen_transcript', 'Listen to Transcript')} ({lang})",
             )
 
         st.markdown(
             f'<div style="font-size:0.8rem;color:{sub_color};margin-bottom:0.75rem;margin-top:0.5rem;">'
-            f'🔧 Active STT Engine: <code style="background:rgba(255,122,0,0.1);padding:0.2rem 0.5rem;border-radius:4px;">'
+            f'🔧 {t("active_stt_engine", "Active STT Engine")}: <code style="background:rgba(255,122,0,0.1);padding:0.2rem 0.5rem;border-radius:4px;">'
             f'{ENGINE} / Live WebSpeech</code></div>',
             unsafe_allow_html=True,
         )
