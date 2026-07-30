@@ -93,18 +93,13 @@ def render() -> None:
 
     # ── Section tables ─────────────────────────────────────────────
     if is_google_form:
-        if dynamic_qs:
-            req_qs = [q for q in dynamic_qs if q.get("required")]
-            q_items = req_qs if req_qs else dynamic_qs
-        else:
-            q_items = [{"id": f"eq_{i}", "title": k, "required": True} for k in extracted_data.keys()]
-
+        q_items = dynamic_qs if dynamic_qs else [{"id": f"eq_{i}", "title": k} for k in extracted_data.keys()]
         st.markdown(
             f'<div class="card" style="border-left:5px solid #FF7A00;margin-bottom:1.5rem;">'
             f'<div style="font-weight:800;font-size:1.1rem;color:#FF7A00;margin-bottom:0.5rem;">'
-            f'📋 Required Form Fields ({len(q_items)} Fields)</div>'
+            f'📋 Imported Google Form Questions ({len(q_items)} Questions)</div>'
             f'<div style="font-size:0.88rem;opacity:0.85;margin-bottom:1rem;">'
-            f'Required fields for your imported Google Form:</div>',
+            f'Extracted values from voice input for your imported Google Form:</div>',
             unsafe_allow_html=True,
         )
 
@@ -155,11 +150,18 @@ def render() -> None:
 
         if is_google_form:
             items = []
-            if dynamic_qs:
-                req_qs = [q for q in dynamic_qs if q.get("required")]
-                q_items = req_qs if req_qs else dynamic_qs
-            else:
-                q_items = [{"title": k} for k in extracted_data.keys()]
+            q_items = dynamic_qs if dynamic_qs else [{"title": k} for k in extracted_data.keys()]
+            for q in q_items:
+                q_t = q["title"]
+                v = form_data.get(q_t) or extracted_data.get(q_t) or "—"
+                if v == "—":
+                    for k, val_found in extracted_data.items():
+                        if val_found and (k.lower() in q_t.lower() or q_t.lower() in k.lower()):
+                            v = val_found
+                            break
+                items.append((q_t, str(v)))
+            if not items:
+                items = list(extracted_data.items())
 
             for q in q_items:
                 q_t = q["title"]
